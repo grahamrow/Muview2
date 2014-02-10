@@ -32,6 +32,9 @@ Window::Window(int argc, char *argv[]) :
 {
     ui->setupUi(this);
 
+    // Clipboard
+    clipboard = QApplication::clipboard();
+
     // File defaults
     lastSavedLocation = QDir::home();
     lastOpenedLocation = QDir::home();
@@ -61,13 +64,13 @@ Window::Window(int argc, char *argv[]) :
 //    connect(ui->zSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setZRotation(int)));
 //    connect(ui->viewport, SIGNAL(zRotationChanged(int)), ui->zSlider, SLOT(setValue(int)));
 
-//	// Slicing
-//    connect(ui->xSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setXSliceLow(int)));
-//    connect(ui->xSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setXSliceHigh(int)));
-//    connect(ui->ySpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setYSliceLow(int)));
-//    connect(ui->ySpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setYSliceHigh(int)));
-//    connect(ui->zSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setZSliceLow(int)));
-//    connect(ui->zSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setZSliceHigh(int)));
+    // Slicing
+    connect(ui->xSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setXSliceLow(int)));
+    connect(ui->xSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setXSliceHigh(int)));
+    connect(ui->ySpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setYSliceLow(int)));
+    connect(ui->ySpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setYSliceHigh(int)));
+    connect(ui->zSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setZSliceLow(int)));
+    connect(ui->zSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setZSliceHigh(int)));
 
     // Animation
     ui->animSlider->setEnabled(false);
@@ -78,6 +81,7 @@ Window::Window(int argc, char *argv[]) :
     connect(ui->actionPreferences, SIGNAL(triggered()), this, SLOT(openSettings()));
     connect(ui->actionFiles, SIGNAL(triggered()), this, SLOT(openFiles()));
     connect(ui->actionDir, SIGNAL(triggered()), this, SLOT(openDir()));
+    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(copyImage()));
 
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(ui->actionSequence, SIGNAL(triggered()), this, SLOT(saveImageSequence()));
@@ -214,6 +218,13 @@ void Window::updatePrefs() {
     ui->viewport->setBackgroundColor(prefs->getBackgroundColor());
     ui->viewport->setSpriteResolution(prefs->getSpriteResolution());
     ui->viewport->setBrightness(prefs->getBrightness());
+    if (prefs->getImageDimensions() == QSize(-1,-1)) {
+        ui->viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+    } else {
+        ui->viewport->setFixedSize(prefs->getImageDimensions());
+        this->adjustSize();
+    }
+
 }
 
 void Window::openSettings()
@@ -266,7 +277,7 @@ void Window::openFiles()
     names = QFileDialog::getOpenFileNames(this,
         tr("Open File"), lastOpenedLocation.path(),
         tr("OVF Files (*.omf *.ovf)"));
-    qDebug() << names;
+//    qDebug() << names;
 
     if (names.length() > 0)
     {
@@ -429,11 +440,17 @@ void Window::openDir()
 void Window::saveImageFile(QString name)
 {
     if (name != "") {
-        qDebug() << "Image saving triggered" << name;
+//        qDebug() << "Image saving triggered" << name;
         lastSavedLocation = QDir(name);
         QImage screen = ui->viewport->grabFrameBuffer();
-        screen.save(name, "JPG", 90);
+        screen.save(name, (prefs->getFormat()).toStdString().c_str(), 90);
     }
+}
+
+void Window::copyImage()
+{
+    QImage screen = ui->viewport->grabFrameBuffer();
+    clipboard->setImage(screen);
 }
 
 void Window::saveImage()
@@ -452,10 +469,8 @@ void Window::saveImageSequence()
 
     if (dir != "")
     {
-//      disconnect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
         connect(ui->viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
 
-        qDebug() << "Saving image sequence to" << dir;
         lastSavedLocation = QDir(dir);
         QImage screen;
         QString number;
@@ -468,7 +483,6 @@ void Window::saveImageSequence()
         }
 
         disconnect(ui->viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
-//        connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
     }
 }
 
@@ -552,3 +566,4 @@ Window::~Window()
 {
     delete ui;
 }
+

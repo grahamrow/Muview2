@@ -43,3 +43,17 @@ float Preferences::getBrightness()
 {
     return ((float)ui->brightnessSlider->value())/50.0;
 }
+
+QString Preferences::getFormat()
+{
+    return ui->imageFormat->currentText();
+}
+
+QSize Preferences::getImageDimensions()
+{
+    if (ui->fixedSize->isChecked()) {
+        return QSize(ui->imageWidth->value(), ui->imageHeight->value());
+    } else {
+        return QSize(-1,-1);
+    }
+}

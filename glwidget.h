@@ -33,6 +33,8 @@ public:
     void updateHeader(header_ptr header, array_ptr data);
     void isDoneRendering();
     virtual void renderFrame(QString file);
+    void setSize(QSize size);
+    QSize sizeHint() const;
 
     // View Preferences
     virtual void toggleDisplay(int type);
@@ -95,12 +97,14 @@ private:
     float brightness;
 
     // View Related
+    QSize mandatedSize;
     QColor backgroundColor;
     QMatrix4x4 projection, view, model;
     bool displayOn;
     float xcom, ycom, zcom;
     float xmax, ymax, zmax;
     float xmin, ymin, zmin;
+    int xRot, yRot, zRot;
     // slice variables
     int xSliceLow, xSliceHigh;
     int ySliceLow, ySliceHigh;

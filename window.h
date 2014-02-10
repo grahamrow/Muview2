@@ -39,7 +39,7 @@ class Window : public QMainWindow
 public:
     explicit Window(int argc, char *argv[]);
     ~Window();
-
+    QSize sizeHint();
 protected:
     void keyPressEvent( QKeyEvent* e );
 
@@ -49,6 +49,7 @@ private slots:
     void saveImage();
     void saveImageSequence();
     void saveImageFile(QString name);
+    void copyImage();
     void watchDir(const QString& str);
     void toggleDisplay();
     void updateWatchedFiles(const QString& str);
@@ -62,6 +63,7 @@ private:
     QActionGroup *displayType;
     Preferences *prefs;
     AboutDialog *about;
+    QClipboard *clipboard;
 
     // Convenience Functions for Sliders
     void initSlider(QSlider *slider);

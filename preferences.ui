@@ -276,6 +276,102 @@
       <attribute name="title">
        <string>Output</string>
       </attribute>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>140</y>
+         <width>273</width>
+         <height>85</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>This is probably not going to work very well for a while</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="">
+       <property name="geometry">
+        <rect>
+         <x>15</x>
+         <y>41</y>
+         <width>150</width>
+         <height>116</height>
+        </rect>
+       </property>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Output Format</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QComboBox" name="imageFormat">
+          <item>
+           <property name="text">
+            <string>JPG</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PNG</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QCheckBox" name="fixedSize">
+          <property name="text">
+           <string>Set Fixed Size</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Output Width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="imageWidth">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>800</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Output Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="imageHeight">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximum">
+           <number>2000</number>
+          </property>
+          <property name="value">
+           <number>600</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
    </item>
@@ -300,8 +396,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>196</x>
-     <y>319</y>
+     <x>205</x>
+     <y>351</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -316,8 +412,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>264</x>
-     <y>319</y>
+     <x>273</x>
+     <y>351</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -354,6 +450,38 @@
     <hint type="destinationlabel">
      <x>409</x>
      <y>155</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fixedSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imageWidth</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>96</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>151</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fixedSize</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>imageHeight</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>126</x>
+     <y>121</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>172</y>
     </hint>
    </hints>
   </connection>

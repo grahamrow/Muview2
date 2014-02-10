@@ -24,6 +24,10 @@ GLWidget::GLWidget( QWidget* parent )
     toggleDisplay(0); // Start with cubes
     brightness = 1.0;
 
+    // Slicing
+    xSliceLow=ySliceLow=zSliceLow=0;
+    xSliceHigh=ySliceHigh=zSliceHigh=16*100;
+
     // Draw at a fixed framerate (if updates are needed)
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
@@ -82,6 +86,17 @@ void GLWidget::renderFrame(QString file)
     update();
 }
 
+void GLWidget::setSize(QSize size)
+{
+    mandatedSize = size;
+}
+
+QSize GLWidget::sizeHint() const
+{
+//    qDebug() << "Size I'm returning is" << mandatedSize;
+    return mandatedSize;
+}
+
 void GLWidget::initializeGL()
 {
     QGLFormat glFormat = QGLWidget::format();
@@ -124,31 +139,6 @@ void GLWidget::paintGL()
     // Clear the buffer with the current clearing color
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-//    for (int i=0; i<100; i++) {
-//        for (int j=0; j<100; j++) {
-//            model.setToIdentity();
-//            model = translation*model;
-//            model.rotate(rotation);
-//            model.scale(0.5);
-//            model.translate(-50.0 + 2.5*i,-50.0 + 2.5*j,-4.0);
-
-//            view.setToIdentity();
-//            view.translate(QVector3D(0.0,0.0,-30.0));
-
-//            glBindVertexArray(displayObject->vao);
-//            displayObject->shader.bind();
-//            displayObject->shader.setUniformValue("model",             model);
-//            displayObject->shader.setUniformValue("view",              view);
-//            displayObject->shader.setUniformValue("projection",        projection);
-//            displayObject->shader.setUniformValue("color",             QVector4D(0.6, 0.6, 1.0, 1.0));
-//            displayObject->shader.setUniformValue("light.position",    lightPosition);
-//            displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
-//            displayObject->shader.setUniformValue("ambient",           lightAmbient*brightness);
-
-//            glDrawArrays( GL_TRIANGLES, 0, displayObject->count );
-//        }
-//    }
-
     if (displayOn) {
 
         const long unsigned int *size = dataPtr->shape();
@@ -171,15 +161,13 @@ void GLWidget::paintGL()
                                     (*dataPtr)[i][j][k][2] * (*dataPtr)[i][j][k][2]);
                     }
 
-//                    if ( ((valuedim == 1 ) || ((valuedim == 3) && mag != 0.0)) &&
-//                         i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
-//                         i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
-//                         j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
-//                         j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
-//                         k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
-//                         k <= (zmax-zmin)*(float)zSliceHigh/1600.0)
-
-                    if ((valuedim == 1 ) || ((valuedim == 3) && mag != 0.0))
+                    if ( ((valuedim == 1 ) || ((valuedim == 3) && mag != 0.0)) &&
+                         i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
+                         i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
+                         j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
+                         j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
+                         k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
+                         k <= (zmax-zmin)*(float)zSliceHigh/1600.0)
                     {
 
                         theta = acos(  (*dataPtr)[i][j][k][2]/mag);
@@ -202,7 +190,6 @@ void GLWidget::paintGL()
                         model = translation*model;
                         model.rotate(rotation);
                         model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
-//                        model.translate(((float)i-xcom)/10.0,((float)j-ycom)/10.0,((float)k-zcom)/10.0);
                         if (displayType != 0) {
                             // Don't rotate the cubes...
                             model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);

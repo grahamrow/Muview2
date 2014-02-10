@@ -17,6 +17,8 @@ public:
     QColor getBackgroundColor();
     int getSpriteResolution();
     float getBrightness();
+    QString getFormat();
+    QSize getImageDimensions();
     ~Preferences();
 
 private:
