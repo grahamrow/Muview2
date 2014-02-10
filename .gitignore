@@ -1,0 +1,10 @@
+moc_*.cpp
+muview
+install
+test
+*.o
+*.a
+ui_*
+Makefile
+muview.pro.user*
+qrc_*
