@@ -38,6 +38,7 @@ Window::Window(int argc, char *argv[]) :
     // File defaults
     lastSavedLocation = QDir::home();
     lastOpenedLocation = QDir::home();
+    watcher = new QFileSystemWatcher;
 
 	// Cache size
 	cacheSize = 50;
@@ -56,13 +57,13 @@ Window::Window(int argc, char *argv[]) :
     initSpanSlider(ui->ySpanSlider);
     initSpanSlider(ui->zSpanSlider);
 
-//	// Rotation
-//    connect(ui->xSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setXRotation(int)));
-//    connect(ui->viewport, SIGNAL(xRotationChanged(int)), ui->xSlider, SLOT(setValue(int)));
-//    connect(ui->ySlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setYRotation(int)));
-//    connect(ui->viewport, SIGNAL(yRotationChanged(int)), ui->ySlider, SLOT(setValue(int)));
-//    connect(ui->zSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setZRotation(int)));
-//    connect(ui->viewport, SIGNAL(zRotationChanged(int)), ui->zSlider, SLOT(setValue(int)));
+    // Rotation
+    connect(ui->xSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setXRotation(int)));
+    connect(ui->viewport, SIGNAL(xRotationChanged(int)), ui->xSlider, SLOT(setValue(int)));
+    connect(ui->ySlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setYRotation(int)));
+    connect(ui->viewport, SIGNAL(yRotationChanged(int)), ui->ySlider, SLOT(setValue(int)));
+    connect(ui->zSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setZRotation(int)));
+    connect(ui->viewport, SIGNAL(zRotationChanged(int)), ui->zSlider, SLOT(setValue(int)));
 
     // Slicing
     connect(ui->xSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setXSliceLow(int)));
@@ -100,11 +101,12 @@ Window::Window(int argc, char *argv[]) :
     signalMapper->setMapping (ui->actionFollow, "") ;
     connect (signalMapper, SIGNAL(mapped(QString)), this, SLOT(watchDir(QString))) ;
     connect(ui->actionFollow, SIGNAL(triggered()), signalMapper, SLOT(map()));
+    connect(ui->actionUnfollow, SIGNAL(triggered()), this, SLOT(stopWatchingDir()));
 
-    ui->xSlider->setValue(15 * 160);
-    ui->ySlider->setValue(345 * 160);
-    ui->zSlider->setValue(0 * 160);
-	setWindowTitle(tr("MuView 0.9"));
+    ui->xSlider->setValue(345 * 1600);
+    ui->ySlider->setValue(0 * 1600);
+    ui->zSlider->setValue(0 * 1600);
+    setWindowTitle(tr("MuView 2.0b1"));
 
     // Data, don't connect until we are ready (probably still not ready here)...
     connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
@@ -157,6 +159,7 @@ Window::Window(int argc, char *argv[]) :
         }
     }
 
+    updatePrefs();
 }
 
 void Window::initSpanSlider(QxtSpanSlider *slider)
@@ -178,6 +181,7 @@ void Window::initSlider(QSlider *slider)
     slider->setPageStep(15 * 1600);
     slider->setTickInterval(15 * 1600);
     slider->setTickPosition(QSlider::TicksRight);
+    slider->setValue(0);
 }
 
 void Window::adjustAnimSlider(bool back)
@@ -188,7 +192,7 @@ void Window::adjustAnimSlider(bool back)
         ui->animSlider->setRange(0, numFiles-1);
         ui->animSlider->setSingleStep(1);
         ui->animSlider->setPageStep(10);
-        ui->animSlider->setTickInterval(2);
+        ui->animSlider->setTickInterval( numFiles < 20 ? numFiles : numFiles/20);
         ui->animSlider->setTickPosition(QSlider::TicksRight);
         ui->animSlider->setEnabled(true);
 		if (back) {
@@ -224,7 +228,8 @@ void Window::updatePrefs() {
         ui->viewport->setFixedSize(prefs->getImageDimensions());
         this->adjustSize();
     }
-
+    ui->viewport->setColoredQuantity(prefs->getColorQuantity());
+    ui->viewport->setColorScale(prefs->getColorScale());
 }
 
 void Window::openSettings()
@@ -508,7 +513,7 @@ void Window::watchDir(const QString& str)
     if (dir != "")
     {
         // Added the dir to the watch list
-        watcher = new QFileSystemWatcher();
+        watcher->removePaths(watcher->directories());
         watcher->addPath(dir);
 
         // Now read all of the current files
@@ -527,29 +532,40 @@ void Window::watchDir(const QString& str)
             filenames.push_back(dirString + file);
         }
 
-        if (filenames.length()>0) {
+        processFilenames();
+        gotoFrontOfCache();
+//        if (filenames.length()>0) {
 
-            // Only cache the last file
-            header_ptr header = header_ptr(new OMFHeader());
-            cachePos = filenames.size()-1;
-            omfHeaderCache.push_back(header);
-            omfCache.push_back(readOMF(filenames.last().toStdString(), *header));
+//            // Only cache the last file
+//            header_ptr header = header_ptr(new OMFHeader());
+//            cachePos = filenames.size()-1;
+//            omfHeaderCache.push_back(header);
+//            omfCache.push_back(readOMF(filenames.last().toStdString(), *header));
 
-            // Update the Display with the first element
-            ui->viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
-            ui->viewport->updateData(omfCache.back());
+//            // Update the Display with the first element
+//            ui->viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
+//            ui->viewport->updateData(omfCache.back());
 			
-            // Update the top overlay
-            ui->statusbar->showMessage(displayNames.back());
+//            // Update the top overlay
+//            ui->statusbar->showMessage(displayNames.back());
 
-            // Refresh the animation bar
-            adjustAnimSlider(true);
-        }
+//            // Refresh the animation bar
+//            adjustAnimSlider(true);
+//        }
         // Now the callbacks
-        QObject::connect(watcher, SIGNAL(directoryChanged(QString)),
+        connect(watcher, SIGNAL(directoryChanged(QString)),
             this, SLOT(updateWatchedFiles(QString)));
     }
 
+}
+
+void Window::stopWatchingDir()
+{
+    if (watcher->directories().length() > 0) {
+        watcher->removePaths(watcher->directories());
+        disconnect(watcher, SIGNAL(directoryChanged(QString)),
+                   this, SLOT(updateWatchedFiles(QString)));
+    }
 }
 
 void Window::toggleDisplay() {

@@ -52,45 +52,58 @@
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_inplane">
+          <widget class="QRadioButton" name="colorFull">
            <property name="text">
-            <string>In-Plane Angle</string>
+            <string>Full Orientation</string>
            </property>
            <property name="checked">
             <bool>true</bool>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">coloringGroup</string>
+            <string notr="true">coloredQuantityGroup</string>
            </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_x">
+          <widget class="QRadioButton" name="colorAngle">
+           <property name="text">
+            <string>In-Plane Angle</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">coloredQuantityGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="colorX">
            <property name="text">
             <string>X Coordinate</string>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">coloringGroup</string>
+            <string notr="true">coloredQuantityGroup</string>
            </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_y">
+          <widget class="QRadioButton" name="colorY">
            <property name="text">
             <string>Y Coordinate</string>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">coloringGroup</string>
+            <string notr="true">coloredQuantityGroup</string>
            </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_z">
+          <widget class="QRadioButton" name="colorZ">
            <property name="text">
             <string>Z Coordinate</string>
            </property>
            <attribute name="buttonGroup">
-            <string notr="true">coloringGroup</string>
+            <string notr="true">coloredQuantityGroup</string>
            </attribute>
           </widget>
          </item>
@@ -111,27 +124,36 @@
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_inplane_2">
+          <widget class="QRadioButton" name="colorScaleHSL">
            <property name="text">
             <string>HSL</string>
            </property>
            <property name="checked">
             <bool>true</bool>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">colorScaleGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_x_2">
+          <widget class="QRadioButton" name="colorScaleRedBlue">
            <property name="text">
             <string>Blue to Red</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">colorScaleGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="color_y_2">
+          <widget class="QRadioButton" name="colorScaleGray">
            <property name="text">
             <string>Grayscale</string>
            </property>
+           <attribute name="buttonGroup">
+            <string notr="true">colorScaleGroup</string>
+           </attribute>
           </widget>
          </item>
         </layout>
@@ -279,24 +301,24 @@
       <widget class="QLabel" name="label_9">
        <property name="geometry">
         <rect>
-         <x>20</x>
-         <y>140</y>
-         <width>273</width>
-         <height>85</height>
+         <x>200</x>
+         <y>40</y>
+         <width>191</width>
+         <height>131</height>
         </rect>
        </property>
        <property name="text">
-        <string>This is probably not going to work very well for a while</string>
+        <string>The viewport will be set to a fixed size if this box is checked. This can be undone in the obious way.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
        </property>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>15</x>
-         <y>41</y>
+         <x>20</x>
+         <y>70</y>
          <width>150</width>
          <height>116</height>
         </rect>
@@ -487,6 +509,7 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="coloringGroup"/>
+  <buttongroup name="colorScaleGroup"/>
+  <buttongroup name="coloredQuantityGroup"/>
  </buttongroups>
 </ui>

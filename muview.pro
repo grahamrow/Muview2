@@ -33,7 +33,9 @@ FORMS += \
 OTHER_FILES +=  \
     shaders/diffuse.frag \
     shaders/standard.frag \
-    shaders/standard.vert
+    shaders/standard.vert \
+    resources/splash.png \
+    resources/splash2.png
 
 RESOURCES += \
     resources.qrc

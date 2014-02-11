@@ -44,26 +44,27 @@ void GLWidget::mouseReleaseEvent(QMouseEvent *e)
 void GLWidget::mouseMoveEvent(QMouseEvent *e)
 {
     QVector2D diff = QVector2D(e->localPos()) - previousMousePosition;
-    QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
 
-    if (leftMousePressed) {
-        rotation = QQuaternion::fromAxisAndAngle(n, diff.length()) * rotation;
-    } else if (middleMousePressed) {
-        translation.translate(diff.x()/20.0, -diff.y()/20.0, 0.0);
-    } else if (rightMousePressed) {
-        rotation = QQuaternion::fromAxisAndAngle(QVector3D(0.0,0.0,1.0), -diff.y()/20.0) * rotation;
-    }
+    if (e->buttons() & Qt::LeftButton) {
+        setXRotation(xRot + 800 * diff.y());
+        setYRotation(yRot + 800 * diff.x());
+      } else if (e->buttons() & Qt::RightButton) {
+        setXRotation(xRot + 800 * diff.y());
+        setZRotation(zRot + 800 * diff.x());
+      } else if (e->buttons() & Qt::MidButton) {
+        setXLoc(xLoc + 0.2*diff.x());
+        setYLoc(yLoc - 0.2*diff.y());
+      }
 
-//    if (leftMousePressed || middleMousePressed || rightMousePressed )
     previousMousePosition = QVector2D(e->localPos());
-    needsUpdate = true;
+
 }
 
 void GLWidget::wheelEvent(QWheelEvent *e)
 {
     if(e->orientation() == Qt::Vertical)
     {
-        translation.translate(0,0,e->delta()/40.0);
+         zoom += (float)(e->delta()) / 50;
     }
     needsUpdate = true;
 }
@@ -114,4 +115,96 @@ void GLWidget::setZSliceHigh(int high)
         zSliceHigh = high;
         needsUpdate = true;
     }
+}
+
+static void qNormalizeAngle(int &angle)
+{
+  while (angle < 0)
+    angle += 360 * 1600;
+  while (angle > 360 * 1600)
+    angle -= 360 * 1600;
+}
+
+void GLWidget::setXRotation(int angle)
+{
+  qNormalizeAngle(angle);
+  if (angle != xRot) {
+    xRot = angle;
+    emit xRotationChanged(angle);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setYRotation(int angle)
+{
+  qNormalizeAngle(angle);
+  if (angle != yRot) {
+    yRot = angle;
+    emit yRotationChanged(angle);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setZRotation(int angle)
+{
+  qNormalizeAngle(angle);
+  if (angle != zRot) {
+    zRot = angle;
+    emit zRotationChanged(angle);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setXLoc(float val)
+{
+  if (xLoc != val) {
+    xLoc = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setYLoc(float val)
+{
+  if (yLoc != val) {
+    yLoc = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setZLoc(float val)
+{
+  if (zLoc != val) {
+    zLoc = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setXCom(float val)
+{
+  if (xcom != val) {
+    xcom = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setYCom(float val)
+{
+  if (ycom != val) {
+    ycom = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
+}
+
+void GLWidget::setZCom(float val)
+{
+  if (zcom != val) {
+    zcom = val;
+    emit COMChanged(val);
+    needsUpdate = true;
+  }
 }

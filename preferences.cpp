@@ -57,3 +57,13 @@ QSize Preferences::getImageDimensions()
         return QSize(-1,-1);
     }
 }
+
+QString Preferences::getColorScale()
+{
+    return ui->colorScaleGroup->checkedButton()->text();
+}
+
+QString Preferences::getColorQuantity()
+{
+    return ui->coloredQuantityGroup->checkedButton()->text();
+}

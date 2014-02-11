@@ -3,5 +3,7 @@
         <file>shaders/diffuse.frag</file>
         <file>shaders/standard.frag</file>
         <file>shaders/standard.vert</file>
+        <file>resources/splash.png</file>
+        <file>resources/splash2.png</file>
     </qresource>
 </RCC>

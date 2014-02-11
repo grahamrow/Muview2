@@ -23,6 +23,9 @@ GLWidget::GLWidget( QWidget* parent )
     displayOn  = false;
     toggleDisplay(0); // Start with cubes
     brightness = 1.0;
+    xRot = yRot = zRot = 0;
+    xLoc = yLoc = 0;
+    zoom = -300.0;
 
     // Slicing
     xSliceLow=ySliceLow=zSliceLow=0;
@@ -91,11 +94,11 @@ void GLWidget::setSize(QSize size)
     mandatedSize = size;
 }
 
-QSize GLWidget::sizeHint() const
-{
-//    qDebug() << "Size I'm returning is" << mandatedSize;
-    return mandatedSize;
-}
+//QSize GLWidget::sizeHint() const
+//{
+////    qDebug() << "Size I'm returning is" << mandatedSize;
+//    return mandatedSize;
+//}
 
 void GLWidget::initializeGL()
 {
@@ -113,14 +116,15 @@ void GLWidget::initializeGL()
     initializeVect(16, 1.0, 5.0, 0.6, 0.5);
     initializeLights();
 
-    translation.setToIdentity();
+//    translation.setToIdentity();
 
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
     glEnable(GL_SMOOTH);
     glDepthFunc( GL_LEQUAL );
 
-    view.lookAt(QVector3D(0.0,0.0,65.0), QVector3D(0.0,0.0,-5.0), QVector3D(0.0,1.0,0.0) );
+    view.setToIdentity();
+//    view.lookAt(QVector3D(0.0,0.0,zoom), QVector3D(0.0,0.0,-5.0), QVector3D(0.0,1.0,0.0) );
 }
 
 void GLWidget::resizeGL( int w, int h )
@@ -146,6 +150,14 @@ void GLWidget::paintGL()
         int ynodes = size[1];
         int znodes = size[2];
         float theta, phi, mag;
+        float hueVal, lumVal, satVal;
+
+        QMatrix4x4 globalMovement;
+        globalMovement.setToIdentity();
+        globalMovement.translate(xLoc, yLoc, zoom);
+        globalMovement.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
+        globalMovement.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
+        globalMovement.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
         for(int i=0; i<xnodes; i++)
         {
@@ -173,22 +185,45 @@ void GLWidget::paintGL()
                         theta = acos(  (*dataPtr)[i][j][k][2]/mag);
                         phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
 
-                        QColor spriteColor;
-
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {
                                 phi = 2.0f*PI*fabs(mag-minmag)/fabs(maxmag-minmag);
                             } else {
                                 phi = 0.0f;
                             }
-                            spriteColor = QColor::fromHsvF((phi+PI)/(2.0f*PI), 1.0, 1.0);
-                        } else {
-                            spriteColor = QColor::fromHslF((phi+PI)/(2.0f*PI), 1.0, 0.5 + 0.5*(*dataPtr)[i][j][k][2]/mag);
                         }
 
-                        model.setToIdentity();
-                        model = translation*model;
-                        model.rotate(rotation);
+                        lumVal = 0.5;
+                        if (coloredQuantity == ("In-Plane Angle")) {
+                            hueVal = (phi+PI)/(2.0f*PI);
+                        } else if (coloredQuantity ==  ("Full Orientation")) {
+                            hueVal = (phi+PI)/(2.0f*PI);
+                            lumVal = 0.5 + 0.5*(*dataPtr)[i][j][k][2]/mag;
+                        } else if (coloredQuantity ==  ("X Coordinate")) {
+                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][0]/mag;
+                        } else if (coloredQuantity ==  ("Y Coordinate")) {
+                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][1]/mag;
+                        } else if (coloredQuantity ==  ("Z Coordinate")) {
+                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][2]/mag;
+                        } else {
+                            hueVal = 0.0;
+                        }
+
+                        if (colorScale ==  ("HSL")) {
+                            spriteColor = QColor::fromHslF(hueVal, 1.0, lumVal);
+                        } else if (colorScale ==  ("Grayscale")) {
+                            spriteColor = QColor::fromHslF(0.0, 0.0, hueVal);
+                        } else if (colorScale ==  ("Blue to Red")) {
+                            if (hueVal <= 0.5) {
+                                spriteColor = QColor::fromHsvF(0.0,2.0*hueVal,1.0);
+                            } else {
+                                spriteColor = QColor::fromHsvF(0.5,(1.0-hueVal)*2.0,1.0);
+                            }
+                        } else {
+                            spriteColor = QColor::fromRgbF(0.0,0.0,0.0);
+                        }
+
+                        model = globalMovement;
                         model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
                         if (displayType != 0) {
                             // Don't rotate the cubes...
@@ -203,8 +238,12 @@ void GLWidget::paintGL()
                         displayObject->shader.setUniformValue("projection",        projection);
                         displayObject->shader.setUniformValue("color",             spriteColor);
                         displayObject->shader.setUniformValue("light.position",    lightPosition);
-                        displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
-                        displayObject->shader.setUniformValue("ambient",           lightAmbient*brightness);
+                        if (displayType ==0) {
+                            displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                        } else {
+                            displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                        }
+                        displayObject->shader.setUniformValue("ambient",           lightAmbient);
 
                         glDrawArrays( GL_TRIANGLES, 0, displayObject->count );
 
@@ -245,4 +284,14 @@ void GLWidget::setBrightness(float bright)
 {
     brightness = bright;
     needsUpdate = true;
+}
+
+void GLWidget::setColoredQuantity(QString value)
+{
+    coloredQuantity = value;
+}
+
+void GLWidget::setColorScale(QString value)
+{
+    colorScale = value;
 }

@@ -19,6 +19,8 @@ public:
     float getBrightness();
     QString getFormat();
     QSize getImageDimensions();
+    QString getColorScale();
+    QString getColorQuantity();
     ~Preferences();
 
 private:

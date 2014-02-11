@@ -34,27 +34,41 @@ public:
     void isDoneRendering();
     virtual void renderFrame(QString file);
     void setSize(QSize size);
-    QSize sizeHint() const;
+//    QSize sizeHint() const;
 
     // View Preferences
     virtual void toggleDisplay(int type);
     virtual void setBackgroundColor(QColor color);
     virtual void setSpriteResolution(int slices);
     virtual void setBrightness(float bright);
+    void setColorScale(QString value);
+    void setColoredQuantity(QString value);
 
 public slots:
     virtual void update();
 
     // Movement and slicing
+    void setXRotation(int angle);
+    void setYRotation(int angle);
+    void setZRotation(int angle);
     void setXSliceLow(int low);
     void setYSliceLow(int low);
     void setZSliceLow(int low);
     void setXSliceHigh(int high);
     void setYSliceHigh(int high);
     void setZSliceHigh(int high);
+    void setXCom(float val);
+    void setYCom(float val);
+    void setZCom(float val);
+    void setXLoc(float val);
+    void setYLoc(float val);
+    void setZLoc(float val);
 
 signals:
-    void rotationChanged(int xangle, int yangle, int zangle);
+    void xRotationChanged(int angle);
+    void yRotationChanged(int angle);
+    void zRotationChanged(int angle);
+    void COMChanged(float val);
     void doneRenderingFrame(QString filename);
 
 protected:
@@ -89,6 +103,7 @@ private:
     int valuedim;    // scalar or vector
     array_ptr dataPtr;
     float maxmag, minmag;
+    QColor spriteColor;
 
     // Lighting
     GLfloat   lightAmbient;
@@ -105,17 +120,18 @@ private:
     float xmax, ymax, zmax;
     float xmin, ymin, zmin;
     int xRot, yRot, zRot;
+    float xLoc, yLoc, zLoc, zoom;
     // slice variables
     int xSliceLow, xSliceHigh;
     int ySliceLow, ySliceHigh;
     int zSliceLow, zSliceHigh;
+    QString colorScale;
+    QString coloredQuantity;
 
     // Mouse control
     QVector2D previousMousePosition;
-    QVector3D rotationAxis;
-    QQuaternion rotation;
-    QMatrix4x4 translation;
-    qreal theta, phi;
+//    QMatrix4x4 translation;
+//    qreal viewTheta, viewPhi;
     bool leftMousePressed;
     bool middleMousePressed;
     bool rightMousePressed;

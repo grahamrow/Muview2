@@ -5,7 +5,7 @@
 bool GLWidget::initializeLights()
 {
     lightIntensity = QVector4D(1.0,1.0,1.0,1.0);
-    lightPosition = QVector4D(1.0,1.5,2.0,1.0);
+    lightPosition = QVector4D(10,10,150,1.0);
     lightAmbient = 0.4f;
     return true;
 }

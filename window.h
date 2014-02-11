@@ -51,6 +51,7 @@ private slots:
     void saveImageFile(QString name);
     void copyImage();
     void watchDir(const QString& str);
+    void stopWatchingDir();
     void toggleDisplay();
     void updateWatchedFiles(const QString& str);
     void openSettings();
