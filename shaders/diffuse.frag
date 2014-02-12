@@ -1,4 +1,5 @@
-#version 330
+#version 140
+#extension GL_ARB_gpu_shader5 : enable
 
 out vec4 fragColor;
 in vec4 fragNormal;

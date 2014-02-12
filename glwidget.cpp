@@ -8,12 +8,17 @@ GLWidget::GLWidget( QWidget* parent )
     : QGLWidget( QGLFormat(QGL::SampleBuffers), parent )
 {
     QGLFormat fmt = format();
-    fmt.setVersion(3,2);
+    fmt.setVersion(3,1);
     fmt.setDepthBufferSize(24);
     fmt.setProfile(QGLFormat::CoreProfile); // Functions deprecated in 3.0 are not available
     fmt.setSamples(4);
     setFormat(fmt);
     makeCurrent(); // prevents QGLTemporaryContext from being used
+
+    qDebug() << "VENDOR:       " << (const char*)glGetString(GL_VENDOR);
+    qDebug() << "RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
+    qDebug() << "VERSION:      " << (const char*)glGetString(GL_VERSION);
+    qDebug() << "GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     // Restore missing functionality
     glGenVertexArrays = (PglGenVertexArrays) context()->getProcAddress("glGenVertexArrays");
