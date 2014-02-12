@@ -56,15 +56,12 @@ void GLWidget::updateData(array_ptr data)
 void GLWidget::updateHeader(header_ptr header, array_ptr data)
 {
     valuedim = header->valuedim;
-    if ((header->xmin == 0.0) && (header->xmax == 0.0) && \
-            (header->ymin == 0.0) && (header->ymax == 0.0) && \
-            (header->zmin == 0.0) && (header->zmax == 0.0)) {
-        // Nothing set for the extents...
-        if (valuedim == 3) {
-            minmaxmag(data, minmag, maxmag);
-        } else if (valuedim == 1) {
-            minmax(data, minmag, maxmag);
-        }
+    // Nothing set for the extents...
+    if (valuedim == 3) {
+        minmaxmag(data, minmag, maxmag);
+    } else if (valuedim == 1) {
+        minmax(data, minmag, maxmag);
+        qDebug() << "Running maxmagminthing" << minmag << maxmag;
     }
 }
 
@@ -155,7 +152,8 @@ void GLWidget::paintGL()
         int ynodes = size[1];
         int znodes = size[2];
         float theta, phi, mag;
-        float hueVal, lumVal, satVal;
+        float hueVal, lumVal;
+        sprite *tempObject;
 
         QMatrix4x4 globalMovement;
         globalMovement.setToIdentity();
@@ -192,7 +190,7 @@ void GLWidget::paintGL()
 
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {
-                                phi = 2.0f*PI*fabs(mag-minmag)/fabs(maxmag-minmag);
+                                phi = PI*(-0.999+1.998*(mag-minmag)/(maxmag-minmag));
                             } else {
                                 phi = 0.0f;
                             }
@@ -203,7 +201,11 @@ void GLWidget::paintGL()
                             hueVal = (phi+PI)/(2.0f*PI);
                         } else if (coloredQuantity ==  ("Full Orientation")) {
                             hueVal = (phi+PI)/(2.0f*PI);
-                            lumVal = 0.5 + 0.5*(*dataPtr)[i][j][k][2]/mag;
+                            if (valuedim == 1) {
+                                lumVal=0.5;
+                            } else {
+                                lumVal = 0.5 + 0.5*(*dataPtr)[i][j][k][2]/mag;
+                            }
                         } else if (coloredQuantity ==  ("X Coordinate")) {
                             hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][0]/mag;
                         } else if (coloredQuantity ==  ("Y Coordinate")) {
@@ -236,21 +238,26 @@ void GLWidget::paintGL()
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
                         }
 
-                        glBindVertexArray(displayObject->vao);
-                        displayObject->shader.bind();
-                        displayObject->shader.setUniformValue("model",             model);
-                        displayObject->shader.setUniformValue("view",              view);
-                        displayObject->shader.setUniformValue("projection",        projection);
-                        displayObject->shader.setUniformValue("color",             spriteColor);
-                        displayObject->shader.setUniformValue("light.position",    lightPosition);
-                        if (displayType ==0) {
-                            displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                        if (valuedim == 1) {
+                            tempObject = &cube;
                         } else {
-                            displayObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                            tempObject = displayObject;
                         }
-                        displayObject->shader.setUniformValue("ambient",           lightAmbient);
+                        glBindVertexArray(tempObject->vao);
+                        tempObject->shader.bind();
+                        tempObject->shader.setUniformValue("model",             model);
+                        tempObject->shader.setUniformValue("view",              view);
+                        tempObject->shader.setUniformValue("projection",        projection);
+                        tempObject->shader.setUniformValue("color",             spriteColor);
+                        tempObject->shader.setUniformValue("light.position",    lightPosition);
+                        if (displayType ==0) {
+                            tempObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                        } else {
+                            tempObject->shader.setUniformValue("light.intensities", lightIntensity*brightness);
+                        }
+                        tempObject->shader.setUniformValue("ambient",           lightAmbient);
 
-                        glDrawArrays( GL_TRIANGLES, 0, displayObject->count );
+                        glDrawArrays( GL_TRIANGLES, 0, tempObject->count );
 
                     }
                 }
