@@ -222,9 +222,9 @@ void GLWidget::paintGL()
                             spriteColor = QColor::fromHslF(0.0, 0.0, hueVal);
                         } else if (colorScale ==  ("Blue to Red")) {
                             if (hueVal <= 0.5) {
-                                spriteColor = QColor::fromHsvF(0.0,2.0*hueVal,1.0);
+                                spriteColor = QColor::fromHsvF(0.0,1.0-2.0*hueVal,1.0);
                             } else {
-                                spriteColor = QColor::fromHsvF(0.5,(1.0-hueVal)*2.0,1.0);
+                                spriteColor = QColor::fromHsvF(0.5,(hueVal-0.5)*2.0,1.0);
                             }
                         } else {
                             spriteColor = QColor::fromRgbF(0.0,0.0,0.0);
