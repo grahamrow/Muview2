@@ -61,7 +61,6 @@ void GLWidget::updateHeader(header_ptr header, array_ptr data)
         minmaxmag(data, minmag, maxmag);
     } else if (valuedim == 1) {
         minmax(data, minmag, maxmag);
-        qDebug() << "Running maxmagminthing" << minmag << maxmag;
     }
 }
 
@@ -96,11 +95,6 @@ void GLWidget::setSize(QSize size)
     mandatedSize = size;
 }
 
-//QSize GLWidget::sizeHint() const
-//{
-////    qDebug() << "Size I'm returning is" << mandatedSize;
-//    return mandatedSize;
-//}
 
 void GLWidget::initializeGL()
 {
@@ -118,15 +112,12 @@ void GLWidget::initializeGL()
     initializeVect(16, 1.0, 5.0, 0.6, 0.5);
     initializeLights();
 
-//    translation.setToIdentity();
-
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
     glEnable(GL_SMOOTH);
     glDepthFunc( GL_LEQUAL );
 
     view.setToIdentity();
-//    view.lookAt(QVector3D(0.0,0.0,zoom), QVector3D(0.0,0.0,-5.0), QVector3D(0.0,1.0,0.0) );
 }
 
 void GLWidget::resizeGL( int w, int h )

@@ -187,7 +187,6 @@ void Window::initSlider(QSlider *slider)
 void Window::adjustAnimSlider(bool back)
 {
 	int numFiles = filenames.size();
-	//qDebug() << QString("Updating Animation Slider to size") << numFiles;
 	if (numFiles > 1) {
         ui->animSlider->setRange(0, numFiles-1);
         ui->animSlider->setSingleStep(1);
@@ -203,7 +202,6 @@ void Window::adjustAnimSlider(bool back)
 	} else {
         ui->animSlider->setEnabled(false);
 	}
-	//qDebug() << QString("Updated Animation Slider to size") << numFiles;
 }
 
 void Window::keyPressEvent(QKeyEvent *e)
@@ -282,7 +280,6 @@ void Window::openFiles()
     names = QFileDialog::getOpenFileNames(this,
         tr("Open File"), lastOpenedLocation.path(),
         tr("OVF Files (*.omf *.ovf)"));
-//    qDebug() << names;
 
     if (names.length() > 0)
     {
@@ -324,29 +321,23 @@ void Window::updateWatchedFiles(const QString& str) {
     bool changed = false;
     foreach(QString dirFile, dirFiles)
     {
-        //qDebug() << QString("Changed File!") << dirFile;
         if (!filenames.contains(dirString + dirFile)) {
             // Haven't been loaded
             QString fullPath = dirString + dirFile;
             QFileInfo info(fullPath);
-            //qDebug() << QString("Not in filenames: ") << (dirFile);
 
             if (!watchedFiles.contains(fullPath)) {
                 // Not on the watch list yet
                 watchedFiles.insert(fullPath, info.lastModified());
-                //qDebug() << QString("Inserted: ") << (dirFile);
             } else {
                 // on the watch list
                 if (info.lastModified() == watchedFiles[fullPath]) {
                     // File size has stabalized
-                    //qDebug() << QString("Stable, pushed") << dirFile;
                     filenames.append(fullPath);
                     displayNames.append(dirFile);
-                    //omfCache.push_back(readOMF(fullPath.toStdString(), tempHeader));
                     changed = true;
                 } else {
                     // File still changing
-                    //qDebug() << QSt        //qDebug() << QString("Pushing Back") << filenames[loadPos];ring("Unstable") << dirFile;
                     watchedFiles[fullPath] = info.lastModified();
                 }
             }
@@ -372,7 +363,6 @@ void Window::updateDisplayData(int index)
     if ( abs(index-cachePos) >= cacheSize ) {
             // Out of the realm of caching
             // Clear the cache of pre-existing elements
-            //qDebug() << QString("Clearing the cache, too far out of range") << index << cachePos;
         clearCaches();
         cachePos = index;
         for (int loadPos=index; loadPos<(index+cacheSize) && loadPos<filenames.size(); loadPos++) {
@@ -383,7 +373,6 @@ void Window::updateDisplayData(int index)
         cachePos = index;
     } else if ( index < cachePos ) {
             // Moving backwards, regroup for fast scrubbing!
-            //qDebug() << QString("Moving backwards") << index << cachePos;
         for (int loadPos=cachePos-1; loadPos >= index && loadPos<filenames.size(); loadPos--) {
             if (omfCache.size()==uint(cacheSize)) {
                 omfCache.pop_back();
@@ -399,14 +388,11 @@ void Window::updateDisplayData(int index)
 
     // We are within the current cache
     if (index < filenames.size()) {
-        //qDebug() << QString("In Cache Range") << index << cachePos;
         ui->statusbar->showMessage(displayNames[index]);
         // Update the Display
-        //qDebug() << QString("Current cache size") << omfCache.size();
         ui->viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
         ui->viewport->updateData(omfCache.at(index-cachePos));
     } else {
-            //qDebug() << QString("Out of Cache Range!!!!") << index << cachePos;
         ui->statusbar->showMessage(QString("Don't scroll so erratically..."));
     }
 }
@@ -445,7 +431,6 @@ void Window::openDir()
 void Window::saveImageFile(QString name)
 {
     if (name != "") {
-//        qDebug() << "Image saving triggered" << name;
         lastSavedLocation = QDir(name);
         QImage screen = ui->viewport->grabFrameBuffer();
         screen.save(name, (prefs->getFormat()).toStdString().c_str(), 90);
@@ -494,7 +479,7 @@ void Window::saveImageSequence()
 void Window::watchDir(const QString& str)
 {
     QString dir;
-        // Don't show a dialog if we get this message from the command line
+    // Don't show a dialog if we get this message from the command line
     if (str == "") {
         dir = QFileDialog::getExistingDirectory(this, tr("Watch Directory"),
             lastOpenedLocation.path(),
@@ -533,26 +518,8 @@ void Window::watchDir(const QString& str)
         }
 
         processFilenames();
-        gotoFrontOfCache();
-//        if (filenames.length()>0) {
+        gotoBackOfCache();
 
-//            // Only cache the last file
-//            header_ptr header = header_ptr(new OMFHeader());
-//            cachePos = filenames.size()-1;
-//            omfHeaderCache.push_back(header);
-//            omfCache.push_back(readOMF(filenames.last().toStdString(), *header));
-
-//            // Update the Display with the first element
-//            ui->viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
-//            ui->viewport->updateData(omfCache.back());
-			
-//            // Update the top overlay
-//            ui->statusbar->showMessage(displayNames.back());
-
-//            // Refresh the animation bar
-//            adjustAnimSlider(true);
-//        }
-        // Now the callbacks
         connect(watcher, SIGNAL(directoryChanged(QString)),
             this, SLOT(updateWatchedFiles(QString)));
     }
@@ -582,4 +549,3 @@ Window::~Window()
 {
     delete ui;
 }
-

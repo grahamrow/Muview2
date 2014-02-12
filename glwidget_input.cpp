@@ -7,7 +7,6 @@ void GLWidget::updateCOM()
     xcom = (float)size[0]*0.5;
     ycom = (float)size[1]*0.5;
     zcom = (float)size[2]*0.5;
-//    qDebug() << "COM:" << xcom << ycom << zcom ;
 }
 
 void GLWidget::keyPressEvent( QKeyEvent* e )
