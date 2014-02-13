@@ -2,6 +2,7 @@
 Name=Muview Viewer
 Comment=Open OVF/OMF files
 TryExec=muview
+Icon=muview
 Exec=muview %U
 StartupNotify=true
 Terminal=false

@@ -5,5 +5,11 @@
         <file>shaders/standard.vert</file>
         <file>resources/splash.png</file>
         <file>resources/splash2.png</file>
+        <file>resources/32x32/muview.png</file>
+        <file>resources/64x64/muview.png</file>
+        <file>resources/128x128/muview.png</file>
+        <file>resources/256x256/muview.png</file>
+        <file>resources/512x512/muview.png</file>
+        <file>resources/16x16/muview.png</file>
     </qresource>
 </RCC>
