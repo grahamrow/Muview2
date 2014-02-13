@@ -42,7 +42,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;a href=&quot;grahamrow.github.io/Muview2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#49aaff;&quot;&gt;Muview2&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt; is written in C++ using OpenGL and Qt 5&lt;br/&gt;Graham Rowlands&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-style:italic; color:#ffffff;&quot;&gt;Version 2.0b1 - February 2014&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;a href=&quot;grahamrow.github.io/Muview2&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0c3d5e;&quot;&gt;Muview2&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt; is written in C++ using OpenGL and Qt 5&lt;br/&gt;Graham Rowlands&lt;br/&gt;&lt;/span&gt;&lt;span style=&quot; font-style:italic; color:#ffffff;&quot;&gt;Version 2.0b1 - February 2014&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;right&quot;&gt;&lt;span style=&quot; color:#ffffff;&quot;&gt;&lt;br/&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="wordWrap">
     <bool>true</bool>
@@ -61,7 +61,7 @@
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap resource="resources.qrc">:/resources/splash2.png</pixmap>
+    <pixmap resource="resources.qrc">:/resources/splash.png</pixmap>
    </property>
   </widget>
   <zorder>label_2</zorder>
