@@ -18,8 +18,8 @@ linux {
         message("Ubuntu type distribution found:")
         message("   will install muview.desktop to /usr/share/applications")
         message("   will install icons to /usr/share/icons/hicolor/")
-	desktopfile.path = /usr/share/applications
-	desktopfile.files += resources/muview.desktop
+	    desktopfile.path = /usr/share/applications
+	    desktopfile.files += resources/muview.desktop
         iconfile512.path  = /usr/share/icons/hicolor/512x512/apps
         iconfile512.files = resources/512x512/muview.png
         iconfile256.path  = /usr/share/icons/hicolor/256x256/apps
@@ -44,11 +44,14 @@ linux {
     INSTALLS += target  pixmap
 }
 
-macosx {
-    message(Building in Mac OS X Environment)
-    message("    will install muview (binary) to /Applications")
-    message("    with link at /usr/local/bin")
+macx {
+    message(Building in Mac OSX Environment)
+    message("    will install muview (app) to /Applications")
     target.path = /Applications
+
+    LIBS        += -L/usr/local/Cellar/boost/1.55.0/lib
+    INCLUDEPATH += /usr/local/Cellar/boost/1.55.0/include \
+                   libomf
 
     INSTALLS += target
 }
