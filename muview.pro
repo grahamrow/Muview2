@@ -1,7 +1,5 @@
 
 QT           += core gui opengl
-LIBS         += libomf/libomf.a
-INCLUDEPATH  += $$PWD/libomf
 TARGET       = muview
 TEMPLATE     = app
 
@@ -50,13 +48,11 @@ macx {
     target.path = /Applications
 
     LIBS        += -L/usr/local/Cellar/boost/1.55.0/lib
-    INCLUDEPATH += /usr/local/Cellar/boost/1.55.0/include \
-                   libomf
-
+    INCLUDEPATH += /usr/local/Cellar/boost/1.55.0/include 
     INSTALLS += target
 }
 
-windows {
+win {
     message(Building in Windows Environment)
     message("    will install muview (binary) to C:\\Program Files")
     target.path = "C:\\Program Files"
@@ -73,7 +69,9 @@ SOURCES +=  \
     qxtspanslider.cpp \
     preferences.cpp \
     aboutdialog.cpp \
-    analysis.cpp
+    analysis.cpp \
+    OMFImport.cpp \
+    OMFHeader.cpp
 
 HEADERS  += \
     glwidget.h \
@@ -82,7 +80,10 @@ HEADERS  += \
     preferences.h \
     aboutdialog.h \
     window.h \
-    analysis.h
+    analysis.h \
+    OMFEndian.h \
+    OMFImport.h \
+    OMFContainer.h
 
 FORMS += \
     preferences.ui \
