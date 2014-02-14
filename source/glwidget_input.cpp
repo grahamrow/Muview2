@@ -34,7 +34,7 @@ void GLWidget::mousePressEvent(QMouseEvent *e)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-    
+    (void) e;
     leftMousePressed = false;
     middleMousePressed = false;
     rightMousePressed = false;
