@@ -4,6 +4,10 @@ TARGET       = ../muview
 TEMPLATE     = app
 INCLUDEPATH += $$top_srcdir
 
+UI_DIR      = uics
+MOC_DIR     = mocs
+OBJECTS_DIR = objs
+
 linux {
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
