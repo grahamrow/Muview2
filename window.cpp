@@ -106,7 +106,7 @@ Window::Window(int argc, char *argv[]) :
     ui->xSlider->setValue(345 * 1600);
     ui->ySlider->setValue(0 * 1600);
     ui->zSlider->setValue(0 * 1600);
-    setWindowTitle(tr("MuView 2.0b1"));
+    setWindowTitle(tr("MuView 2.0b2"));
 
     // Data, don't connect until we are ready (probably still not ready here)...
     connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));

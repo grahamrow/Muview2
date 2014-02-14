@@ -18,6 +18,3 @@ Otherwise, groups of files or entire directories can be loaded from the GUI.
 
 ### Planned Features
 Please let me know what would be useful! I don't plan to add any analysis capabilities.
-
-[] Image export preferences
-[] Finish wiring color controls
