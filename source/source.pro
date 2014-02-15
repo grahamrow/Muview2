@@ -51,9 +51,8 @@ macx {
     message(Building in Mac OSX Environment)
     message("    will install muview (app) to /Applications")
     target.path = /Applications
+    ICON = resources/muview.icns
 
-    LIBS        += -L/usr/local/Cellar/boost/1.55.0/lib
-    INCLUDEPATH += /usr/local/Cellar/boost/1.55.0/include 
     INSTALLS += target
 }
 
