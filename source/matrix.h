@@ -1,7 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
-#import <QVector>
-#import <QVector3D>
+#include <QVector>
+#include <QVector3D>
 
 class matrix
 {

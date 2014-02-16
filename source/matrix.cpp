@@ -35,17 +35,17 @@ QVector<int> matrix::shape()
 
 void matrix::minmaxScalar(float &min, float &max)
 {
-    float minSearch = data->at(0)[0];
-    float maxSearch = data->at(0)[0];
+    float minSearch = (data->at(0)).x();
+    float maxSearch = (data->at(0)).x();
     float val;
 
     for(int k=0; k<numElements; k++)
     {
-        val = data->at(k)[0];
-        if (data->at(k)[0] < minSearch) {
+        val = (data->at(0)).x();
+        if (val < minSearch) {
             minSearch = val;
         }
-        if (data->at(k)[0] > maxSearch) {
+        if (val > maxSearch) {
             maxSearch = val;
         }
     }

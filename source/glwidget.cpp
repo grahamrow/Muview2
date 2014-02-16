@@ -137,7 +137,6 @@ void GLWidget::paintGL()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if (displayOn) {
-        qDebug() << "Made it to draw";
         QVector<int> size = dataPtr->shape();
         int xnodes = size[0];
         int ynodes = size[1];
