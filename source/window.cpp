@@ -247,23 +247,29 @@ void Window::processFilenames() {
         QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
         omfHeaderCache.push_back(header);
         omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), *header));
+        qDebug() << "Made it to 1";
     }
 }
 
 void Window::gotoFrontOfCache() {
+    qDebug() << "Made it to 2";
     ui->viewport->updateHeader(omfHeaderCache.front(), omfCache.front());
     ui->statusbar->showMessage(filenames.front());
+    qDebug() << "Made it to 3";
     ui->viewport->updateData(omfCache.front());
     cachePos = 0;
     adjustAnimSlider(false); // Go to end of slider
 }
 
 void Window::gotoBackOfCache() {
+    qDebug() << "Made it to 2";
     ui->viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
     ui->statusbar->showMessage(filenames.back());
+    qDebug() << "Made it to 3";
     ui->viewport->updateData(omfCache.back());
     cachePos = filenames.size()-1;
-    adjustAnimSlider(true); // Go to start of slider
+    adjustAnimSlider(true); // Go to start of slide
+
 }
 
 void Window::clearCaches() {

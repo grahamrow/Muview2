@@ -76,7 +76,6 @@ SOURCES +=  \
     qxtspanslider.cpp \
     preferences.cpp \
     aboutdialog.cpp \
-#    analysis.cpp \
     OMFImport.cpp \
     OMFHeader.cpp
 
@@ -89,10 +88,8 @@ HEADERS  += \
     preferences.h \
     aboutdialog.h \
     window.h \
-#    analysis.h \
     OMFEndian.h \
     OMFImport.h \
-    OMFContainer.h \
     OMFHeader.h
 
 FORMS += \

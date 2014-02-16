@@ -58,9 +58,9 @@ void GLWidget::updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<mat
     valuedim = header->valuedim;
     // Nothing set for the extents...
     if (valuedim == 3) {
-        dataPtr->minmaxMagnitude(minmag, maxmag);
+        data->minmaxMagnitude(minmag, maxmag);
     } else if (valuedim == 1) {
-        dataPtr->minmaxScalar(minmag, maxmag);
+        data->minmaxScalar(minmag, maxmag);
     }
 }
 
@@ -137,7 +137,7 @@ void GLWidget::paintGL()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if (displayOn) {
-
+        qDebug() << "Made it to draw";
         QVector<int> size = dataPtr->shape();
         int xnodes = size[0];
         int ynodes = size[1];

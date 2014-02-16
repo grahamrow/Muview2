@@ -10,7 +10,7 @@
 //#include "OMFContainer.h"
 #include "matrix.h"
 #include "OMFHeader.h"
-#include "analysis.h"
+//#include "analysis.h"
 
 typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
 typedef void (*PglBindVertexArray) (GLuint array);

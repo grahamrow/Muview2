@@ -3,6 +3,7 @@
 // Modified by Graham Rowlands <grahamrow@gmail.com>
 
 #include <QSharedPointer>
+#include <QDebug>
 #include <stdlib.h>
 
 #include <algorithm>
@@ -13,9 +14,7 @@
 
 #include "matrix.h"
 #include "OMFImport.h"
-//#include "OMFContainer.h"
 #include "OMFEndian.h"
-//using namespace std;
 
 struct OMFImport
 {
@@ -35,8 +34,6 @@ struct OMFImport
   bool eof;
   char next_char;
 
-  //std::auto_ptr<VectorMatrix> field;
-//  array_ptr field;
   QSharedPointer<matrix> field;
 
   void acceptLine();
@@ -108,7 +105,6 @@ static bool parseCommentLine(const std::string &line, std::string &key, std::str
       std::transform(key.begin(), key.end(), key.begin(), ::tolower);
       value = std::string(line.begin()+sep+2, line.end());
       std::transform(value.begin(), value.end(), value.begin(), ::tolower);
-      //std::cout << "Header:\t" << key << "\t" << value << std::endl;
       return true;
       //}
   } else {
@@ -380,13 +376,7 @@ void OMFImport::parseDataBinary4()
   field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
   //const int num_cells = field->numElements();
-  int num_cells;
-  if (header.valuedim == 1) {
-  	num_cells = field->num_elements()/3;
-  	// std::cout << "Number of cells:\t" << num_cells << std::endl;
-  } else {
-  	num_cells = field->num_elements()/3;
-  }
+  int num_cells = field->num_elements();
 
   // Read magic value and field contents from file
   float magic; 
@@ -476,7 +466,7 @@ void OMFImport::parseDataBinary8()
   field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
   //const int num_cells = field->numElements();
-  const int num_cells = field->num_elements()/3;
+  const int num_cells = field->num_elements();
 
   // Read magic value and field contents from file
   double magic;
