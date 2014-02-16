@@ -3,7 +3,7 @@
 
 void GLWidget::updateCOM()
 {
-    const long unsigned int *size = dataPtr->shape();
+    QVector<int> size = dataPtr->shape();
     xcom = (float)size[0]*0.5;
     ycom = (float)size[1]*0.5;
     zcom = (float)size[2]*0.5;

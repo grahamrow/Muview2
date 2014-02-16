@@ -6,14 +6,15 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 
-#include <boost/smart_ptr.hpp>
-#include "OMFContainer.h"
+//#include <boost/smart_ptr.hpp>
+//#include "OMFContainer.h"
+#include "matrix.h"
 #include "OMFHeader.h"
 #include "analysis.h"
 
 typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
 typedef void (*PglBindVertexArray) (GLuint array);
-typedef boost::shared_ptr<OMFHeader> header_ptr;
+//typedef boost::shared_ptr<OMFHeader> header_ptr;
 
 struct sprite
 {
@@ -29,8 +30,8 @@ class GLWidget : public QGLWidget
 public:
     GLWidget( QWidget *parent );
     // Data and Drawing
-    void updateData(array_ptr data);
-    void updateHeader(header_ptr header, array_ptr data);
+    void updateData(QSharedPointer<matrix> data);
+    void updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data);
     void isDoneRendering();
     virtual void renderFrame(QString file);
     void setSize(QSize size);
@@ -101,7 +102,7 @@ private:
     sprite *displayObject;
     int displayType; // Cube 0, Cone 1, Vector 2
     int valuedim;    // scalar or vector
-    array_ptr dataPtr;
+    QSharedPointer<matrix> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;
 
@@ -116,6 +117,7 @@ private:
     QColor backgroundColor;
     QMatrix4x4 projection, view, model;
     bool displayOn;
+    QVector3D com, location, maxExtent, minExtent;
     float xcom, ycom, zcom;
     float xmax, ymax, zmax;
     float xmin, ymin, zmin;

@@ -8,6 +8,8 @@ UI_DIR      = uics
 MOC_DIR     = mocs
 OBJECTS_DIR = objs
 
+#CONFIG += C++11
+
 linux {
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
@@ -65,6 +67,7 @@ win {
 }
 
 SOURCES +=  \
+    matrix.cpp \
     main.cpp \
     window.cpp \
     glwidget.cpp \
@@ -73,21 +76,24 @@ SOURCES +=  \
     qxtspanslider.cpp \
     preferences.cpp \
     aboutdialog.cpp \
-    analysis.cpp \
+#    analysis.cpp \
     OMFImport.cpp \
     OMFHeader.cpp
 
+
 HEADERS  += \
+    matrix.h \
     glwidget.h \
     qxtspanslider.h \
     qxtspanslider_p.h \
     preferences.h \
     aboutdialog.h \
     window.h \
-    analysis.h \
+#    analysis.h \
     OMFEndian.h \
     OMFImport.h \
-    OMFContainer.h
+    OMFContainer.h \
+    OMFHeader.h
 
 FORMS += \
     preferences.ui \

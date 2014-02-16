@@ -7,18 +7,21 @@
 #include <QString>
 #include <QDateTime>
 #include <QDir>
-#include <boost/smart_ptr.hpp>
+#include <QSharedPointer>
+#include <QVector>
+//#include <boost/smart_ptr.hpp>
 
 // Other parts of the interface
 #include "preferences.h"
 #include "aboutdialog.h"
 
 // For reading OMF files
-#include "OMFContainer.h"
+//#include "OMFContainer.h"
 #include "OMFHeader.h"
-#include <deque>
+#include "matrix.h"
+//#include <deque>
 
-typedef boost::shared_ptr<OMFHeader> header_ptr;
+//typedef boost::shared_ptr<OMFHeader> header_ptr;
 
 // Forward Declarations
 class QSlider;
@@ -86,8 +89,8 @@ private:
     void gotoFrontOfCache();
     void processFilenames();
 
-    std::deque<array_ptr>  omfCache;
-    std::deque<header_ptr> omfHeaderCache;
+    QVector<QSharedPointer<matrix> >    omfCache;
+    QVector<QSharedPointer<OMFHeader> > omfHeaderCache;
     QStringList filenames;
     QStringList displayNames;
 

@@ -2,6 +2,7 @@
 // domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
 // Modified by Graham Rowlands <grahamrow@gmail.com>
 
+#include <QSharedPointer>
 #include <stdlib.h>
 
 #include <algorithm>
@@ -10,8 +11,9 @@
 #include <stdexcept>
 #include <sstream>
 
+#include "matrix.h"
 #include "OMFImport.h"
-#include "OMFContainer.h"
+//#include "OMFContainer.h"
 #include "OMFEndian.h"
 //using namespace std;
 
@@ -34,13 +36,14 @@ struct OMFImport
   char next_char;
 
   //std::auto_ptr<VectorMatrix> field;
-  array_ptr field;
+//  array_ptr field;
+  QSharedPointer<matrix> field;
 
   void acceptLine();
 };
 
 
-array_ptr readOMF(const std::string &path, OMFHeader &header)
+QSharedPointer<matrix> readOMF(const std::string &path, OMFHeader &header)
 {
   std::ifstream in(path.c_str());
   if (!in.good()) {
@@ -50,15 +53,15 @@ array_ptr readOMF(const std::string &path, OMFHeader &header)
   OMFImport omf;
   omf.read(in);
   header = omf.header;
-  return array_ptr(omf.field);
+  return QSharedPointer<matrix>(omf.field);
 }
 
-array_ptr readOMF(std::istream &in, OMFHeader &header)
+QSharedPointer<matrix> readOMF(std::istream &in, OMFHeader &header)
 {
 	OMFImport omf;
 	omf.read(in);
 	header = omf.header;
-	return array_ptr(omf.field);
+    return QSharedPointer<matrix>(omf.field);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -321,7 +324,8 @@ void OMFImport::parseDataAscii()
 	acceptLine();
 
 	// Create field matrix object
-	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+//	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+    field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
 	//std::cout << "Loading!" << std::endl;
 
@@ -332,34 +336,23 @@ void OMFImport::parseDataAscii()
 	      ss << line;
 	      
 	      double v1, v2, v3;
+          QVector3D val;
 	      if (header.valuedim == 1) {
 	      	ss >> v1;
+            val = QVector3D(v1,v1,v1);
 	      	// std::cout << v1 << std::endl;
 	      } else {
 			ss >> v1 >> v2 >> v3;
+            val = QVector3D(v1,v2,v3);
 			// std::cout << v1 << std::endl;
 	      }
 
 	      if (header.version==1) {
-	      	if (header.valuedim == 1) {
-	      		v1 = v1*header.valuemultiplier;
-	      	} else {
-				v1 = v1*header.valuemultiplier;
-				v2 = v2*header.valuemultiplier;
-				v3 = v3*header.valuemultiplier;
-			}
+              val = val*header.valuemultiplier;
 	      }
 
-	      //std::cout << v1 << "\t" << v2 << "\t" << v3 << std::endl;
-	      if (header.valuedim == 1) {
-	      	  (*field)[x][y][z][0] = (float)v1;
-		      (*field)[x][y][z][1] = (float)v1;
-		      (*field)[x][y][z][2] = (float)v1;
-	      } else {
-		      (*field)[x][y][z][0] = (float)v1;
-		      (*field)[x][y][z][1] = (float)v2;
-		      (*field)[x][y][z][2] = (float)v3;
-		  }
+          field->set(x,y,z,val);
+
 	      acceptLine();
 	    }
 
@@ -384,8 +377,7 @@ void OMFImport::parseDataBinary4()
   }
 
   // Create field matrix object
-  //field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
-  field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+  field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
   //const int num_cells = field->numElements();
   int num_cells;
@@ -422,44 +414,33 @@ void OMFImport::parseDataBinary4()
 	  input->read((char*)buffer, 3*num_cells*sizeof(float));
   }
 
-  const int stridez = header.ynodes*header.xnodes;
-  const int stridey = header.xnodes;
-  int z,y,x;
-
+  QVector3D val;
   for (int i=0; i<num_cells; ++i) {
-  	x = i%stridey;
-	z = i/stridez;
-	y = (i - x -  z*stridez)/stridey;
-  	if (header.valuedim == 1) {
-  		if (header.version==1) {
-  			float val = fromBigEndian(buffer[i]) * header.valuemultiplier;
-			(*field)[x][y][z][0] = val;
-			(*field)[x][y][z][1] = val;
-			(*field)[x][y][z][2] = val;
-			// std::cout << val << std::endl;
-	      } else {
-			float val = fromLittleEndian(buffer[i]);
-			(*field)[x][y][z][0] = val;
-			(*field)[x][y][z][1] = val;
-			(*field)[x][y][z][2] = val;
-			// std::cout << val << std::endl;
-	      }
-	} else {
-	    for (int j=0; j<3; ++j) {
-	      if (header.version==1) {
-			(*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
-	      } else {
-			(*field)[x][y][z][j] = fromLittleEndian(buffer[i*3+j]);
-	      }
-	    }
-	}
+    if (header.valuedim == 1) {
+        if (header.version==1) {
+            float v1 = fromBigEndian(buffer[i]) * header.valuemultiplier;
+            val = QVector3D(v1,v1,v1);
+        } else {
+            float v1 = fromLittleEndian(buffer[i]);
+            val = QVector3D(v1,v1,v1);
+        }
+    } else {
+        if (header.version==1) {
+            val.setX(fromBigEndian(buffer[i*3+0]));
+            val.setY(fromBigEndian(buffer[i*3+1]));
+            val.setZ(fromBigEndian(buffer[i*3+2]));
+            val = val * header.valuemultiplier;
+        } else {
+            val.setX(fromLittleEndian(buffer[i*3+0]));
+            val.setY(fromLittleEndian(buffer[i*3+1]));
+            val.setZ(fromLittleEndian(buffer[i*3+2]));
+        }
+     }
+    field->set(i,val);
   }
 
   delete [] buffer;
 
-  if (header.version==1) {
-    //acceptLine(); // read trailing newline character
-  }
   acceptLine(); // read next line...
 
   // Seems that we must remove the first erroneous char
@@ -492,7 +473,7 @@ void OMFImport::parseDataBinary8()
 
   // Create field matrix object
   //field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
-  field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
+  field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
   //const int num_cells = field->numElements();
   const int num_cells = field->num_elements()/3;
@@ -521,27 +502,33 @@ void OMFImport::parseDataBinary8()
   double *buffer = new double [3*num_cells];
   input->read((char*)buffer, 3*num_cells*sizeof(double));
 
-  const int stridez = header.ynodes*header.xnodes;
-  const int stridey = header.xnodes;
-  int z,y,x;
-
+  QVector3D val;
   for (int i=0; i<num_cells; ++i) {
-    for (int j=0; j<3; ++j) {
-      //field_acc.linearSet(i,j,fromBigEndian(buffer[i*3+j]) * header.valuemultiplier);
-      x = i%stridey;
-      z = i/stridez;
-      y = (i - x -  z*stridez)/stridey;
-      if (header.version==1) {
-	(*field)[x][y][z][j] = fromBigEndian(buffer[i*3+j]) * header.valuemultiplier;
-      } else {
-	(*field)[x][y][z][j] = fromLittleEndian(buffer[i*3+j]);
-      }
-    }
+    if (header.valuedim == 1) {
+        if (header.version==1) {
+            float v1 = fromBigEndian(buffer[i]) * header.valuemultiplier;
+            val = QVector3D(v1,v1,v1);
+        } else {
+            float v1 = fromLittleEndian(buffer[i]);
+            val = QVector3D(v1,v1,v1);
+        }
+    } else {
+        if (header.version==1) {
+            val.setX(fromBigEndian(buffer[i*3+0]));
+            val.setY(fromBigEndian(buffer[i*3+1]));
+            val.setZ(fromBigEndian(buffer[i*3+2]));
+            val = val * header.valuemultiplier;
+        } else {
+            val.setX(fromLittleEndian(buffer[i*3+0]));
+            val.setY(fromLittleEndian(buffer[i*3+1]));
+            val.setZ(fromLittleEndian(buffer[i*3+2]));
+        }
+     }
+    field->set(i,val);
   }
 
   delete [] buffer;
 
-  //acceptLine(); // read trailing newline character
   acceptLine(); // read next line...
 
   // Seems that we must remove the first erroneous char

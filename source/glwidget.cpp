@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include <QKeyEvent>
 #include <QTimer>
-
+#include <math.h>
 #include "glwidget.h"
 
 GLWidget::GLWidget( QWidget* parent )
@@ -42,7 +42,7 @@ GLWidget::GLWidget( QWidget* parent )
     timer->start(16);
 }
 
-void GLWidget::updateData(array_ptr data)
+void GLWidget::updateData(QSharedPointer<matrix> data)
 {
     dataPtr    = data;
     displayOn  = true;
@@ -53,20 +53,20 @@ void GLWidget::updateData(array_ptr data)
     needsUpdate = true;
 }
 
-void GLWidget::updateHeader(header_ptr header, array_ptr data)
+void GLWidget::updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data)
 {
     valuedim = header->valuedim;
     // Nothing set for the extents...
     if (valuedim == 3) {
-        minmaxmag(data, minmag, maxmag);
+        dataPtr->minmaxMagnitude(minmag, maxmag);
     } else if (valuedim == 1) {
-        minmax(data, minmag, maxmag);
+        dataPtr->minmaxScalar(minmag, maxmag);
     }
 }
 
 void GLWidget::updateExtent()
 {
-    const long unsigned int *size = dataPtr->shape();
+    QVector<int> size = dataPtr->shape();
     xmax = size[0];
     ymax = size[1];
     zmax = size[2];
@@ -138,10 +138,11 @@ void GLWidget::paintGL()
 
     if (displayOn) {
 
-        const long unsigned int *size = dataPtr->shape();
+        QVector<int> size = dataPtr->shape();
         int xnodes = size[0];
         int ynodes = size[1];
         int znodes = size[2];
+        QVector3D datum;
         float theta, phi, mag;
         float hueVal, lumVal;
         sprite *tempObject;
@@ -159,12 +160,11 @@ void GLWidget::paintGL()
             {
                 for(int k=0; k<znodes; k++)
                 {
+                    datum = dataPtr->at(i,j,k);
                     if (valuedim == 1) {
-                        mag = (*dataPtr)[i][j][k][0];
+                        mag = datum.x();
                     } else {
-                        mag = sqrt( (*dataPtr)[i][j][k][0] * (*dataPtr)[i][j][k][0] +
-                                    (*dataPtr)[i][j][k][1] * (*dataPtr)[i][j][k][1] +
-                                    (*dataPtr)[i][j][k][2] * (*dataPtr)[i][j][k][2]);
+                        mag = datum.length();
                     }
 
                     if ( ((valuedim == 1 ) || ((valuedim == 3) && mag != 0.0)) &&
@@ -176,8 +176,8 @@ void GLWidget::paintGL()
                          k <= (zmax-zmin)*(float)zSliceHigh/1600.0)
                     {
 
-                        theta = acos(  (*dataPtr)[i][j][k][2]/mag);
-                        phi   = atan2( (*dataPtr)[i][j][k][1],  (*dataPtr)[i][j][k][0]);
+                        theta = acos(  datum.z()/mag);
+                        phi   = atan2( datum.y(), datum.x());
 
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {
@@ -195,14 +195,14 @@ void GLWidget::paintGL()
                             if (valuedim == 1) {
                                 lumVal=0.5;
                             } else {
-                                lumVal = 0.5 + 0.5*(*dataPtr)[i][j][k][2]/mag;
+                                lumVal = 0.5 + 0.5*datum.x()/mag;
                             }
                         } else if (coloredQuantity ==  ("X Coordinate")) {
-                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][0]/mag;
+                            hueVal = 0.5+ 0.5*datum.x()/mag;
                         } else if (coloredQuantity ==  ("Y Coordinate")) {
-                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][1]/mag;
+                            hueVal = 0.5+ 0.5*datum.y()/mag;
                         } else if (coloredQuantity ==  ("Z Coordinate")) {
-                            hueVal = 0.5+ 0.5*(*dataPtr)[i][j][k][2]/mag;
+                            hueVal = 0.5+ 0.5*datum.z()/mag;
                         } else {
                             hueVal = 0.0;
                         }

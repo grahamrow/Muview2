@@ -13,6 +13,7 @@
 #include <QMap>
 #include <QColorDialog>
 #include <QGLFormat>
+#include <QSharedPointer>
 
 #include "glwidget.h"
 #include "window.h"
@@ -22,7 +23,7 @@
 
 #include "OMFImport.h"
 #include "OMFHeader.h"
-#include "OMFContainer.h"
+//#include "OMFContainer.h"
 
 struct OMFImport;
 
@@ -243,7 +244,7 @@ void Window::openAbout()
 void Window::processFilenames() {
     // Looping over files
     for (int loadPos=0; loadPos<cacheSize && loadPos<filenames.size(); loadPos++) {
-        header_ptr header = header_ptr(new OMFHeader());
+        QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
         omfHeaderCache.push_back(header);
         omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), *header));
     }
@@ -366,7 +367,7 @@ void Window::updateDisplayData(int index)
         clearCaches();
         cachePos = index;
         for (int loadPos=index; loadPos<(index+cacheSize) && loadPos<filenames.size(); loadPos++) {
-            header_ptr header = header_ptr(new OMFHeader());
+            QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             omfHeaderCache.push_back(header);
             omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), *header));
         }
@@ -378,7 +379,7 @@ void Window::updateDisplayData(int index)
                 omfCache.pop_back();
                 omfHeaderCache.pop_back();
             }
-            header_ptr header = header_ptr(new OMFHeader());
+            QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             omfHeaderCache.push_front(header);
             omfCache.push_front(readOMF((filenames[loadPos]).toStdString(), *header));
 			
