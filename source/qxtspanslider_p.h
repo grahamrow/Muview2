@@ -29,8 +29,8 @@
 #include <QObject>
 #include "qxtspanslider.h"
 
-QT_FORWARD_DECLARE_CLASS(QStylePainter)
-QT_FORWARD_DECLARE_CLASS(QStyleOptionSlider)
+class QStylePainter;
+class QStyleOptionSlider;
 
 class QxtSpanSliderPrivate : public QObject, public QxtPrivate<QxtSpanSlider>
 {
@@ -74,7 +74,7 @@ public:
     bool firstMovement;
     bool blockTracking;
 
-public Q_SLOTS:
+public slots:
     void updateRange(int min, int max);
     void movePressedHandle();
 };
