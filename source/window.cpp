@@ -161,7 +161,11 @@ Window::Window(int argc, char *argv[]) :
     }
 
     updatePrefs();
-    this->resize(1000, 500);
+
+    // This seems to solve the strange issue of the QGLwidget not filling its container...
+    ui->viewport->setFixedSize(QSize(800,600));
+    this->adjustSize();
+    ui->viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
 }
 
 void Window::initSpanSlider(QxtSpanSlider *slider)
@@ -225,6 +229,7 @@ void Window::updatePrefs() {
     if (prefs->getImageDimensions() == QSize(-1,-1)) {
         ui->viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
     } else {
+        qDebug() << "Set fixed image size" << prefs->getImageDimensions();
         ui->viewport->setFixedSize(prefs->getImageDimensions());
         this->adjustSize();
     }

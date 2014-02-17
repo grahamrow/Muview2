@@ -34,8 +34,6 @@ public:
     void updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data);
     void isDoneRendering();
     virtual void renderFrame(QString file);
-    void setSize(QSize size);
-//    QSize sizeHint() const;
 
     // View Preferences
     virtual void toggleDisplay(int type);

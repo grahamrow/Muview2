@@ -94,12 +94,6 @@ void GLWidget::renderFrame(QString file)
     update();
 }
 
-void GLWidget::setSize(QSize size)
-{
-    mandatedSize = size;
-}
-
-
 void GLWidget::initializeGL()
 {
     QGLFormat glFormat = QGLWidget::format();
