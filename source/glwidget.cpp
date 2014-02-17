@@ -21,9 +21,13 @@ GLWidget::GLWidget( QWidget* parent )
     qDebug() << "GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
     // Restore missing functionality
+#ifdef _WIN64
+    glGenVertexArrays = (PglGenVertexArrays) wglGetProcAddress("glGenVertexArrays");
+    glBindVertexArray = (PglBindVertexArray) wglGetProcAddress("glBindVertexArray");
+#else
     glGenVertexArrays = (PglGenVertexArrays) context()->getProcAddress("glGenVertexArrays");
     glBindVertexArray = (PglBindVertexArray) context()->getProcAddress("glBindVertexArray");
-
+#endif
     // Defaults
     displayOn  = false;
     toggleDisplay(0); // Start with cubes

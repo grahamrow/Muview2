@@ -58,12 +58,12 @@ macx {
     INSTALLS += target
 }
 
-win {
+win32 {
     message(Building in Windows Environment)
     message("    will install muview (binary) to C:\\Program Files")
     target.path = "C:\\Program Files"
 
-    INSTALL += target
+    INSTALLS += target
 }
 
 SOURCES +=  \

@@ -1,5 +1,5 @@
 #include <QtGui>
-#include <glwidget.h>
+#include "glwidget.h"
 
 void GLWidget::updateCOM()
 {

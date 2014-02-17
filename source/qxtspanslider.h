@@ -94,7 +94,7 @@ private:
 
 class QxtSpanSliderPrivate;
 
-class QXT_GUI_EXPORT QxtSpanSlider : public QSlider
+class QxtSpanSlider : public QSlider
 {
     Q_OBJECT
     QXT_DECLARE_PRIVATE(QxtSpanSlider)
