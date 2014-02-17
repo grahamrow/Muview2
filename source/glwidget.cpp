@@ -198,7 +198,7 @@ void GLWidget::paintGL()
                             if (valuedim == 1) {
                                 lumVal=0.5;
                             } else {
-                                lumVal = 0.5 + 0.5*datum.x()/mag;
+                                lumVal = 0.5 + 0.5*datum.z()/mag;
                             }
                         } else if (coloredQuantity ==  ("X Coordinate")) {
                             hueVal = 0.5+ 0.5*datum.x()/mag;

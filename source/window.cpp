@@ -376,7 +376,7 @@ void Window::updateDisplayData(int index)
     } else if ( index < cachePos ) {
             // Moving backwards, regroup for fast scrubbing!
         for (int loadPos=cachePos-1; loadPos >= index && loadPos<filenames.size(); loadPos--) {
-            if (omfCache.size()==uint(cacheSize)) {
+            if (omfCache.size() == cacheSize) {
                 omfCache.pop_back();
                 omfHeaderCache.pop_back();
             }
