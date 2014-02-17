@@ -1,14 +1,15 @@
 
-QT          += core gui opengl
-TARGET       = ../muview
+QT          += core gui opengl 
 TEMPLATE     = app
+TARGET       = ../muview
 INCLUDEPATH += $$top_srcdir
 
 UI_DIR      = uics
 MOC_DIR     = mocs
 OBJECTS_DIR = objs
 
-#CONFIG += C++11
+CONFIG += release
+CONFIG += static
 
 linux {
     message(Building in Linux Environment)

@@ -161,6 +161,7 @@ Window::Window(int argc, char *argv[]) :
     }
 
     updatePrefs();
+    this->resize(1000, 500);
 }
 
 void Window::initSpanSlider(QxtSpanSlider *slider)
