@@ -1,12 +1,11 @@
-#include "glwidget.h"
-
 #include <QCoreApplication>
 #include <QKeyEvent>
 #include <QTimer>
 #include <math.h>
+#include "glwidget.h"
 
-GLWidget::GLWidget( const QGLFormat& format, QWidget* parent )
-    : QGLWidget( format, parent )
+GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
+    : QGLWidget( glformat, parent )
 {
     // Defaults
     displayOn  = false;
@@ -15,10 +14,13 @@ GLWidget::GLWidget( const QGLFormat& format, QWidget* parent )
     xRot = yRot = zRot = 0;
     xLoc = yLoc = 0;
     zoom = -300.0;
+    slices = 16;
 
     // Slicing
     xSliceLow=ySliceLow=zSliceLow=0;
     xSliceHigh=ySliceHigh=zSliceHigh=16*100;
+
+    context()->makeCurrent();
 
     // Draw at a fixed framerate (if updates are needed)
     QTimer *timer = new QTimer(this);
@@ -76,7 +78,6 @@ void GLWidget::renderFrame(QString file)
 
 void GLWidget::initializeGL()
 {
-
     qDebug() << "Widget OpenGl: " << format().majorVersion() << "." << format().minorVersion();
     qDebug() << "Context valid: " << context()->isValid();
     qDebug() << "Really used OpenGl: " << context()->format().majorVersion() << "." << context()->format().minorVersion();
@@ -89,20 +90,12 @@ void GLWidget::initializeGL()
     if ( !glFormat.sampleBuffers() )
         qWarning() << "Could not enable sample buffers";
 
-    // Restore missing functionality
-#ifdef _WIN64
-    glGenVertexArrays = (PglGenVertexArrays) wglGetProcAddress("glGenVertexArrays");
-    glBindVertexArray = (PglBindVertexArray) wglGetProcAddress("glBindVertexArray");
-#else
-    glGenVertexArrays = (PglGenVertexArrays) context()->getProcAddress("glGenVertexArrays");
-    glBindVertexArray = (PglBindVertexArray) context()->getProcAddress("glBindVertexArray");
-#endif
-
     // Set the clear color to black
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
     qglClearColor( backgroundColor );
 
     // Prepare a complete shader program...
+    context()->makeCurrent();
     initializeShaders();
     initializeCube();
     initializeCone(16, 1.0, 2.0);
@@ -225,28 +218,32 @@ void GLWidget::paintGL()
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
                         }
 
-                        if (valuedim == 1) {
+                        if (valuedim == 1 ) {
                             tempObject = &cube;
-                            flatShader.bind();
-                            flatShader.setUniformValue("model",             model);
-                            flatShader.setUniformValue("view",              view);
-                            flatShader.setUniformValue("projection",        projection);
-                            flatShader.setUniformValue("color",             spriteColor);
-                            flatShader.setUniformValue("light.position",    lightPosition);
-                            flatShader.setUniformValue("light.intensities", lightIntensity*brightness);
-                            flatShader.setUniformValue("ambient",           lightAmbient);
                         } else {
                             tempObject = displayObject;
+                        }
+
+                        if (tempObject == &cube ) {
+                            flatShader.bind();
+                            flatShader.setUniformValue("model",      model);
+                            flatShader.setUniformValue("view",       view);
+                            flatShader.setUniformValue("projection", projection);
+                            flatShader.setUniformValue("color",      spriteColor);
+                            flatShader.setUniformValue("brightness", brightness);
+                        } else {
                             diffuseShader.bind();
                             diffuseShader.setUniformValue("model",             model);
                             diffuseShader.setUniformValue("view",              view);
                             diffuseShader.setUniformValue("projection",        projection);
                             diffuseShader.setUniformValue("color",             spriteColor);
                             diffuseShader.setUniformValue("light.position",    lightPosition);
-                            diffuseShader.setUniformValue("light.intensities", lightIntensity*brightness);
+                            diffuseShader.setUniformValue("light.intensities", lightIntensity);
                             diffuseShader.setUniformValue("ambient",           lightAmbient);
+                            diffuseShader.setUniformValue("brightness",        brightness);
                         }
-                        glBindVertexArray(tempObject->vao);
+
+                        tempObject->vao->bind();
 
                         glDrawArrays( GL_TRIANGLES, 0, tempObject->count );
 
@@ -276,11 +273,14 @@ void GLWidget::setBackgroundColor(QColor color) {
     needsUpdate = true;
 }
 
-void GLWidget::setSpriteResolution(int slices)
+void GLWidget::setSpriteResolution(int newslices)
 {
-    initializeCone(slices, 1.0, 3.0);
-    initializeVect(slices, 1.0, 5.0, 0.6, 0.5);
-    needsUpdate = true;
+    if (slices != newslices){
+        slices = newslices;
+        initializeCone(slices, 1.0, 3.0);
+        initializeVect(slices, 1.0, 5.0, 0.6, 0.5);
+        needsUpdate = true;
+    }
 }
 
 void GLWidget::setBrightness(float bright)

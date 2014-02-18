@@ -32,16 +32,17 @@ Window::Window(int argc, char *argv[]) :
     // Initialize GUI
     ui->setupUi(this);
 
-    // Specify an OpenGL 3.3 format using the Core profile.
+    // Specify an OpenGL format using the Core profile.
     // That is, no old-school fixed pipeline functionality
     QGLFormat glFormat;
-    glFormat.setVersion( 3, 2 );
+    glFormat.setVersion( 3, 1 );
     glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
     glFormat.setSampleBuffers( true );
 
     // Create a GLWidget requesting our format
     viewport = new GLWidget( glFormat );
     ui->viewportHorizontalLayout->insertWidget(1,viewport, 1);
+
     // Clipboard
     clipboard = QApplication::clipboard();
 
@@ -169,12 +170,13 @@ Window::Window(int argc, char *argv[]) :
         }
     }
 
-    updatePrefs();
-
     // This seems to solve the strange issue of the QGLwidget not filling its container...
     viewport->setFixedSize(QSize(800,600));
     this->adjustSize();
     viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+
+    // Set preferences
+    updatePrefs();
 }
 
 void Window::initSpanSlider(QxtSpanSlider *slider)
@@ -231,7 +233,6 @@ void Window::updatePrefs() {
     if (prefs->getImageDimensions() == QSize(-1,-1)) {
         viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
     } else {
-        qDebug() << "Set fixed image size" << prefs->getImageDimensions();
         viewport->setFixedSize(prefs->getImageDimensions());
         this->adjustSize();
     }

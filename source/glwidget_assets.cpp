@@ -16,7 +16,6 @@ bool GLWidget::initializeShaders()
 
     result = result && flatShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
     result = result && flatShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/standard.frag" );
-
 #ifdef __APPLE__
     result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
     result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuseMacOSX.frag"  );
@@ -26,8 +25,8 @@ bool GLWidget::initializeShaders()
 #endif
 
     if ( !result ) {
-        qWarning() << "Shaders could not be loaded" << flatShader.log();
-        qWarning() << "Shaders could not be loaded" << diffuseShader.log();
+        qWarning() << "Shaders could not be loaded (flat)"    << flatShader.log();
+        qWarning() << "Shaders could not be loaded (diffuse)" << diffuseShader.log();
     }
     return result;
 }
@@ -35,9 +34,9 @@ bool GLWidget::initializeShaders()
 bool GLWidget::initializeCube()
 {
     cube.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-
-    glGenVertexArrays(1, &cube.vao);
-    glBindVertexArray(cube.vao);
+    cube.vao = new QOpenGLVertexArrayObject(this);
+    cube.vao->create();
+    cube.vao->bind();
     cube.count = 6*3*2;
 
     // Generate the coordinates, normals
@@ -107,7 +106,7 @@ bool GLWidget::initializeCube()
     // our application to the shaders
     if ( !flatShader.bind() )
     {
-        qWarning() << "Could not bind shader program to context"  << flatShader.log();
+        qWarning() << "Could not bind shader program to context (flat)"  << flatShader.log();
         return false;
     }
 
@@ -116,22 +115,27 @@ bool GLWidget::initializeCube()
     flatShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
     flatShader.enableAttributeArray( "vertexNormal" );
 
-    glBindVertexArray(0);
+    cube.vao->release();
     return true;
 }
 
 bool GLWidget::initializeCone(int slices, float radius, float height)
 {
+
     if (!cone.vbo.isCreated()) {
         cone.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         cone.vbo.create();
+
+        cone.vao = new QOpenGLVertexArrayObject(this);
+        cone.vao->create();
     } else {
         cone.vbo.destroy();
         cone.vbo.create();
+        cone.vao->destroy();
+        cone.vao->create();
     }
 
-    glGenVertexArrays(1, &cone.vao);
-    glBindVertexArray(cone.vao);
+    cone.vao->bind();
     cone.count = 2*slices*3;
 
     float normScale = 1.0/sqrt(height*height + radius*radius);
@@ -205,7 +209,7 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
     // our application to the shaders
     if ( !diffuseShader.bind() )
     {
-        qWarning() << "Could not bind shader program to context";
+        qWarning() << "Could not bind shader program to context (cone)";
         return false;
     }
 
@@ -214,7 +218,8 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
     diffuseShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
     diffuseShader.enableAttributeArray( "vertexNormal" );
 
-    glBindVertexArray(0);
+    cone.vao->release();
+    diffuseShader.release();
     return true;
 }
 
@@ -223,13 +228,16 @@ bool GLWidget::initializeVect(int slices, float radius, float height, float rati
     if (!vect.vbo.isCreated()) {
         vect.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         vect.vbo.create();
+        vect.vao = new QOpenGLVertexArrayObject(this);
+        vect.vao->create();
     } else {
         vect.vbo.destroy();
         vect.vbo.create();
+        vect.vao->destroy();
+        vect.vao->create();
     }
 
-    glGenVertexArrays(1, &vect.vao);
-    glBindVertexArray(vect.vao);
+    vect.vao->bind();
 
     float normScale = 1.0/sqrt(height*height + radius*radius);
     float offset = ratioTipToTail*height;
@@ -380,7 +388,7 @@ bool GLWidget::initializeVect(int slices, float radius, float height, float rati
     // our application to the shaders
     if ( !diffuseShader.bind() )
     {
-        qWarning() << "Could not bind shader program to context" << diffuseShader.log();
+        qWarning() << "Could not bind shader program to context (vector)" << diffuseShader.log();
         return false;
     }
 
@@ -389,7 +397,8 @@ bool GLWidget::initializeVect(int slices, float radius, float height, float rati
     diffuseShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
     diffuseShader.enableAttributeArray( "vertexNormal" );
 
-    glBindVertexArray(0);
+    vect.vao->release();
+    diffuseShader.release();
     return true;
 }
 

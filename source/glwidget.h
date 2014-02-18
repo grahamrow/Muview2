@@ -5,17 +5,19 @@
 #include <QGLWidget>
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
+#include <QOpenGLVertexArrayObject>
 
 #include "matrix.h"
 #include "OMFHeader.h"
 
-typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
-typedef void (*PglBindVertexArray) (GLuint array);
+//typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
+//typedef void (*PglBindVertexArray) (GLuint array);
 
 struct sprite
 {
     QOpenGLBuffer vbo;
-    GLuint vao;
+//    GLuint vao;
+    QOpenGLVertexArrayObject *vao;
     GLuint count;
 };
 
@@ -34,7 +36,7 @@ public:
     // View Preferences
     virtual void toggleDisplay(int type);
     virtual void setBackgroundColor(QColor color);
-    virtual void setSpriteResolution(int slices);
+    virtual void setSpriteResolution(int newslices);
     virtual void setBrightness(float bright);
     void setColorScale(QString value);
     void setColoredQuantity(QString value);
@@ -82,8 +84,9 @@ protected:
 
 private:
     // Missing commands
-    PglGenVertexArrays glGenVertexArrays;
-    PglBindVertexArray glBindVertexArray;
+//    QOpenGLFunctions_3_1 *glFuncs;
+//    PglGenVertexArrays glGenVertexArrays;
+//    PglBindVertexArray glBindVertexArray;
 
     // Shaders
     QOpenGLShaderProgram flatShader, diffuseShader;
@@ -103,6 +106,7 @@ private:
     QSharedPointer<matrix> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;
+    int slices; // Resolution for cones/vects
 
     // Lighting
     GLfloat   lightAmbient;
