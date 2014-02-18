@@ -18,7 +18,6 @@ typedef void (*PglBindVertexArray) (GLuint array);
 
 struct sprite
 {
-    QOpenGLShaderProgram shader;
     QOpenGLBuffer vbo;
     GLuint vao;
     GLuint count;
@@ -28,7 +27,8 @@ class GLWidget : public QGLWidget
 {
     Q_OBJECT
 public:
-    GLWidget( QWidget *parent );
+    GLWidget( const QGLFormat& format, QWidget* parent = 0 );
+
     // Data and Drawing
     void updateData(QSharedPointer<matrix> data);
     void updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data);
@@ -89,7 +89,11 @@ private:
     PglGenVertexArrays glGenVertexArrays;
     PglBindVertexArray glBindVertexArray;
 
+    // Shaders
+    QOpenGLShaderProgram flatShader, diffuseShader;
+
     // Init functions
+    bool initializeShaders();
     bool initializeLights();
     bool initializeCube();
     bool initializeCone(int slices, float radius, float height);

@@ -110,7 +110,8 @@ OTHER_FILES +=  \
     resources/128x128/muview.png \
     resources/64x64/muview.png \
     resources/32x32/muview.png \
-    resources/16x16/muview.png
+    resources/16x16/muview.png \
+    shaders/diffuseMacOSX.frag
 
 RESOURCES += \
     resources.qrc

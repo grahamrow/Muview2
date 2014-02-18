@@ -10,13 +10,30 @@ bool GLWidget::initializeLights()
     return true;
 }
 
-bool GLWidget::initializeCube()
+bool GLWidget::initializeShaders()
 {
     bool result = true;
-    result = result && cube.shader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
-    result = result && cube.shader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/standard.frag" );
-    if ( !result )
-        qWarning() << "Shaders could not be loaded" << cube.shader.log();
+
+    result = result && flatShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
+    result = result && flatShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/standard.frag" );
+
+#ifdef __APPLE__
+    result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
+    result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuseMacOSX.frag"  );
+#else
+    result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
+    result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuse.frag"  );
+#endif
+
+    if ( !result ) {
+        qWarning() << "Shaders could not be loaded" << flatShader.log();
+        qWarning() << "Shaders could not be loaded" << diffuseShader.log();
+    }
+    return result;
+}
+
+bool GLWidget::initializeCube()
+{
 
     cube.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
@@ -89,16 +106,16 @@ bool GLWidget::initializeCube()
 
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
-    if ( !cube.shader.bind() )
+    if ( !flatShader.bind() )
     {
-        qWarning() << "Could not bind shader program to context";
+        qWarning() << "Could not bind shader program to context"  << flatShader.log();
         return false;
     }
 
-    cube.shader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
-    cube.shader.enableAttributeArray( "vertex" );
-    cube.shader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
-    cube.shader.enableAttributeArray( "vertexNormal" );
+    flatShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "vertex" );
+    flatShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "vertexNormal" );
 
     glBindVertexArray(0);
     return true;
@@ -106,13 +123,12 @@ bool GLWidget::initializeCube()
 
 bool GLWidget::initializeCone(int slices, float radius, float height)
 {
-    if (!cone.shader.isLinked()) {
-        bool result = true;
-        result = result && cone.shader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
-        result = result && cone.shader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuse.frag"  );
-        if ( !result )
-            qWarning() << "Shaders could not be loaded" << cone.shader.log();
-    }
+//    if (!diffuseShader.isLinked()) {
+//        bool result = true;
+
+//        if ( !result )
+//            qWarning() << "Shaders could not be loaded" << diffuseShader.log();
+//    }
 
     if (!cone.vbo.isCreated()) {
         cone.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -195,16 +211,16 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
 
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
-    if ( !cone.shader.bind() )
+    if ( !diffuseShader.bind() )
     {
         qWarning() << "Could not bind shader program to context";
         return false;
     }
 
-    cone.shader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
-    cone.shader.enableAttributeArray( "vertex" );
-    cone.shader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
-    cone.shader.enableAttributeArray( "vertexNormal" );
+    diffuseShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "vertex" );
+    diffuseShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "vertexNormal" );
 
     glBindVertexArray(0);
     return true;
@@ -212,13 +228,18 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
 
 bool GLWidget::initializeVect(int slices, float radius, float height, float ratioTipToTail, float ratioInnerToOuter)
 {
-    if (!vect.shader.isLinked()) {
-        bool result = true;
-        result = result && vect.shader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
-        result = result && vect.shader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuse.frag"  );
-        if ( !result )
-            qWarning() << "Shaders could not be loaded" << vect.shader.log();
-    }
+//    if (!diffuseShader.isLinked()) {
+//        bool result = true;
+//#ifdef __APPLE__
+//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
+//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuseMacOSX.frag"  );
+//#else
+//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
+//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuse.frag"  );
+//#endif
+//        if ( !result )
+//            qWarning() << "Shaders could not be loaded" << diffuseShader.log();
+//    }
 
     if (!vect.vbo.isCreated()) {
         vect.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
@@ -378,16 +399,16 @@ bool GLWidget::initializeVect(int slices, float radius, float height, float rati
 
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
-    if ( !vect.shader.bind() )
+    if ( !diffuseShader.bind() )
     {
-        qWarning() << "Could not bind shader program to context";
+        qWarning() << "Could not bind shader program to context" << diffuseShader.log();
         return false;
     }
 
-    vect.shader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
-    vect.shader.enableAttributeArray( "vertex" );
-    vect.shader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
-    vect.shader.enableAttributeArray( "vertexNormal" );
+    diffuseShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "vertex" );
+    diffuseShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "vertexNormal" );
 
     glBindVertexArray(0);
     return true;

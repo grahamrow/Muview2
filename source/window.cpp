@@ -31,8 +31,19 @@ Window::Window(int argc, char *argv[]) :
     QMainWindow(NULL),
     ui(new Ui::Window)
 {
+    // Initialize GUI
     ui->setupUi(this);
 
+    // Specify an OpenGL 3.3 format using the Core profile.
+    // That is, no old-school fixed pipeline functionality
+    QGLFormat glFormat;
+    glFormat.setVersion( 3, 2 );
+    glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
+    glFormat.setSampleBuffers( true );
+
+    // Create a GLWidget requesting our format
+    viewport = new GLWidget( glFormat );
+    ui->viewportHorizontalLayout->insertWidget(1,viewport, 1);
     // Clipboard
     clipboard = QApplication::clipboard();
 
@@ -59,20 +70,20 @@ Window::Window(int argc, char *argv[]) :
     initSpanSlider(ui->zSpanSlider);
 
     // Rotation
-    connect(ui->xSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setXRotation(int)));
-    connect(ui->viewport, SIGNAL(xRotationChanged(int)), ui->xSlider, SLOT(setValue(int)));
-    connect(ui->ySlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setYRotation(int)));
-    connect(ui->viewport, SIGNAL(yRotationChanged(int)), ui->ySlider, SLOT(setValue(int)));
-    connect(ui->zSlider,  SIGNAL(valueChanged(int)),     ui->viewport, SLOT(setZRotation(int)));
-    connect(ui->viewport, SIGNAL(zRotationChanged(int)), ui->zSlider, SLOT(setValue(int)));
+    connect(ui->xSlider,  SIGNAL(valueChanged(int)),     viewport, SLOT(setXRotation(int)));
+    connect(viewport, SIGNAL(xRotationChanged(int)), ui->xSlider, SLOT(setValue(int)));
+    connect(ui->ySlider,  SIGNAL(valueChanged(int)),     viewport, SLOT(setYRotation(int)));
+    connect(viewport, SIGNAL(yRotationChanged(int)), ui->ySlider, SLOT(setValue(int)));
+    connect(ui->zSlider,  SIGNAL(valueChanged(int)),     viewport, SLOT(setZRotation(int)));
+    connect(viewport, SIGNAL(zRotationChanged(int)), ui->zSlider, SLOT(setValue(int)));
 
     // Slicing
-    connect(ui->xSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setXSliceLow(int)));
-    connect(ui->xSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setXSliceHigh(int)));
-    connect(ui->ySpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setYSliceLow(int)));
-    connect(ui->ySpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setYSliceHigh(int)));
-    connect(ui->zSpanSlider, SIGNAL(lowerValueChanged(int)), ui->viewport, SLOT(setZSliceLow(int)));
-    connect(ui->zSpanSlider, SIGNAL(upperValueChanged(int)), ui->viewport, SLOT(setZSliceHigh(int)));
+    connect(ui->xSpanSlider, SIGNAL(lowerValueChanged(int)), viewport, SLOT(setXSliceLow(int)));
+    connect(ui->xSpanSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setXSliceHigh(int)));
+    connect(ui->ySpanSlider, SIGNAL(lowerValueChanged(int)), viewport, SLOT(setYSliceLow(int)));
+    connect(ui->ySpanSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setYSliceHigh(int)));
+    connect(ui->zSpanSlider, SIGNAL(lowerValueChanged(int)), viewport, SLOT(setZSliceLow(int)));
+    connect(ui->zSpanSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setZSliceHigh(int)));
 
     // Animation
     ui->animSlider->setEnabled(false);
@@ -163,9 +174,9 @@ Window::Window(int argc, char *argv[]) :
     updatePrefs();
 
     // This seems to solve the strange issue of the QGLwidget not filling its container...
-    ui->viewport->setFixedSize(QSize(800,600));
+    viewport->setFixedSize(QSize(800,600));
     this->adjustSize();
-    ui->viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+    viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
 }
 
 void Window::initSpanSlider(QxtSpanSlider *slider)
@@ -223,18 +234,18 @@ void Window::keyPressEvent(QKeyEvent *e)
 }
 
 void Window::updatePrefs() {
-    ui->viewport->setBackgroundColor(prefs->getBackgroundColor());
-    ui->viewport->setSpriteResolution(prefs->getSpriteResolution());
-    ui->viewport->setBrightness(prefs->getBrightness());
+    viewport->setBackgroundColor(prefs->getBackgroundColor());
+    viewport->setSpriteResolution(prefs->getSpriteResolution());
+    viewport->setBrightness(prefs->getBrightness());
     if (prefs->getImageDimensions() == QSize(-1,-1)) {
-        ui->viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
+        viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
     } else {
         qDebug() << "Set fixed image size" << prefs->getImageDimensions();
-        ui->viewport->setFixedSize(prefs->getImageDimensions());
+        viewport->setFixedSize(prefs->getImageDimensions());
         this->adjustSize();
     }
-    ui->viewport->setColoredQuantity(prefs->getColorQuantity());
-    ui->viewport->setColorScale(prefs->getColorScale());
+    viewport->setColoredQuantity(prefs->getColorQuantity());
+    viewport->setColorScale(prefs->getColorScale());
 }
 
 void Window::openSettings()
@@ -257,17 +268,17 @@ void Window::processFilenames() {
 }
 
 void Window::gotoFrontOfCache() {
-    ui->viewport->updateHeader(omfHeaderCache.front(), omfCache.front());
+    viewport->updateHeader(omfHeaderCache.front(), omfCache.front());
     ui->statusbar->showMessage(filenames.front());
-    ui->viewport->updateData(omfCache.front());
+    viewport->updateData(omfCache.front());
     cachePos = 0;
     adjustAnimSlider(false); // Go to end of slider
 }
 
 void Window::gotoBackOfCache() {
-    ui->viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
+    viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
     ui->statusbar->showMessage(filenames.back());
-    ui->viewport->updateData(omfCache.back());
+    viewport->updateData(omfCache.back());
     cachePos = filenames.size()-1;
     adjustAnimSlider(true); // Go to start of slide
 
@@ -398,8 +409,8 @@ void Window::updateDisplayData(int index)
     if (index < filenames.size()) {
         ui->statusbar->showMessage(displayNames[index]);
         // Update the Display
-        ui->viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
-        ui->viewport->updateData(omfCache.at(index-cachePos));
+        viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
+        viewport->updateData(omfCache.at(index-cachePos));
     } else {
         ui->statusbar->showMessage(QString("Don't scroll so erratically..."));
     }
@@ -440,14 +451,14 @@ void Window::saveImageFile(QString name)
 {
     if (name != "") {
         lastSavedLocation = QDir(name);
-        QImage screen = ui->viewport->grabFrameBuffer();
+        QImage screen = viewport->grabFrameBuffer();
         screen.save(name, (prefs->getFormat()).toStdString().c_str(), 90);
     }
 }
 
 void Window::copyImage()
 {
-    QImage screen = ui->viewport->grabFrameBuffer();
+    QImage screen = viewport->grabFrameBuffer();
     clipboard->setImage(screen);
 }
 
@@ -467,20 +478,20 @@ void Window::saveImageSequence()
 
     if (dir != "")
     {
-        connect(ui->viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
+        connect(viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
 
         lastSavedLocation = QDir(dir);
         QImage screen;
         QString number;
         for (int i=0; i<filenames.length(); i++) {
             number = QString("%1").arg(i, 6, 'd', 0, QChar('0'));
-            ui->viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
+            viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
             ui->animSlider->setValue(i);
             ui->statusbar->showMessage("Saving file"+dir+"/muviewSequence"+number+".jpg");
             update();
         }
 
-        disconnect(ui->viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
+        disconnect(viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
     }
 }
 
@@ -545,11 +556,11 @@ void Window::stopWatchingDir()
 
 void Window::toggleDisplay() {
     if (ui->actionCubes->isChecked()) {
-        ui->viewport->toggleDisplay(0);
+        viewport->toggleDisplay(0);
     } else if (ui->actionCones->isChecked()) {
-        ui->viewport->toggleDisplay(1);
+        viewport->toggleDisplay(1);
     } else {
-        ui->viewport->toggleDisplay(2);
+        viewport->toggleDisplay(2);
     }
 }
 

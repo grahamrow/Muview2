@@ -19,6 +19,7 @@
 //#include "OMFContainer.h"
 #include "OMFHeader.h"
 #include "matrix.h"
+#include "glwidget.h"
 //#include <deque>
 
 //typedef boost::shared_ptr<OMFHeader> header_ptr;
@@ -64,6 +65,7 @@ private slots:
 
 private:
     Ui::Window *ui;
+    GLWidget *viewport;
     QActionGroup *displayType;
     Preferences *prefs;
     AboutDialog *about;
