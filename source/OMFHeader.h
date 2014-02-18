@@ -1,5 +1,6 @@
 // This part is originally created and released into the public
 // domain by Gunnar Selke <gselke@physnet.uni-hamburg.de>.
+// Modified by Graham Rowlands <grahamrow@gmail.com>
 
 #ifndef OMF_HEADER_H
 #define OMF_HEADER_H

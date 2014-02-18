@@ -22,6 +22,8 @@
  ** <http://libqxt.org>  <foundation@libqxt.org>
  **
  ****************************************************************************/
+// Modified by Graham Rowlands <grahamrow@gmail.com>
+
 #include "qxtspanslider.h"
 #include "qxtspanslider_p.h"
 #include <QKeyEvent>

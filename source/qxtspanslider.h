@@ -22,6 +22,8 @@
  ** <http://libqxt.org>  <foundation@libqxt.org>
  **
  ****************************************************************************/
+// Modified by Graham Rowlands <grahamrow@gmail.com>
+
 #ifndef QXTSPANSLIDER_H
 #define QXTSPANSLIDER_H
 

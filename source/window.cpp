@@ -1,6 +1,5 @@
-#include <deque>
-#include <iostream>
 
+#include <iostream>
 #include <QtGui>
 #include <QDir>
 #include <QKeySequence>
@@ -23,7 +22,6 @@
 
 #include "OMFImport.h"
 #include "OMFHeader.h"
-//#include "OMFContainer.h"
 
 struct OMFImport;
 
@@ -118,7 +116,7 @@ Window::Window(int argc, char *argv[]) :
     ui->xSlider->setValue(345 * 1600);
     ui->ySlider->setValue(0 * 1600);
     ui->zSlider->setValue(0 * 1600);
-    setWindowTitle(tr("MuView 2.0b2"));
+    setWindowTitle(tr("MuView 2.0b3"));
 
     // Data, don't connect until we are ready (probably still not ready here)...
     connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
@@ -224,13 +222,6 @@ void Window::adjustAnimSlider(bool back)
 void Window::keyPressEvent(QKeyEvent *e)
 {
     QWidget::keyPressEvent(e);
-//    if (e->modifiers() == Qt::CTRL) {
-//        // Close on Ctrl-Q or Ctrl-W
-//        if (e->key() == Qt::Key_Q || e->key() == Qt::Key_W )
-//            close();
-//    } else {
-//        QWidget::keyPressEvent(e);
-//    }
 }
 
 void Window::updatePrefs() {

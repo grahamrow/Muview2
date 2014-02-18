@@ -8,15 +8,6 @@
 GLWidget::GLWidget( const QGLFormat& format, QWidget* parent )
     : QGLWidget( format, parent )
 {
-//    // Specify an OpenGL 3.3 format using the Core profile.
-//    // That is, no old-school fixed pipeline functionality
-//    QGLFormat glFormat;
-//    glFormat.setVersion( 3, 2 );
-//    glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
-//    glFormat.setSampleBuffers( true );
-//    QGLWidget( (const QGLFormat)glFormat, parent );
-//    makeCurrent();
-
     // Defaults
     displayOn  = false;
     toggleDisplay(0); // Start with cubes
@@ -85,7 +76,7 @@ void GLWidget::renderFrame(QString file)
 
 void GLWidget::initializeGL()
 {
-    // get context opengl-version
+
     qDebug() << "Widget OpenGl: " << format().majorVersion() << "." << format().minorVersion();
     qDebug() << "Context valid: " << context()->isValid();
     qDebug() << "Really used OpenGl: " << context()->format().majorVersion() << "." << context()->format().minorVersion();

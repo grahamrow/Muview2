@@ -9,20 +9,15 @@
 #include <QDir>
 #include <QSharedPointer>
 #include <QVector>
-//#include <boost/smart_ptr.hpp>
 
 // Other parts of the interface
 #include "preferences.h"
 #include "aboutdialog.h"
 
 // For reading OMF files
-//#include "OMFContainer.h"
 #include "OMFHeader.h"
 #include "matrix.h"
 #include "glwidget.h"
-//#include <deque>
-
-//typedef boost::shared_ptr<OMFHeader> header_ptr;
 
 // Forward Declarations
 class QSlider;

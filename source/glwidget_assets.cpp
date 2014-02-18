@@ -34,7 +34,6 @@ bool GLWidget::initializeShaders()
 
 bool GLWidget::initializeCube()
 {
-
     cube.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
 
     glGenVertexArrays(1, &cube.vao);
@@ -123,13 +122,6 @@ bool GLWidget::initializeCube()
 
 bool GLWidget::initializeCone(int slices, float radius, float height)
 {
-//    if (!diffuseShader.isLinked()) {
-//        bool result = true;
-
-//        if ( !result )
-//            qWarning() << "Shaders could not be loaded" << diffuseShader.log();
-//    }
-
     if (!cone.vbo.isCreated()) {
         cone.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         cone.vbo.create();
@@ -228,19 +220,6 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
 
 bool GLWidget::initializeVect(int slices, float radius, float height, float ratioTipToTail, float ratioInnerToOuter)
 {
-//    if (!diffuseShader.isLinked()) {
-//        bool result = true;
-//#ifdef __APPLE__
-//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
-//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuseMacOSX.frag"  );
-//#else
-//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Vertex,   ":/shaders/standard.vert" );
-//        result = result && diffuseShader.addShaderFromSourceFile( QOpenGLShader::Fragment, ":/shaders/diffuse.frag"  );
-//#endif
-//        if ( !result )
-//            qWarning() << "Shaders could not be loaded" << diffuseShader.log();
-//    }
-
     if (!vect.vbo.isCreated()) {
         vect.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         vect.vbo.create();

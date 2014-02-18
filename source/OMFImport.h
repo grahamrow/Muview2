@@ -5,16 +5,13 @@
 #ifndef OMF_IMPORT_H
 #define OMF_IMPORT_H
 
-//#include "matrix/VectorMatrix.h"
-//#include "OMFContainer.h"
-
 #include <QSharedPointer>
 #include <string>
 #include <istream>
 #include "matrix.h"
 #include "OMFHeader.h"
 
-// Now we return pointers to boost arrays.
+// Now we return pointers to a custom matrix class.
 // Arrays should be garbage collected when
 // we dereference the pointers everywhere
 

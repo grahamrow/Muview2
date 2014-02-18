@@ -6,15 +6,11 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLShaderProgram>
 
-//#include <boost/smart_ptr.hpp>
-//#include "OMFContainer.h"
 #include "matrix.h"
 #include "OMFHeader.h"
-//#include "analysis.h"
 
 typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
 typedef void (*PglBindVertexArray) (GLuint array);
-//typedef boost::shared_ptr<OMFHeader> header_ptr;
 
 struct sprite
 {
@@ -134,8 +130,6 @@ private:
 
     // Mouse control
     QVector2D previousMousePosition;
-//    QMatrix4x4 translation;
-//    qreal viewTheta, viewPhi;
     bool leftMousePressed;
     bool middleMousePressed;
     bool rightMousePressed;
