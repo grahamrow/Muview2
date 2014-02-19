@@ -3,15 +3,15 @@ QT          += core gui opengl
 TEMPLATE     = app
 TARGET       = ../muview
 INCLUDEPATH += $$top_srcdir
-
 UI_DIR      = uics
 MOC_DIR     = mocs
 OBJECTS_DIR = objs
+VERSION     = 2.0.0b3
 
 CONFIG += release
-CONFIG += static
 
 linux {
+    CONFIG += static
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
     target.path = /usr/local/bin
@@ -54,8 +54,10 @@ macx {
     message(Building in Mac OSX Environment)
     message("    will install muview (app) to /Applications")
     target.path = /Applications
-    ICON = resources/muview.icns
 
+    TARGET    = ../Muview
+    ICON      = resources/muview.icns
+    CONFIG   += dead-strip
     INSTALLS += target
 }
 

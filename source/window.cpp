@@ -35,7 +35,12 @@ Window::Window(int argc, char *argv[]) :
     // Specify an OpenGL format using the Core profile.
     // That is, no old-school fixed pipeline functionality
     QGLFormat glFormat;
+#ifdef __APPLE__
+    // This actually seems to yield a 4.1 context on Mavericks
+    glFormat.setVersion(3, 2);
+#else
     glFormat.setVersion( 3, 1 );
+#endif
     glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
     glFormat.setSampleBuffers( true );
 
@@ -560,3 +565,4 @@ Window::~Window()
 {
     delete ui;
 }
+
