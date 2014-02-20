@@ -16,5 +16,8 @@ muview OOMMF-Data/Oxs*.omf
 ```
 Otherwise, groups of files or entire directories can be loaded from the GUI.
 
+### Installation and Compilation
+Until the dust settles, please see release-specific instruction on the [releases](https://github.com/grahamrow/Muview2/releases) page.
+
 ### Planned Features
 Please let me know what would be useful! I don't plan to add any analysis capabilities.
