@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Static build of Qt5.2.1 done with the following commands
+# ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
+# make -j10 sub-src
+
 VERSION="2.0b3"
 NAME="Muview${VERSION}"
 
