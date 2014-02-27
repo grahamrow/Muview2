@@ -6,11 +6,11 @@ INCLUDEPATH += $$top_srcdir
 UI_DIR      = uics
 MOC_DIR     = mocs
 OBJECTS_DIR = objs
-VERSION     = 2.0.0b3
 
 CONFIG += release
 
 linux {
+    VERSION = 2.0.0b3
     CONFIG += static
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
@@ -55,6 +55,7 @@ macx {
     message("    will install muview (app) to /Applications")
     target.path = /Applications
 
+    VERSION   = 2.0.0b3
     TARGET    = ../Muview
     ICON      = resources/muview.icns
     CONFIG   += dead-strip

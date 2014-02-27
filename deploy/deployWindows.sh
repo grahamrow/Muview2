@@ -11,6 +11,8 @@ SOURCE_DIR="/C/Qt/5.2.1/msvc2012_64_opengl/bin"
 QTDLLS="Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL icuin51 icuuc51 icudt51"
 WINDLL_DIR="/C/Windows/System32"
 WINDLLS="msvcp110 msvcr110"
+PLATFORMDLLS="qwindows qminimal"
+PLUGIN_DIR="C:\Qt\5.2.1\msvc2012_64_opengl\plugins"
 FILES="README.md LICENSE"
 
 # Kill old product
@@ -20,7 +22,7 @@ if [ -d $NAME ]
   rm -r $NAME
 fi
 
-mkdir $NAME
+mkdir -p $NAME/platforms
 
 for DLL in $QTDLLS
 do
@@ -32,6 +34,12 @@ for DLL in $WINDLLS
 do
 	echo "Copying ${DLL}.dll"
 	cp "${WINDLL_DIR}/${DLL}.dll" ${NAME}
+done
+
+for DLL in $PLATFORMDLLS
+do
+	echo "Copying ${DLL}.dll"
+	cp "${PLUGIN_DIR}/platforms/${DLL}.dll" ${NAME}/platforms
 done
 
 cp "${BUILD_DIR}/${TARGET}" "${BUILD_DIR}/${MANIFEST}" $NAME
