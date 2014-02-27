@@ -301,6 +301,11 @@ void OMFImport::parseHeader()
 		acceptLine();
 	}
 
+	if (header.version == 1) {
+		header.valuedim = 3;
+	}
+
+
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "header") {
 		throw std::runtime_error("Expected 'End Header'");
@@ -323,8 +328,6 @@ void OMFImport::parseDataAscii()
 //	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
     field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
-	//std::cout << "Loading!" << std::endl;
-
 	for (int z=0; z<header.znodes; ++z)
 	  for (int y=0; y<header.ynodes; ++y)
 	    for (int x=0; x<header.xnodes; ++x) {
@@ -336,11 +339,9 @@ void OMFImport::parseDataAscii()
 	      if (header.valuedim == 1) {
 	      	ss >> v1;
             val = QVector3D(v1,v1,v1);
-	      	// std::cout << v1 << std::endl;
 	      } else {
 			ss >> v1 >> v2 >> v3;
             val = QVector3D(v1,v2,v3);
-			// std::cout << v1 << std::endl;
 	      }
 
 	      if (header.version==1) {
@@ -431,19 +432,19 @@ void OMFImport::parseDataBinary4()
 
   delete [] buffer;
 
-  acceptLine(); // read next line...
-
-  // Seems that we must remove the first erroneous char
-  line = line.substr(1,line.size()-1);
-  
-// Parse "End: Data Binary 4"
+  // Parse "End: Data Binary 4"
   if (header.version==1) {
+  	line = line.substr(1,line.size()-1); // Remove the first erroneous char
+  	acceptLine(); 
+  	acceptLine(); 
     ok = parseCommentLine(line, key, value);
     if (!ok || key != "end" || value != "data binary 4") {
       throw std::runtime_error("Expected 'End Data Binary 4'");
     }
     acceptLine();
   } else {
+  	acceptLine(); 
+  	line = line.substr(1,line.size()-1); // Remove the first erroneous char
     acceptLine();
   }
 }
