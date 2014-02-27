@@ -64,24 +64,40 @@ a:hover {
 }
 
 header {
-  padding-top: 35px;
-  padding-bottom: 25px;
+  /*padding-top: 35px;*/
+  padding-bottom: 10px;
+  background: transparent url(../images/header.png) no-repeat;
+  height: 300px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;                     
+  border-radius: 15px;
+  background-clip:border-box;
+}
+
+section, footer {
+  padding: 0 20px;
 }
 
 header h1 {
-  font-family: 'Chivo', 'Helvetica Neue', Helvetica, Arial, serif; font-weight: 900;
+  font-family: 'Helvetica Neue', Helvetica, Arial, serif; font-weight: 900;
   letter-spacing: -1px;
   font-size: 48px;
-  color: #303030;
-  line-height: 1.2;
+  color: #A24141;
+  line-height: 1.0;
+  padding: 15px 30px 0px;
+  text-align: right;
+  margin: 0;
 }
 
 header h2 {
-  letter-spacing: -1px;
-  font-size: 24px;
-  color: #aaa;
+  /*letter-spacing: px;*/
+  font-size: 16px;
+  color: #303030;
   font-weight: normal;
-  line-height: 1.3;
+  line-height: 1.1;
+  padding: 0px 30px;
+  text-align: right;
+  /*text-shadow: none;*/
 }
 
 #container {
@@ -90,8 +106,19 @@ header h2 {
 }
 
 .inner {
-  width: 620px;
-  margin: 0 auto;
+  width: 660px;
+  /*padding: 20px;*/
+  margin: 20px auto;
+  border-top: solid 1px #cbcbcb;
+  border-left: solid 1px #b7b7b7;
+  border-right: solid 1px #b7b7b7;
+  border-bottom: solid 1px #b3b3b3;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;                     
+  border-radius: 15px;
+  -webkit-box-shadow: 10px 10px 5px #888;
+  -moz-box-shadow: 10px 10px 5px #888;
+  box-shadow: 1px 3px 10px 3px #888;
 }
 
 #container .inner img {
@@ -99,7 +126,7 @@ header h2 {
 }
 
 #downloads {
-  margin-bottom: 40px;
+  margin-bottom: 10px;
 }
 
 a.button {
@@ -114,7 +141,7 @@ a.button {
   line-height: 25px;
   font-weight: bold;
   font-size: 15px;
-  padding: 12px 8px 12px 8px;
+  padding: 4px 8px 4px 8px;
   display: block;
   float: left;
   width: 179px;
@@ -157,6 +184,9 @@ a.button span {
 }
 #download-tar-gz span {
   background: transparent url(../images/tar-gz-icon.png) 12px 50% no-repeat;
+}
+#download-dmg span {
+  background: transparent url(../images/dmg-icon.png) 12px 50% no-repeat;
 }
 #view-on-github span {
   background: transparent url(../images/octocat-icon.png) 12px 50% no-repeat;
