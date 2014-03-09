@@ -13,6 +13,7 @@
 #include <QColorDialog>
 #include <QGLFormat>
 #include <QSharedPointer>
+#include <QCommandLineParser>
 
 #include "glwidget.h"
 #include "window.h"
@@ -25,10 +26,29 @@
 
 struct OMFImport;
 
-Window::Window(int argc, char *argv[]) :
+Window::Window(QStringList arguments) :
     QMainWindow(NULL),
     ui(new Ui::Window)
 {
+    QCommandLineParser parser;
+    parser.setApplicationDescription("3D Viewer of OVF/OMF Micromagnetic Data");
+    parser.addHelpOption();
+    parser.addVersionOption();
+
+    // General input
+    parser.addPositionalArgument("input", QCoreApplication::translate("Files or Directories", "Input files to open."));
+
+    // Watch files
+    QCommandLineOption watchDirectoryOption(QStringList() << "w" << "watch",
+                QCoreApplication::translate("main", "Watch <directory> and update when new data appears therein."),
+                QCoreApplication::translate("main", "directory"));
+    parser.addOption(watchDirectoryOption);
+
+    // Actually parse the arguments
+    parser.process(arguments);
+    const QStringList fileargs = parser.positionalArguments();
+    QString watchDir = parser.value(watchDirectoryOption);
+
     // Initialize GUI
     ui->setupUi(this);
 
@@ -103,8 +123,8 @@ Window::Window(int argc, char *argv[]) :
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveImage()));
     connect(ui->actionSequence, SIGNAL(triggered()), this, SLOT(saveImageSequence()));
 
-    connect(ui->actionCubes,   SIGNAL(triggered()), this, SLOT(toggleDisplay()));
-    connect(ui->actionCones,   SIGNAL(triggered()), this, SLOT(toggleDisplay()));
+    connect(ui->actionCubes, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
+    connect(ui->actionCones, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
     connect(ui->actionVectors, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
 
     displayType = new QActionGroup(this);
@@ -115,60 +135,51 @@ Window::Window(int argc, char *argv[]) :
 
     signalMapper = new QSignalMapper(this);
     signalMapper->setMapping (ui->actionFollow, "") ;
-    connect (signalMapper, SIGNAL(mapped(QString)), this, SLOT(watchDir(QString))) ;
+    connect (signalMapper, SIGNAL(mapped(QString)), this, SLOT(watch(QString))) ;
     connect(ui->actionFollow, SIGNAL(triggered()), signalMapper, SLOT(map()));
-    connect(ui->actionUnfollow, SIGNAL(triggered()), this, SLOT(stopWatchingDir()));
+    connect(ui->actionUnfollow, SIGNAL(triggered()), this, SLOT(stopWatch()));
 
     ui->xSlider->setValue(345 * 1600);
-    ui->ySlider->setValue(0 * 1600);
-    ui->zSlider->setValue(0 * 1600);
+    ui->ySlider->setValue(0   * 1600);
+    ui->zSlider->setValue(0   * 1600);
     setWindowTitle(tr("MuView 2.0b3"));
 
     // Data, don't connect until we are ready (probably still not ready here)...
     connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
 
-    // Load files from command line if supplied
-    if (argc > 1) {
-        QStringList rawList;
-        for (int i=1; i<argc; i++) {
-            rawList << argv[i];
-        }
+    // Watching a directory, if that is requested
+    if (watchDir != "") {
+        watch(watchDir);
+    }
 
-        if (rawList.contains(QString("-w"))) {
-            if (rawList.indexOf("-w") < (rawList.length() - 1))  {
-                watchDir(rawList[rawList.indexOf("-w")+1]);
-            }
-        } else {
-            QStringList allLoadedFiles;
-            foreach (QString item, rawList)
-            {
-                QFileInfo info(item);
-                if (!info.exists()) {
-                    std::cout << "File " << item.toStdString() << " does not exist" << std::endl;
-                } else {
-                    // Push our new content...
-                    if (info.isDir()) {
-                        QDir chosenDir(item);
-                        dirString = chosenDir.path()+"/";
-                        QStringList filters;
-                        filters << "*.omf" << "*.ovf";
-                        chosenDir.setNameFilters(filters);
-                        QStringList files = chosenDir.entryList();
+    // Otherwise we load files and directories
+    if (watchDir == "") {
+        foreach (QString item, fileargs) {
+            QFileInfo info(item);
+            if (!info.exists()) {
+                qDebug() << "File " << item << " does not exist";
+            } else {
+                // Push our new content...
+                if (info.isDir()) {
+                    QDir chosenDir(item);
+                    dirString = chosenDir.path()+"/";
+                    QStringList filters;
+                    filters << "*.omf" << "*.ovf";
+                    chosenDir.setNameFilters(filters);
+                    QStringList files = chosenDir.entryList();
 
-                        foreach (QString file, files)
-                        {
-                            filenames << (dirString+file);
-                            displayNames << (dirString+item);
-                        }
-
-                    } else {
-                        // just a normal file
-                        filenames << (dirString+item);
+                    foreach (QString file, files)
+                    {
+                        filenames << (dirString+file);
                         displayNames << (dirString+item);
                     }
+
+                } else {
+                    // just a normal file
+                    filenames << (dirString+item);
+                    displayNames << (dirString+item);
                 }
             }
-
             processFilenames();
             gotoFrontOfCache();
             adjustAnimSlider(false);  // Refresh the animation bar
@@ -313,7 +324,7 @@ void Window::openFiles()
     }
 }
 
-void Window::updateWatchedFiles(const QString& str) {
+void Window::updateWatchedFiles() {
     // Look at all of the files in the directory
     // and add those which are not in the list of
     // original filenames
@@ -324,7 +335,7 @@ void Window::updateWatchedFiles(const QString& str) {
     // When the timestamps in wathcedFiles stop changing we actually
     // push the relevant files into the OMF cache.
 
-    QDir chosenDir(str);
+    QDir chosenDir(watchedDir);
     QString dirString = chosenDir.path()+"/";
     QStringList filters;
     filters << "*.omf" << "*.ovf";
@@ -345,6 +356,8 @@ void Window::updateWatchedFiles(const QString& str) {
             if (!watchedFiles.contains(fullPath)) {
                 // Not on the watch list yet
                 watchedFiles.insert(fullPath, info.lastModified());
+                // Callback shortly to see if the file is done changing!
+                QTimer::singleShot(100, this, SLOT(updateWatchedFiles()));
             } else {
                 // on the watch list
                 if (info.lastModified() == watchedFiles[fullPath]) {
@@ -355,6 +368,8 @@ void Window::updateWatchedFiles(const QString& str) {
                 } else {
                     // File still changing
                     watchedFiles[fullPath] = info.lastModified();
+                    // Callback shortly to see if the file is done changing!
+                    QTimer::singleShot(100, this, SLOT(updateWatchedFiles()));
                 }
             }
         }
@@ -492,7 +507,7 @@ void Window::saveImageSequence()
     }
 }
 
-void Window::watchDir(const QString& str)
+void Window::watch(const QString& str)
 {
     QString dir;
     // Don't show a dialog if we get this message from the command line
@@ -505,8 +520,10 @@ void Window::watchDir(const QString& str)
         dir = str;
     }
 
-    filenames.clear();
-    displayNames.clear();
+    if (filenames.length() > 0) {
+        filenames.clear();
+        displayNames.clear();
+    }
     clearCaches();
 
     cachePos = 0; // reset position to beginning
@@ -514,8 +531,11 @@ void Window::watchDir(const QString& str)
     if (dir != "")
     {
         // Added the dir to the watch list
-        watcher->removePaths(watcher->directories());
+        if (watcher->directories().length() > 0) {
+            watcher->removePaths(watcher->directories());
+        }
         watcher->addPath(dir);
+        watchedDir = dir;
 
         // Now read all of the current files
         QDir chosenDir(dir);
@@ -537,12 +557,12 @@ void Window::watchDir(const QString& str)
         gotoBackOfCache();
 
         connect(watcher, SIGNAL(directoryChanged(QString)),
-            this, SLOT(updateWatchedFiles(QString)));
+            this, SLOT(updateWatchedFiles()));
     }
 
 }
 
-void Window::stopWatchingDir()
+void Window::stopWatch()
 {
     if (watcher->directories().length() > 0) {
         watcher->removePaths(watcher->directories());

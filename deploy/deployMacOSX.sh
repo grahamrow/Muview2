@@ -1,6 +1,7 @@
 #!/bin/bash
 
-
+#buildDir="../build-muview-Desktop_Qt_5_2_1_clang_64bit-Release"
+buildDir='./'
 backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
 finalDMGName="Muview2.0b3.dmg"
@@ -11,6 +12,11 @@ if [ -d $applicationName ]
   then
   echo "Removing $applicationName"
   rm -r $applicationName
+fi
+if [ -d $buildDir/$applicationName ]
+  then
+  echo "Removing $buildDir/$applicationName"
+  rm -r $buildDir/$applicationName
 fi
 
 # This produces Muview 
@@ -26,7 +32,7 @@ echo "Creating Bundle at $PWD/Muview.app"
 echo "using qmake from $(which qmake)"
 echo "using macdeployqt from $(which macdeployqt)"
 
-macdeployqt Muview.app -verbose=3
+macdeployqt $buildDir/$applicationName -verbose=3
 
 # Create a Nice Looking DMG
 # http://stackoverflow.com/questions/96882/how-do-i-create-a-nice-looking-dmg-for-mac-os-x-using-command-line-tools
@@ -40,7 +46,7 @@ if [ -e $finalDMGName ]
 	rm $finalDMGName
 fi
 
-hdiutil create pack.temp.dmg -srcfolder Muview.app -format UDRW -volname $title
+hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title
 
 device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | \
          egrep '^/dev/' | sed 1q | awk '{print $1}')

@@ -36,7 +36,7 @@ class Window : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit Window(int argc, char *argv[]);
+    explicit Window(QStringList arguments);
     ~Window();
     QSize sizeHint();
 protected:
@@ -49,10 +49,11 @@ private slots:
     void saveImageSequence();
     void saveImageFile(QString name);
     void copyImage();
-    void watchDir(const QString& str);
-    void stopWatchingDir();
+    void watch(const QString& str);
+    void stopWatch();
     void toggleDisplay();
-    void updateWatchedFiles(const QString& str);
+//    void updateWatchedFiles(const QString& str);
+    void updateWatchedFiles();
     void openSettings();
     void openAbout();
     void updateDisplayData(int index);
@@ -99,6 +100,7 @@ private:
     QSignalMapper* signalMapper;
     QFileSystemWatcher *watcher;
     QMap<QString, QDateTime> watchedFiles;
+    QString watchedDir;
     bool noFollowUpdate;
 
 };

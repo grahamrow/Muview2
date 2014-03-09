@@ -5,9 +5,15 @@
 
 int main( int argc, char* argv[] )
 {
-    QApplication a( argc, argv );
-    a.setStyle(QStyleFactory::create("GTK+"));
-    Window w( argc, argv );
+    QApplication app( argc, argv );
+
+    // Parse command line arguments
+    QApplication::setApplicationName("Muview");
+    QApplication::setApplicationVersion("2.0b4");
+    app.setStyle(QStyleFactory::create("GTK+"));
+
+    Window w( app.arguments() );
     w.show();
-    return a.exec();
+
+    return app.exec();
 }
