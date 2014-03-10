@@ -4,7 +4,7 @@
 # ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
 # make -j10 sub-src
 
-VERSION="2.0b3"
+VERSION="2.0"
 NAME="Muview${VERSION}"
 
 if [ -e muview ]

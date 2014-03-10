@@ -4,7 +4,7 @@
 buildDir='./'
 backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
-finalDMGName="Muview2.0b3.dmg"
+finalDMGName="Muview2.0.dmg"
 title="Muview"
 
 # Kill old product
