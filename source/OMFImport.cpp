@@ -18,14 +18,14 @@
 
 struct OMFImport
 {
-  void read(std::istream &input);
+  bool read(std::istream &input);
 
-  void parse();
-  void parseSegment();
-  void parseHeader();
-  void parseDataAscii();
-  void parseDataBinary4();
-  void parseDataBinary8();
+  bool parse();
+  bool parseSegment();
+  bool parseHeader();
+  bool parseDataAscii();
+  bool parseDataBinary4();
+  bool parseDataBinary8();
 
   OMFHeader header;
   std::istream *input;
@@ -39,26 +39,40 @@ struct OMFImport
   void acceptLine();
 };
 
-
 QSharedPointer<matrix> readOMF(const std::string &path, OMFHeader &header)
 {
   std::ifstream in(path.c_str());
   if (!in.good()) {
-    throw std::runtime_error(std::string("Could not open file: ") + path);
+      qDebug() << "Could not open file: " << QString(path.c_str());
+      // Return a null pointer instead of throwing errors...
+      return QSharedPointer<matrix>();
   }
 
+  bool success;
   OMFImport omf;
-  omf.read(in);
-  header = omf.header;
-  return QSharedPointer<matrix>(omf.field);
+  success = omf.read(in);
+
+  if (!success) {
+      return QSharedPointer<matrix>();
+  } else {
+      header  = omf.header;
+      return QSharedPointer<matrix>(omf.field);
+  }
+  return QSharedPointer<matrix>();
 }
 
 QSharedPointer<matrix> readOMF(std::istream &in, OMFHeader &header)
 {
+    bool success;
 	OMFImport omf;
-	omf.read(in);
-	header = omf.header;
-    return QSharedPointer<matrix>(omf.field);
+    success = omf.read(in);
+    if (!success) {
+        return QSharedPointer<matrix>();
+    } else {
+        header  = omf.header;
+        return QSharedPointer<matrix>(omf.field);
+    }
+    return QSharedPointer<matrix>();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,13 +120,12 @@ static bool parseCommentLine(const std::string &line, std::string &key, std::str
       value = std::string(line.begin()+sep+2, line.end());
       std::transform(value.begin(), value.end(), value.begin(), ::tolower);
       return true;
-      //}
   } else {
     return false;
   }
 }
 
-void OMFImport::read(std::istream &in)
+bool OMFImport::read(std::istream &in)
 {
 	OMFHeader header = OMFHeader();
 	input = &in;
@@ -120,8 +133,11 @@ void OMFImport::read(std::istream &in)
 	eof = false;
 	input->read(&next_char, sizeof(char));
 
-	acceptLine(); // read in first line
-	parse();      // Parse file
+    bool success;
+    acceptLine(); // read in first line
+    success = parse(); // Parse File
+
+    return success;
 }
 
 void OMFImport::acceptLine()
@@ -156,12 +172,9 @@ void OMFImport::acceptLine()
 	    reallydone=true;
 	  }
 	}
-	
 }
 
-// OMF file parser /////////////////////////////////////////////////////////////////////////////
-
-void OMFImport::parse()
+bool OMFImport::parse()
 {
 	bool ok;
 	std::string key, value;
@@ -170,65 +183,80 @@ void OMFImport::parse()
 	if (ok && key == "oommf") {
 	  acceptLine();
 	} else {
-		throw std::runtime_error("Expected 'OOMMF' at line 1");
-	}
+        qDebug() << "Expected valid 'OOMMF' header at line 1";
+        return false;
+    }
 
 	ok = parseCommentLine(line, key, value);
 	if (ok && key == "segment count") {
 		acceptLine();
 	} else {
-		throw std::runtime_error("Expected 'Segment count' at line 2");
+        qDebug() << "Expected 'Segment count' at line 2";
+        return false;
 	}
 
 	ok = parseCommentLine(line, key, value);
 	if (ok && key == "begin" && value == "segment") {
 		parseSegment();
 	} else {
-		throw std::runtime_error("Expected begin of segment");
+        qDebug() << "Expected begin of segment";
+        return false;
 	}
+
+    return true;
 }
 
-void OMFImport::parseSegment()
+bool OMFImport::parseSegment()
 {
 	bool ok;
 	std::string key, value;
 
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "begin" || value != "segment") {
-		throw std::runtime_error("Parse error. Expected 'Begin Segment'");
+        qDebug() << "Parse error. Expected 'Begin Segment'";
+        return false;
 	}
 	acceptLine();
 
 	parseHeader();
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "begin") {
-		throw std::runtime_error("Parse error. Expected 'Begin Data <type>'");
+        qDebug() << "Parse error. Expected 'Begin Data <type>'";
+        return false;
 	}
-	if (value == "data text") {
-	  parseDataAscii();
+    if (value == "data text") {
+      ok = parseDataAscii();
 	} else if (value == "data binary 4") {
-	  parseDataBinary4();
+      ok = parseDataBinary4();
 	} else if (value == "data binary 8") {
-	  parseDataBinary8();
+      ok = parseDataBinary8();
 	} else {
-		throw std::runtime_error("Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type");
+        qDebug() << "Expected either 'Text', 'Binary 4' or 'Binary 8' chunk type";
+        return false;
 	}
+
+    if (!ok) {
+        qDebug() << "Parsing failed.";
+        return false;
+    }
 
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "segment") {
-		throw std::runtime_error("Expected 'End Segment'");
+        qDebug() << "Expected 'End Segment'";
+        return false;
 	}
 	acceptLine();
+    return true;
 }
 
-void OMFImport::parseHeader()
+bool OMFImport::parseHeader()
 {
 	bool ok;
 	std::string key, value;
 
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "begin" || value != "header") {
-		throw std::runtime_error("Expected 'Begin Header'");
+        qDebug() << "Expected 'Begin Header'";
 	}
 	acceptLine();
 	
@@ -236,7 +264,7 @@ void OMFImport::parseHeader()
 	while (!done) {
 		ok = parseCommentLine(line, key, value);
 		if (!ok) {
-		  std::cout << "Skipped line." << std::endl;
+          qDebug() << "Skipped erroneous line in header.";
 		  continue;
 		}
 
@@ -296,7 +324,7 @@ void OMFImport::parseHeader()
 		} else if (key == "znodes") {
 			header.znodes = str2int(value);
 		} else {
-		  std::clog << "OMFImport::parseHeader: Unknown key: " << key << "/" << value << std::endl;
+          qDebug() << "OMFImport::parseHeader: Unknown key: " << key.c_str() << "/" << value.c_str();
 		}
 		acceptLine();
 	}
@@ -305,27 +333,28 @@ void OMFImport::parseHeader()
 		header.valuedim = 3;
 	}
 
-
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "header") {
-		throw std::runtime_error("Expected 'End Header'");
+        qDebug() << "Expected 'End Header'";
+        return false;
 	}
 	acceptLine();
+    return true;
 }
 
-void OMFImport::parseDataAscii()
+bool OMFImport::parseDataAscii()
 {
 	bool ok;
 	std::string key, value;
 	
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "begin" || value != "data text") {
-		throw std::runtime_error("Expected 'Begin DataText'");
+        qDebug() << "Expected 'Begin DataText'";
+        return false;
 	}
 	acceptLine();
 
 	// Create field matrix object
-//	field = array_ptr(new array_type(boost::extents[header.xnodes][header.ynodes][header.znodes][3]));
     field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
 	for (int z=0; z<header.znodes; ++z)
@@ -355,12 +384,14 @@ void OMFImport::parseDataAscii()
 
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "data text") {
-		throw std::runtime_error("Expected 'End Data Text'");
+        qDebug() << "Expected 'End Data Text'";
+        return false;
 	}
 	acceptLine();
+    return true;
 }
 
-void OMFImport::parseDataBinary4()
+bool OMFImport::parseDataBinary4()
 {
   assert(sizeof(float) == 4);
 
@@ -370,7 +401,8 @@ void OMFImport::parseDataBinary4()
   // Parse "Begin: Data Binary 4"
   ok = parseCommentLine(line, key, value);
   if (!ok || key != "begin" || value != "data binary 4") {
-    throw std::runtime_error("Expected 'Begin Binary 4'");
+      qDebug() << "Expected 'Begin Binary 4'";
+      return false;
   }
 
   // Create field matrix object
@@ -391,10 +423,11 @@ void OMFImport::parseDataBinary4()
     magic = fromLittleEndian(magic);
   } else {
     magic = 0;
-    throw std::runtime_error("Wrong version number detected.");
+    qDebug() << "Wrong version number detected.";
+    return false;
   }
   
-  if (magic != 1234567.0f) throw std::runtime_error("Wrong magic number (binary 4 format)");
+  if (magic != 1234567.0f) qDebug() << "Wrong magic number (binary 4 format)";
 
   float *buffer;
   if (header.valuedim == 1) {
@@ -439,7 +472,8 @@ void OMFImport::parseDataBinary4()
   	acceptLine(); 
     ok = parseCommentLine(line, key, value);
     if (!ok || key != "end" || value != "data binary 4") {
-      throw std::runtime_error("Expected 'End Data Binary 4'");
+        qDebug() << "Expected 'End Data Binary 4'";
+        return false;
     }
     acceptLine();
   } else {
@@ -447,9 +481,10 @@ void OMFImport::parseDataBinary4()
   	line = line.substr(1,line.size()-1); // Remove the first erroneous char
     acceptLine();
   }
+  return true;
 }
 
-void OMFImport::parseDataBinary8()
+bool OMFImport::parseDataBinary8()
 {
   assert(sizeof(double) == 8);
 
@@ -459,11 +494,11 @@ void OMFImport::parseDataBinary8()
   // Parse "Begin: Data Binary 8"
   ok = parseCommentLine(line, key, value);
   if (!ok || key != "begin" || value != "data binary 8") {
-    throw std::runtime_error("Expected 'Begin Binary 8'");
+      qDebug() << "Expected 'Begin Binary 8'";
+      return false;
   }
 
   // Create field matrix object
-  //field.reset(new VectorMatrix(IntVector3d(header.xnodes, header.ynodes, header.znodes), Vector3d(0.0, 0.0, 0.0)));
   field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
 
   //const int num_cells = field->numElements();
@@ -485,10 +520,11 @@ void OMFImport::parseDataBinary8()
     magic = fromLittleEndian(magic);
   } else {
     magic = 0;
-    throw std::runtime_error("Wrong version number detected.");
+    qDebug() << "Wrong version number detected.";
+    return false;
   }
 
-  if (magic != 123456789012345.0) throw std::runtime_error("Wrong magic number (binary 8 format)");
+  if (magic != 123456789012345.0) qDebug() << "Wrong magic number (binary 8 format)";
 
   double *buffer = new double [3*num_cells];
   input->read((char*)buffer, 3*num_cells*sizeof(double));
@@ -528,7 +564,9 @@ void OMFImport::parseDataBinary8()
   // Parse "End: Data Binary 8"
   ok = parseCommentLine(line, key, value);
   if (!ok || key != "end" || value != "data binary 8") {
-    throw std::runtime_error("Expected 'End Data Binary 8'");
+      qDebug() << "Expected 'End Data Binary 8'";
+      return false;
   }
   acceptLine();
+  return true;
 }

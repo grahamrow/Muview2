@@ -269,9 +269,15 @@ void Window::openAbout()
 void Window::processFilenames() {
     // Looping over files
     for (int loadPos=0; loadPos<cacheSize && loadPos<filenames.size(); loadPos++) {
+        // Initialize a header object
         QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
+        // Attempt to read the file, null pointer returned if this fails
+        QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+        if (omfdata.isNull()) {
+            qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
+        }
         omfHeaderCache.push_back(header);
-        omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), *header));
+        omfCache.push_back(omfdata);
     }
 }
 
@@ -356,7 +362,7 @@ void Window::updateWatchedFiles() {
             if (!watchedFiles.contains(fullPath)) {
                 // Not on the watch list yet
                 watchedFiles.insert(fullPath, info.lastModified());
-                // Callback shortly to see if the file is done changing!
+                // Callback this method to see if the file is done changing!
                 QTimer::singleShot(100, this, SLOT(updateWatchedFiles()));
             } else {
                 // on the watch list
@@ -368,7 +374,7 @@ void Window::updateWatchedFiles() {
                 } else {
                     // File still changing
                     watchedFiles[fullPath] = info.lastModified();
-                    // Callback shortly to see if the file is done changing!
+                    // Callback this method to see if the file is done changing!
                     QTimer::singleShot(100, this, SLOT(updateWatchedFiles()));
                 }
             }
@@ -397,9 +403,15 @@ void Window::updateDisplayData(int index)
         clearCaches();
         cachePos = index;
         for (int loadPos=index; loadPos<(index+cacheSize) && loadPos<filenames.size(); loadPos++) {
+            // Initialize a header object
             QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
+            // Attempt to read the file, null pointer returned if this fails
+            QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+            if (omfdata.isNull()) {
+                qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
+            }
             omfHeaderCache.push_back(header);
-            omfCache.push_back(readOMF((filenames[loadPos]).toStdString(), *header));
+            omfCache.push_back(omfdata);
         }
         cachePos = index;
     } else if ( index < cachePos ) {
@@ -409,20 +421,29 @@ void Window::updateDisplayData(int index)
                 omfCache.pop_back();
                 omfHeaderCache.pop_back();
             }
+            // Initialize a header object
             QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
-            omfHeaderCache.push_front(header);
-            omfCache.push_front(readOMF((filenames[loadPos]).toStdString(), *header));
-			
+            // Attempt to read the file, null pointer returned if this fails
+            QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+            if (omfdata.isNull()) {
+                qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
+            }
+            omfHeaderCache.push_back(header);
+            omfCache.push_back(omfdata);
         }
         cachePos = index;
     }
 
     // We are within the current cache
     if (index < filenames.size()) {
-        ui->statusbar->showMessage(displayNames[index]);
-        // Update the Display
-        viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
-        viewport->updateData(omfCache.at(index-cachePos));
+        if (omfCache.at(index-cachePos).isNull()) {
+            ui->statusbar->showMessage("File " + displayNames[index] + " was not understood by Muview and is being skipped.");
+        } else {
+            ui->statusbar->showMessage(displayNames[index]);
+            // Update the Display
+            viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
+            viewport->updateData(omfCache.at(index-cachePos));
+        }
     } else {
         ui->statusbar->showMessage(QString("Don't scroll so erratically..."));
     }
