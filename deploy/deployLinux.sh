@@ -41,5 +41,5 @@ rm $NAME/resources/muview.icns $NAME/resources/splash*.png
 # Copy the rest of the files
 cp $FILES $NAME
 
-tar -cjvf "${NAME}.tar.bz" $NAME
+tar -czvf "${NAME}.tar.gz" $NAME
 echo "Done deploying!"
