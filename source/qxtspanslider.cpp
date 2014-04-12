@@ -31,6 +31,7 @@
 #include <QApplication>
 #include <QStylePainter>
 #include <QStyleOptionSlider>
+#include <QtDebug>
 
 QxtSpanSliderPrivate::QxtSpanSliderPrivate() :
         lower(0),
@@ -45,7 +46,8 @@ QxtSpanSliderPrivate::QxtSpanSliderPrivate() :
         upperPressed(QStyle::SC_None),
         movement(QxtSpanSlider::FreeMovement),
         firstMovement(false),
-        blockTracking(false)
+        blockTracking(false),
+        fixedInterval(false)
 {
 }
 
@@ -598,6 +600,11 @@ void QxtSpanSlider::mousePressEvent(QMouseEvent* event)
         return;
     }
 
+    if (event->modifiers() & Qt::ShiftModifier) {
+        qDebug() << "Shift pressed, baby!";
+        qxt_d().fixedInterval = true;
+    }
+
     qxt_d().handleMousePress(event->pos(), qxt_d().upperPressed, qxt_d().upper, QxtSpanSliderPrivate::UpperHandle);
     if (qxt_d().upperPressed != QStyle::SC_SliderHandle)
         qxt_d().handleMousePress(event->pos(), qxt_d().lowerPressed, qxt_d().lower, QxtSpanSliderPrivate::LowerHandle);
@@ -650,9 +657,23 @@ void QxtSpanSlider::mouseMoveEvent(QMouseEvent* event)
     if (qxt_d().lowerPressed == QStyle::SC_SliderHandle)
     {
         if (qxt_d().movement == NoCrossing)
+        {
             newPosition = qMin(newPosition, upperValue());
+        }
         else if (qxt_d().movement == NoOverlapping)
-            newPosition = qMin(newPosition, upperValue() - 1);
+        {
+            if (qxt_d().fixedInterval)
+            {
+                int span = qxt_d().upperPos - qxt_d().lowerPos;
+                newPosition = qMin(newPosition, upperValue() - 1);
+                newPosition = qMin(newPosition, maximum() - span);
+                setUpperPosition(newPosition + span);
+            }
+            else
+            {
+                newPosition = qMin(newPosition, upperValue() - 1);
+            }
+        }
 
         if (qxt_d().movement == FreeMovement && newPosition > qxt_d().upper)
         {
@@ -669,8 +690,19 @@ void QxtSpanSlider::mouseMoveEvent(QMouseEvent* event)
         if (qxt_d().movement == NoCrossing)
             newPosition = qMax(newPosition, lowerValue());
         else if (qxt_d().movement == NoOverlapping)
-            newPosition = qMax(newPosition, lowerValue() + 1);
-
+        {
+            if (qxt_d().fixedInterval)
+            {
+                int span = qxt_d().upperPos - qxt_d().lowerPos;
+                newPosition = qMax(newPosition, lowerValue() + 1);
+                newPosition = qMax(newPosition, span);
+                setLowerPosition(newPosition - span);
+            }
+            else
+            {
+                newPosition = qMax(newPosition, lowerValue() + 1);
+            }
+        }
         if (qxt_d().movement == FreeMovement && newPosition < qxt_d().lower)
         {
             qxt_d().swapControls();
@@ -689,6 +721,7 @@ void QxtSpanSlider::mouseMoveEvent(QMouseEvent* event)
  */
 void QxtSpanSlider::mouseReleaseEvent(QMouseEvent* event)
 {
+    qxt_d().fixedInterval = false;
     QSlider::mouseReleaseEvent(event);
     setSliderDown(false);
     qxt_d().lowerPressed = QStyle::SC_None;

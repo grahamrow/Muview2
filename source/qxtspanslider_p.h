@@ -74,6 +74,7 @@ public:
     QxtSpanSlider::HandleMovementMode movement;
     bool firstMovement;
     bool blockTracking;
+    bool fixedInterval;
 
 public slots:
     void updateRange(int min, int max);
