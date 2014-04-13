@@ -601,7 +601,6 @@ void QxtSpanSlider::mousePressEvent(QMouseEvent* event)
     }
 
     if (event->modifiers() & Qt::ShiftModifier) {
-        qDebug() << "Shift pressed, baby!";
         qxt_d().fixedInterval = true;
     }
 

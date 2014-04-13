@@ -73,7 +73,8 @@ private:
     void adjustAnimSlider(bool back);
 
     // ============================================================
-    // Storage and caching
+    // Storage and caching:
+    //
     // A finite number of files, as governed by cacheSize, will
     // reside in memory at a given time, otherwise we will choke
     // the system on large output directories.

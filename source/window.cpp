@@ -127,6 +127,9 @@ Window::Window(QStringList arguments) :
     connect(ui->actionCones, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
     connect(ui->actionVectors, SIGNAL(triggered()), this, SLOT(toggleDisplay()));
 
+    connect(ui->actionIncreaseSubsampling, SIGNAL(triggered()), viewport, SLOT(increaseSubsampling()));
+    connect(ui->actionDecreaseSubsampling, SIGNAL(triggered()), viewport, SLOT(decreaseSubsampling()));
+
     displayType = new QActionGroup(this);
     displayType->addAction(ui->actionCubes);
     displayType->addAction(ui->actionCones);

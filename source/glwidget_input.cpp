@@ -182,6 +182,20 @@ void GLWidget::setZLoc(float val)
   }
 }
 
+void GLWidget::increaseSubsampling()
+{
+    subsampling++;
+    needsUpdate = true;
+}
+
+void GLWidget::decreaseSubsampling()
+{
+    if (subsampling > 1) {
+        subsampling--;
+        needsUpdate = true;
+    }
+}
+
 void GLWidget::setXCom(float val)
 {
   if (xcom != val) {

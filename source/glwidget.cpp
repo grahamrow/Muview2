@@ -15,6 +15,7 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     xLoc = yLoc = 0;
     zoom = -300.0;
     slices = 16;
+    subsampling = 1;
 
     // Slicing
     xSliceLow=ySliceLow=zSliceLow=0;
@@ -143,11 +144,11 @@ void GLWidget::paintGL()
         globalMovement.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
         globalMovement.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
-        for(int i=0; i<xnodes; i++)
+        for(int i=0; i<xnodes; i+=subsampling)
         {
-            for(int j=0; j<ynodes; j++)
+            for(int j=0; j<ynodes; j+=subsampling)
             {
-                for(int k=0; k<znodes; k++)
+                for(int k=0; k<znodes; k+=subsampling)
                 {
                     datum = dataPtr->at(i,j,k);
                     if (valuedim == 1) {
@@ -165,8 +166,8 @@ void GLWidget::paintGL()
                          k <= (zmax-zmin)*(float)zSliceHigh/1600.0)
                     {
 
-                        theta = acos(  datum.z()/mag);
-                        phi   = atan2( datum.y(), datum.x());
+                        theta = acos(datum.z()/mag);
+                        phi   = atan2(datum.y(), datum.x());
 
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {
@@ -212,8 +213,14 @@ void GLWidget::paintGL()
 
                         model = globalMovement;
                         model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
-                        if (displayType != 0) {
-                            // Don't rotate the cubes...
+                        if (displayType == 0) {
+                            // Don't rotate the cubes, but do expand them to fit empty space...
+                            model.scale(xnodes > subsampling ? (float)subsampling : 1.0f,
+                                        ynodes > subsampling ? (float)subsampling : 1.0f,
+                                        znodes > subsampling ? (float)subsampling : 1.0f);
+                        } else {
+                            // Rotate the cones or vectors, but don't mess with their aspect ratios...
+                            model.scale((float)subsampling);
                             model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
                         }

@@ -61,6 +61,10 @@ public slots:
     void setYLoc(float val);
     void setZLoc(float val);
 
+    // Subsampling
+    void increaseSubsampling();
+    void decreaseSubsampling();
+
 signals:
     void xRotationChanged(int angle);
     void yRotationChanged(int angle);
@@ -103,6 +107,7 @@ private:
     sprite *displayObject;
     int displayType; // Cube 0, Cone 1, Vector 2
     int valuedim;    // scalar or vector
+    int subsampling; // display each n'th cell according to this variable
     QSharedPointer<matrix> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;

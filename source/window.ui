@@ -130,7 +130,7 @@
      <x>0</x>
      <y>0</y>
      <width>964</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -157,6 +157,9 @@
     <addaction name="actionCubes"/>
     <addaction name="actionCones"/>
     <addaction name="actionVectors"/>
+    <addaction name="separator"/>
+    <addaction name="actionIncreaseSubsampling"/>
+    <addaction name="actionDecreaseSubsampling"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -293,6 +296,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionIncreaseSubsampling">
+   <property name="text">
+    <string>Increase Subsampling</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
+  </action>
+  <action name="actionDecreaseSubsampling">
+   <property name="text">
+    <string>Decrease Subsampling</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
    </property>
   </action>
  </widget>
