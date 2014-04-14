@@ -1,4 +1,3 @@
-
 MAKEFILE        = Makefile
 CURRENT_DIR     = $(shell pwd)
 INSTALL_FILE    = install -m 644 -p
@@ -6,16 +5,16 @@ INSTALL_DIR     = $(COPY_DIR)
 INSTALL_PROGRAM = install -m 755 -p
 STRIP           = strip
 TARGET          = muview
+DEL_FILE        = rm
 # INSTALL ROOT may be set to the desired prefix
 
 install_target: 
 	@test -d $(INSTALL_ROOT)/usr/local/bin || mkdir -p $(INSTALL_ROOT)/usr/local/bin
-	-$(INSTALL_PROGRAM) "../$(TARGET)" "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
+	-$(INSTALL_PROGRAM) "./$(TARGET)" "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
 	-$(STRIP) "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
 
 uninstall_target:
 	-$(DEL_FILE) "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/local/bin/ 
 
 install_desktopfile: 
 	@test -d $(INSTALL_ROOT)/usr/share/applications || mkdir -p $(INSTALL_ROOT)/usr/share/applications
@@ -23,7 +22,7 @@ install_desktopfile:
 
 uninstall_desktopfile:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/applications/muview.desktop
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/applications/ 
+
 
 install_iconfile512: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps
@@ -31,7 +30,6 @@ install_iconfile512:
 
 uninstall_iconfile512:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps/ 
 
 install_iconfile256: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps
@@ -39,7 +37,6 @@ install_iconfile256:
 
 uninstall_iconfile256:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps/ 
 
 install_iconfile128: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps
@@ -47,7 +44,6 @@ install_iconfile128:
 
 uninstall_iconfile128:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps/ 
 
 install_iconfile64: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps
@@ -55,7 +51,6 @@ install_iconfile64:
 
 uninstall_iconfile64:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps/ 
 
 install_iconfile32: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps
@@ -63,7 +58,6 @@ install_iconfile32:
 
 uninstall_iconfile32:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps/ 
 
 install_iconfile16: 
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps
@@ -71,7 +65,6 @@ install_iconfile16:
 
 uninstall_iconfile16:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps/ 
 
 install_pixmap: 
 	@test -d $(INSTALL_ROOT)/usr/share/pixmaps || mkdir -p $(INSTALL_ROOT)/usr/share/pixmaps
@@ -79,7 +72,6 @@ install_pixmap:
 
 uninstall_pixmap:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/pixmaps/muview.png
-	-$(DEL_DIR) $(INSTALL_ROOT)/usr/share/pixmaps/ 
 
 install:  install_desktopfile install_iconfile512 install_iconfile256 install_iconfile128 install_iconfile64 install_iconfile32 install_iconfile16 install_target install_pixmap 
 
