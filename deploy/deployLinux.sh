@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# Make sure xkbcommon-dev, xcb-dev, gtk-dev are installed
+# Make sure libxkbcommon-dev, libxcb-dev, libgtk-dev are installed
 # Static build of Qt5.2.1 done with the following commands
 # ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
 # make -j10 sub-src
 
-VERSION="2.0"
-NAME="Muview${VERSION}"
+VERSION="2.1"
+NAME="Muview${VERSION}-Linux"
+# buildDir="../build-muview-Desktop-Release"
 
 if [ -e muview ]
 	then
 	rm muview
 fi
-if [ -e "${NAME}.tar.bz" ]
+if [ -e "${NAME}.tar.gz" ]
 	then
-	rm "${NAME}.tar.bz"
+	rm "${NAME}.tar.gz"
 fi
 # Kill old product
 if [ -d $NAME ]
@@ -25,10 +26,10 @@ fi
 
 cd source
 make clean
-qmake
+qmake -r -spec linux-g++
 cd ..
 make clean
-qmake
+qmake -r -spec linux-g++
 make -j20
 
 FILES="muview README.md LICENSE"

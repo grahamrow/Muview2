@@ -10,8 +10,8 @@ OBJECTS_DIR = objs
 CONFIG += release
 
 linux {
-    VERSION = 2.0.0
-    CONFIG += static
+    VERSION = 2.1.0
+    #CONFIG += static
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
     target.path = /usr/local/bin
@@ -55,7 +55,7 @@ macx {
     message("    will install muview (app) to /Applications")
     target.path = /Applications
 
-    VERSION   = 2.0.0
+    VERSION   = 2.1.0
     TARGET    = ../Muview
     ICON      = resources/muview.icns
     CONFIG   += dead-strip
