@@ -38,6 +38,25 @@ int Preferences::getSpriteResolution()
     return ui->spriteResolution->value();
 }
 
+float Preferences::getVectorLength()
+{
+    return ((float)ui->vectorLength->value())/100.f;
+}
+
+float Preferences::getVectorRadius()
+{
+    return ((float)ui->vectorRadius->value())/100.f;
+}
+
+float Preferences::getVectorTipToTail()
+{
+    return ((float)ui->tipPercent->value())/100.f;
+}
+
+float Preferences::getVectorInnerToOuter()
+{
+    return ((float)ui->shaftRadiusPercent->value())/100.f;
+}
 
 float Preferences::getBrightness()
 {

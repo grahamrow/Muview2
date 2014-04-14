@@ -16,12 +16,18 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     zoom = -300.0;
     slices = 16;
     subsampling = 1;
+    vectorLength = 1.0f;
+    vectorRadius = 0.5f;
+    vectorTipLengthRatio = 0.4f;
+    vectorShaftRadiusRatio = 0.4f;
 
     // Slicing
     xSliceLow=ySliceLow=zSliceLow=0;
     xSliceHigh=ySliceHigh=zSliceHigh=16*100;
 
+    // Load shader programs, lights, models, etc.
     context()->makeCurrent();
+    initializeAssets();
 
     // Draw at a fixed framerate (if updates are needed)
     QTimer *timer = new QTimer(this);
@@ -31,23 +37,28 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
 
 void GLWidget::updateData(QSharedPointer<matrix> data)
 {
-    dataPtr    = data;
-    displayOn  = true;
-
-    // Update the display
-    updateCOM();
-    updateExtent();
-    needsUpdate = true;
+    if (data.isNull()) {
+        displayOn = false;
+    } else {
+        dataPtr    = data;
+        displayOn  = true;
+        // Update the display
+        updateCOM();
+        updateExtent();
+        needsUpdate = true;
+    }
 }
 
 void GLWidget::updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data)
 {
-    valuedim = header->valuedim;
-    // Nothing set for the extents...
-    if (valuedim == 3) {
-        data->minmaxMagnitude(minmag, maxmag);
-    } else if (valuedim == 1) {
-        data->minmaxScalar(minmag, maxmag);
+    if (!data.isNull()) {
+        valuedim = header->valuedim;
+        // Nothing set for the extents...
+        if (valuedim == 3) {
+            data->minmaxMagnitude(minmag, maxmag);
+        } else if (valuedim == 1) {
+            data->minmaxScalar(minmag, maxmag);
+        }
     }
 }
 
@@ -94,14 +105,6 @@ void GLWidget::initializeGL()
     // Set the clear color to black
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
     qglClearColor( backgroundColor );
-
-    // Prepare a complete shader program...
-    context()->makeCurrent();
-    initializeShaders();
-    initializeCube();
-    initializeCone(16, 1.0, 2.0);
-    initializeVect(16, 1.0, 5.0, 0.6, 0.5);
-    initializeLights();
 
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
@@ -182,6 +185,11 @@ void GLWidget::paintGL()
                             hueVal = (phi+PI)/(2.0f*PI);
                         } else if (coloredQuantity ==  ("Full Orientation")) {
                             hueVal = (phi+PI)/(2.0f*PI);
+                            if (hueVal < 0.0f) hueVal = 0.0f;
+                            if ((hueVal > 1.0f) || (hueVal < 0.0f))
+                            {
+                                qDebug() << "Hue out of range:" << hueVal << datum.x() << datum.y() << datum.z() << theta << phi;
+                            }
                             if (valuedim == 1) {
                                 lumVal=0.5;
                             } else {
@@ -214,13 +222,13 @@ void GLWidget::paintGL()
                         model = globalMovement;
                         model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
                         if (displayType == 0) {
-                            // Don't rotate the cubes, but do expand them to fit empty space...
+                            // Don't rotate the cubes, but do expand them to fill empty space...
                             model.scale(xnodes > subsampling ? (float)subsampling : 1.0f,
                                         ynodes > subsampling ? (float)subsampling : 1.0f,
                                         znodes > subsampling ? (float)subsampling : 1.0f);
                         } else {
                             // Rotate the cones or vectors, but don't mess with their aspect ratios...
-                            model.scale((float)subsampling);
+                            model.scale(1.0f + (float)subsampling*0.4f);
                             model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
                         }
@@ -280,12 +288,17 @@ void GLWidget::setBackgroundColor(QColor color) {
     needsUpdate = true;
 }
 
-void GLWidget::setSpriteResolution(int newslices)
+void GLWidget::setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio)
 {
-    if (slices != newslices){
+    if ( (slices != newslices) || (vectorLength != length) || (vectorRadius != radius) ||
+         (vectorTipLengthRatio != tipLengthRatio) || (vectorShaftRadiusRatio != shaftRadiusRatio) )
+    {
         slices = newslices;
-        initializeCone(slices, 1.0, 3.0);
-        initializeVect(slices, 1.0, 5.0, 0.6, 0.5);
+        vectorLength = length;
+        vectorRadius = radius;
+        vectorTipLengthRatio = tipLengthRatio;
+        vectorShaftRadiusRatio = shaftRadiusRatio;
+        initializeVect(slices, 5.0f*vectorLength, 1.0f*vectorRadius, vectorTipLengthRatio, vectorShaftRadiusRatio);
         needsUpdate = true;
     }
 }

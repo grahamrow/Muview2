@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Make sure xkbcommon-dev, xcb-dev, gtk-dev are installed
 # Static build of Qt5.2.1 done with the following commands
 # ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
 # make -j10 sub-src

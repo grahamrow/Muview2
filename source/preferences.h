@@ -16,6 +16,10 @@ public:
     explicit Preferences(QWidget *parent = 0);
     QColor getBackgroundColor();
     int getSpriteResolution();
+    float getVectorLength();
+    float getVectorRadius();
+    float getVectorTipToTail();
+    float getVectorInnerToOuter();
     float getBrightness();
     QString getFormat();
     QSize getImageDimensions();

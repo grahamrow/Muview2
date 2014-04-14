@@ -236,7 +236,7 @@ bool OMFImport::parseSegment()
 	}
 
     if (!ok) {
-        qDebug() << "Parsing failed.";
+        qDebug() << "Parsing failed. May load anyway!";
         return false;
     }
 
@@ -472,8 +472,15 @@ bool OMFImport::parseDataBinary4()
   	acceptLine(); 
     ok = parseCommentLine(line, key, value);
     if (!ok || key != "end" || value != "data binary 4") {
-        qDebug() << "Expected 'End Data Binary 4'";
-        return false;
+        if (line == "") {
+            acceptLine();
+            ok = parseCommentLine(line, key, value);
+            if (!ok || key != "end" || value != "data binary 8")
+            {
+                qDebug() << "Expected 'End Data Binary 4' but got" << QString(line.c_str());
+                return false;
+            }
+        }
     }
     acceptLine();
   } else {
@@ -564,8 +571,15 @@ bool OMFImport::parseDataBinary8()
   // Parse "End: Data Binary 8"
   ok = parseCommentLine(line, key, value);
   if (!ok || key != "end" || value != "data binary 8") {
-      qDebug() << "Expected 'End Data Binary 8'";
-      return false;
+      if (line == "") {
+          acceptLine();
+          ok = parseCommentLine(line, key, value);
+          if (!ok || key != "end" || value != "data binary 8")
+          {
+              qDebug() << "Expected 'End Data Binary 8' but got" << QString(line.c_str());
+              return false;
+          }
+      }
   }
   acceptLine();
   return true;

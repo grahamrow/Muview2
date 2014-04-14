@@ -16,7 +16,6 @@
 struct sprite
 {
     QOpenGLBuffer vbo;
-//    GLuint vao;
     QOpenGLVertexArrayObject *vao;
     GLuint count;
 };
@@ -36,7 +35,7 @@ public:
     // View Preferences
     virtual void toggleDisplay(int type);
     virtual void setBackgroundColor(QColor color);
-    virtual void setSpriteResolution(int newslices);
+    virtual void setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio);
     virtual void setBrightness(float bright);
     void setColorScale(QString value);
     void setColoredQuantity(QString value);
@@ -87,20 +86,16 @@ protected:
     virtual void wheelEvent(QWheelEvent *e);
 
 private:
-    // Missing commands
-//    QOpenGLFunctions_3_1 *glFuncs;
-//    PglGenVertexArrays glGenVertexArrays;
-//    PglBindVertexArray glBindVertexArray;
-
     // Shaders
     QOpenGLShaderProgram flatShader, diffuseShader;
 
     // Init functions
+    void initializeAssets();
     bool initializeShaders();
     bool initializeLights();
     bool initializeCube();
     bool initializeCone(int slices, float radius, float height);
-    bool initializeVect(int slices, float radius, float height, float ratioTipToTail, float ratioInnerToOuter);
+    bool initializeVect(int slices, float height, float radius, float fractionTip, float fractionInner);
 
     // Sprites and Data
     sprite cube, cone, vect;
@@ -112,6 +107,7 @@ private:
     float maxmag, minmag;
     QColor spriteColor;
     int slices; // Resolution for cones/vects
+    float vectorLength, vectorRadius, vectorTipLengthRatio, vectorShaftRadiusRatio;
 
     // Lighting
     GLfloat   lightAmbient;

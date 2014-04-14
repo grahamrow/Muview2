@@ -77,7 +77,7 @@ Window::Window(QStringList arguments) :
     watcher = new QFileSystemWatcher;
 
 	// Cache size
-	cacheSize = 50;
+    cacheSize = 20;
 	cachePos  = 0;
 
     // Sub-windows
@@ -247,7 +247,8 @@ void Window::keyPressEvent(QKeyEvent *e)
 
 void Window::updatePrefs() {
     viewport->setBackgroundColor(prefs->getBackgroundColor());
-    viewport->setSpriteResolution(prefs->getSpriteResolution());
+    viewport->setSpriteDimensions(prefs->getSpriteResolution(), prefs->getVectorLength(), prefs->getVectorRadius(),
+                                  prefs->getVectorTipToTail(), prefs->getVectorInnerToOuter());
     viewport->setBrightness(prefs->getBrightness());
     if (prefs->getImageDimensions() == QSize(-1,-1)) {
         viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
@@ -282,6 +283,7 @@ void Window::processFilenames() {
         omfHeaderCache.push_back(header);
         omfCache.push_back(omfdata);
     }
+    cachePos = 0;
 }
 
 void Window::gotoFrontOfCache() {
@@ -399,7 +401,6 @@ void Window::updateDisplayData(int index)
     // of the deque until we've caught up... if we're
     // too far out of range just scratch everything and
     // reload.
-
     if ( abs(index-cachePos) >= cacheSize ) {
             // Out of the realm of caching
             // Clear the cache of pre-existing elements
@@ -431,8 +432,8 @@ void Window::updateDisplayData(int index)
             if (omfdata.isNull()) {
                 qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
             }
-            omfHeaderCache.push_back(header);
-            omfCache.push_back(omfdata);
+            omfHeaderCache.push_front(header);
+            omfCache.push_front(omfdata);
         }
         cachePos = index;
     }
