@@ -32,8 +32,8 @@
         </header>
 
         <section id="downloads" class="clearfix">
-          <a href="https://github.com/grahamrow/Muview2/releases/download/2.0.0/Muview2.0-Linux.tar.gz" id="download-tar-gz" class="button"><span>Linux .tar.gz</span></a>
-          <a href="https://github.com/grahamrow/Muview2/releases/download/2.0.0/Muview2.0-MacOSX.dmg" id="download-dmg" class="button"><span>MacOS .dmg</span></a>
+          <a href="https://github.com/grahamrow/Muview2/releases/download/2.1.0/Muview2.1-Linux.tar.gz" id="download-tar-gz" class="button"><span>Linux .tar.gz</span></a>
+          <a href="https://github.com/grahamrow/Muview2/releases/download/2.1.0/Muview2.1-MacOSX.dmg" id="download-dmg" class="button"><span>MacOS .dmg</span></a>
           <a href="https://github.com/grahamrow/Muview2" id="view-on-github" class="button"><span>View on GitHub</span></a>
         </section>
 
@@ -43,7 +43,7 @@
           <h3>
 <a name="muview2" class="anchor" href="#muview2"><span class="octicon octicon-link"></span></a>Muview2</h3>
 
-<p>Muview2 is a cross-platform OVF (versions 1 and 2) compatible viewer intended to function with Mumax and OOMMF. The viewer provides a fast Qt/OpenGL interface that enables users to scrub through loaded files with an animation timeline, eliminating the need for manually generating image sequences and rendering animations using an awkward conglomeration of third-party software packages.</p>
+<p>Muview2 is a cross-platform OVF (version 1 and 2) compatible viewer intended to function with Mumax and OOMMF. The viewer provides a fast Qt/OpenGL interface that enables users to scrub through loaded files with an animation timeline, eliminating the need for manually generating image sequences and rendering animations using an awkward conglomeration of third-party software packages.</p>
 
 <p>The most recent version can always be found in the Github repository, but binaries will be made available from time to time. Direct links are provided at the top of this page. If anyone can assist me in producing a portable windows binary distribution I would be very grateful.</p>
 
@@ -52,7 +52,9 @@
 
 <ul>
 <li>Interactive 3D view of vector and scalar inputs (of arbitrary type)</li>
-<li>Slicing for viewing cross-sections of the geometry</li>
+<li>Slicing for viewing cross-sections of the geometry (hold shift to drag a fixed-width slice)</li>
+<li>Subdivision for fast viewing of large files</li>
+<li>Fine-tuned control of vector appearances for producing high quality images</li>
 <li>Easy scrubbing (with automatic caching) through loaded files</li>
 <li>Watch folders such that Muview displays new files when they are created</li>
 <li>Save image sequences directly from the loaded set of files</li>
@@ -74,8 +76,8 @@ muview OOMMF-Data/Oxs*.omf
 <p>Please let me know what would be useful! I don't plan to add any analysis capabilities, at least not in the near future.</p>
 
 <ul>
+<li>Direct integration with OOMMF</li>
 <li>More complete image export preferences</li>
-<li>More complete control over vector/cone display</li>
 </ul>
         </section>
 
