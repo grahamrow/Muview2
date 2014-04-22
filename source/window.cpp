@@ -469,18 +469,22 @@ void Window::openDir()
         filters << "*.omf" << "*.ovf";
         chosenDir.setNameFilters(filters);
         QStringList dirFiles = chosenDir.entryList();
-        filenames.clear();
-        foreach (QString file, dirFiles) {
-            filenames.push_back(dirString + file);
+        if (dirFiles.length() == 0) {
+            qDebug() << "No .omf or .ovf files were found in the specified directory.";
+            ui->statusbar->showMessage("No .omf or .ovf files were found in the specified directory.");
+        } else {
+            filenames.clear();
+            foreach (QString file, dirFiles) {
+                filenames.push_back(dirString + file);
+            }
+
+            // persistent storage of filenames for top overlay
+            displayNames = dirFiles;
+
+            clearCaches();
+            processFilenames();
+            gotoFrontOfCache();
         }
-
-        // persistent storage of filenames for top overlay
-        displayNames = dirFiles;
-
-        clearCaches();
-        processFilenames();
-        gotoFrontOfCache();
-
     }
 }
 
