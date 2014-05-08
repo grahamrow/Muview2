@@ -239,13 +239,14 @@ bool OMFImport::parseSegment()
         qDebug() << "Parsing failed. May load anyway!";
         return false;
     }
-
+#ifndef _WIN32
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "segment") {
         qDebug() << "Expected 'End Segment'";
         return false;
 	}
 	acceptLine();
+#endif
     return true;
 }
 
@@ -381,13 +382,16 @@ bool OMFImport::parseDataAscii()
 
 	      acceptLine();
 	    }
-
+// The following code causes problems on Windows only.
+// For now, just comment out!
+#ifndef _WIN32
 	ok = parseCommentLine(line, key, value);
 	if (!ok || key != "end" || value != "data text") {
         qDebug() << "Expected 'End Data Text'";
         return false;
 	}
 	acceptLine();
+#endif
     return true;
 }
 
@@ -464,7 +468,9 @@ bool OMFImport::parseDataBinary4()
   }
 
   delete [] buffer;
-
+// The following code causes problems on Windows only.
+// For now, just comment out!
+#ifndef _WIN32
   // Parse "End: Data Binary 4"
   if (header.version==1) {
   	line = line.substr(1,line.size()-1); // Remove the first erroneous char
@@ -488,6 +494,7 @@ bool OMFImport::parseDataBinary4()
   	line = line.substr(1,line.size()-1); // Remove the first erroneous char
     acceptLine();
   }
+#endif
   return true;
 }
 
@@ -562,7 +569,9 @@ bool OMFImport::parseDataBinary8()
   }
 
   delete [] buffer;
-
+// The following code causes problems on Windows only.
+// For now, just comment out!
+#ifndef _WIN32
   acceptLine(); // read next line...
 
   // Seems that we must remove the first erroneous char
@@ -582,5 +591,6 @@ bool OMFImport::parseDataBinary8()
       }
   }
   acceptLine();
+#endif
   return true;
 }
