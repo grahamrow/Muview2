@@ -77,7 +77,7 @@ Window::Window(QStringList arguments) :
     watcher = new QFileSystemWatcher;
 
 	// Cache size
-    cacheSize = 20;
+    cacheSize = 25;
 	cachePos  = 0;
 
     // Sub-windows
@@ -183,10 +183,10 @@ Window::Window(QStringList arguments) :
                     displayNames << (dirString+item);
                 }
             }
-            processFilenames();
-            gotoFrontOfCache();
-            adjustAnimSlider(false);  // Refresh the animation bar
         }
+        processFilenames();
+        gotoFrontOfCache();
+        adjustAnimSlider(false);  // Refresh the animation bar
     }
 
     // This seems to solve the strange issue of the QGLwidget not filling its container...

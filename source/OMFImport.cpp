@@ -176,14 +176,14 @@ bool OMFReader::parseSegment()
         qDebug() << "Parsing failed. May load anyway!";
         return false;
     }
-#ifndef _WIN32
-    ok = parseCommentLine(key, value);
-    if (!ok || key != "end" || value != "segment") {
-        qDebug() << "Expected 'End Segment'";
-        return false;
-    }
-    acceptLine();
-#endif
+// #ifndef _WIN32
+//     ok = parseCommentLine(key, value);
+//     if (!ok || key != "end" || value != "segment") {
+//         qDebug() << "Expected 'End Segment'";
+//         return false;
+//     }
+//     acceptLine();
+// #endif
     return true;
 }
 
