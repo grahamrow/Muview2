@@ -276,7 +276,7 @@ void Window::processFilenames() {
         // Initialize a header object
         QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
         // Attempt to read the file, null pointer returned if this fails
-        QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+        QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
         if (omfdata.isNull()) {
             qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
         }
@@ -410,7 +410,7 @@ void Window::updateDisplayData(int index)
             // Initialize a header object
             QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             // Attempt to read the file, null pointer returned if this fails
-            QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+            QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
             if (omfdata.isNull()) {
                 qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
             }
@@ -428,7 +428,7 @@ void Window::updateDisplayData(int index)
             // Initialize a header object
             QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             // Attempt to read the file, null pointer returned if this fails
-            QSharedPointer<matrix> omfdata = readOMF((filenames[loadPos]).toStdString(), *header);
+            QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
             if (omfdata.isNull()) {
                 qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
             }

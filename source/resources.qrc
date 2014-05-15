@@ -12,5 +12,9 @@
         <file>resources/512x512/muview.png</file>
         <file>resources/16x16/muview.png</file>
         <file>shaders/diffuseMacOSX.frag</file>
+        <file>shaders/diffuse42.frag</file>
+        <file>shaders/diffuse42.vert</file>
+        <file>shaders/standard42.frag</file>
+        <file>shaders/standard42.vert</file>
     </qresource>
 </RCC>

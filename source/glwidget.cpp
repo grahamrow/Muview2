@@ -135,6 +135,7 @@ void GLWidget::paintGL()
         int xnodes = size[0];
         int ynodes = size[1];
         int znodes = size[2];
+//            qDebug() << xnodes << ynodes << znodes;
         QVector3D datum;
         float theta, phi, mag;
         float hueVal, lumVal;
@@ -171,6 +172,7 @@ void GLWidget::paintGL()
 
                         theta = acos(datum.z()/mag);
                         phi   = atan2(datum.y(), datum.x());
+//                        qDebug() << theta << phi << mag;
 
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {

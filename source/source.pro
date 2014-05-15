@@ -114,7 +114,11 @@ OTHER_FILES +=  \
     resources/64x64/muview.png \
     resources/32x32/muview.png \
     resources/16x16/muview.png \
-    shaders/diffuseMacOSX.frag
+    shaders/diffuseMacOSX.frag \
+    shaders/diffuse42.frag \
+    shaders/diffuse42.vert \
+    shaders/standard42.frag \
+    shaders/standard42.vert
 
 RESOURCES += \
     resources.qrc

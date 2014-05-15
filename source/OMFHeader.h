@@ -4,7 +4,8 @@
 
 #ifndef OMF_HEADER_H
 #define OMF_HEADER_H
-
+#include <QString>
+#include <QStringList>
 #include <string>
 #include <vector>
 
@@ -20,17 +21,17 @@ struct OMFHeader
   OMFHeader();
   ~OMFHeader();
 
-  std::string Title;
-  std::vector<std::string> Desc;
-  std::vector<std::string> valueunits;  // OVF 2.0
-  std::vector<std::string> valuelabels; // OVF 2.0
-  std::string meshunit;  // e.g. "m"
-  std::string valueunit; // e.g. "A/m"
+  QString Title;
+  QStringList Desc;
+  QStringList valueunits;  // OVF 2.0
+  QStringList valuelabels; // OVF 2.0
+  QString meshunit;  // e.g. "m"
+  QString valueunit; // e.g. "A/m"
   double valuemultiplier;
   double xmin, ymin, zmin;
   double xmax, ymax, zmax;
   double ValueRangeMaxMag, ValueRangeMinMag;
-  std::string meshtype; // "rectangular"
+  QString meshtype; // "rectangular"
   double xbase, ybase, zbase;
   double xstepsize, ystepsize, zstepsize;
   int xnodes, ynodes, znodes;
