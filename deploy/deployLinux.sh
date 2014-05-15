@@ -5,7 +5,7 @@
 # ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
 # make -j10 sub-src
 
-VERSION="2.1"
+VERSION="2.1.1"
 NAME="Muview${VERSION}-Linux"
 # buildDir="../build-muview-Desktop-Release"
 
