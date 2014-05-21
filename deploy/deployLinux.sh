@@ -2,7 +2,7 @@
 
 # Make sure libxkbcommon-dev, libxcb-dev, libgtk-dev are installed
 # Static build of Qt5.2.1 done with the following commands
-# ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb
+# ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb -qt-libjpeg -qt-libpng
 # make -j10 sub-src
 
 VERSION="2.1.1"
