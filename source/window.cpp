@@ -557,15 +557,20 @@ void Window::watch(const QString& str)
         chosenDir.setNameFilters(filters);
         QStringList dirFiles = chosenDir.entryList();
 
-        // persistent storage of filenames for status bar
-        displayNames = dirFiles;
+        if (dirFiles.length() == 0) {
+            qDebug() << "No .omf or .ovf files were found in the specified directory. Waiting for input.";
+            ui->statusbar->showMessage("No .omf or .ovf files were found in the specified directory. Waiting for input.");
+        } else {
+            // persistent storage of filenames for status bar
+            displayNames = dirFiles;
+            filenames.clear();
+            foreach (QString file, dirFiles) {
+                filenames.push_back(dirString + file);
+            }
 
-        foreach (QString file, dirFiles) {
-            filenames.push_back(dirString + file);
+            processFilenames();
+            gotoBackOfCache();
         }
-
-        processFilenames();
-        gotoBackOfCache();
 
         connect(watcher, SIGNAL(directoryChanged(QString)),
             this, SLOT(updateWatchedFiles()));
