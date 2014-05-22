@@ -2,17 +2,17 @@
 # Do this through a MINGW terminal to preserve sanity...
 # Compile in QtCreator first...
 
-VERSION="2.1.1"
+VERSION="2.1.2"
 NAME="Muview${VERSION}"
 TARGET="muview.exe"
 MANIFEST="muview.exe.embed.manifest"
-BUILD_DIR="../build-muview-Desktop_Qt_5_2_1_MSVC2012_OpenGL_64bit-Release/source"
-SOURCE_DIR="/C/Qt/Qt5.2.1/5.2.1/msvc2012_64_opengl/bin"
+BUILD_DIR="../build-muview-Desktop_Qt_5_3_0_MSVC2013_OpenGL_64bit-Release/source"
+SOURCE_DIR="/C/Qt/Qt5.3.0/5.3/msvc2013_64_opengl/bin"
 QTDLLS="Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL icuin51 icuuc51 icudt51"
 WINDLL_DIR="/C/Windows/System32"
 WINDLLS="msvcp110 msvcr110"
 PLATFORMDLLS="qwindows qminimal"
-PLUGIN_DIR="C:\Qt\Qt5.2.1\5.2.1\msvc2012_64_opengl\plugins"
+PLUGIN_DIR="C:\Qt\Qt5.3.0\5.3\msvc2013_64_opengl\plugins"
 FILES="README.md LICENSE"
 
 # Kill old product

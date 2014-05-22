@@ -4,7 +4,7 @@
 buildDir='./'
 backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
-finalDMGName="Muview2.1.1-MacOSX.dmg"
+finalDMGName="Muview2.1.2-MacOSX.dmg"
 title="Muview"
 
 # Kill old product
