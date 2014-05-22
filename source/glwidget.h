@@ -8,7 +8,7 @@
 #include <QOpenGLVertexArrayObject>
 
 #include "matrix.h"
-#include "OMFHeader.h"
+#include "OMFImport.h"
 
 //typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
 //typedef void (*PglBindVertexArray) (GLuint array);
@@ -27,8 +27,8 @@ public:
     GLWidget( const QGLFormat& format, QWidget* parent = 0 );
 
     // Data and Drawing
-    void updateData(QSharedPointer<matrix> data);
-    void updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data);
+    void updateData(QSharedPointer<OMFReader> data);
+//    void updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data);
     void isDoneRendering();
     virtual void renderFrame(QString file);
 
@@ -103,7 +103,7 @@ private:
     int displayType; // Cube 0, Cone 1, Vector 2
     int valuedim;    // scalar or vector
     int subsampling; // display each n'th cell according to this variable
-    QSharedPointer<matrix> dataPtr;
+    QSharedPointer<OMFReader> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;
     int slices; // Resolution for cones/vects

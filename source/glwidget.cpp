@@ -35,11 +35,18 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     timer->start(16);
 }
 
-void GLWidget::updateData(QSharedPointer<matrix> data)
+void GLWidget::updateData(QSharedPointer<OMFReader> data)
 {
     if (data.isNull()) {
         displayOn = false;
     } else {
+        valuedim = data->valuedim;
+        // Nothing set for the extents...
+        if (valuedim == 3) {
+            data->field->minmaxMagnitude(minmag, maxmag);
+        } else if (valuedim == 1) {
+            data->field->minmaxScalar(minmag, maxmag);
+        }
         dataPtr    = data;
         displayOn  = true;
         // Update the display
@@ -49,22 +56,9 @@ void GLWidget::updateData(QSharedPointer<matrix> data)
     }
 }
 
-void GLWidget::updateHeader(QSharedPointer<OMFHeader> header, QSharedPointer<matrix> data)
-{
-    if (!data.isNull()) {
-        valuedim = header->valuedim;
-        // Nothing set for the extents...
-        if (valuedim == 3) {
-            data->minmaxMagnitude(minmag, maxmag);
-        } else if (valuedim == 1) {
-            data->minmaxScalar(minmag, maxmag);
-        }
-    }
-}
-
 void GLWidget::updateExtent()
 {
-    QVector<int> size = dataPtr->shape();
+    QVector<int> size = dataPtr->field->shape();
     xmax = size[0];
     ymax = size[1];
     zmax = size[2];
@@ -131,11 +125,10 @@ void GLWidget::paintGL()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if (displayOn) {
-        QVector<int> size = dataPtr->shape();
+        QVector<int> size = dataPtr->field->shape();
         int xnodes = size[0];
         int ynodes = size[1];
         int znodes = size[2];
-//            qDebug() << xnodes << ynodes << znodes;
         QVector3D datum;
         float theta, phi, mag;
         float hueVal, lumVal;
@@ -154,7 +147,7 @@ void GLWidget::paintGL()
             {
                 for(int k=0; k<znodes; k+=subsampling)
                 {
-                    datum = dataPtr->at(i,j,k);
+                    datum = dataPtr->field->at(i,j,k);
                     if (valuedim == 1) {
                         mag = datum.x();
                     } else {
@@ -172,7 +165,6 @@ void GLWidget::paintGL()
 
                         theta = acos(datum.z()/mag);
                         phi   = atan2(datum.y(), datum.x());
-//                        qDebug() << theta << phi << mag;
 
                         if (valuedim == 1) {
                             if (maxmag!=minmag) {

@@ -19,34 +19,35 @@
 
 #include "matrix.h"
 #include "OMFImport.h"
-#include "OMFHeader.h"
+#include "OMFEndian.h"
 
-QSharedPointer<matrix> readOMF(QString &path, OMFHeader &header)
+QSharedPointer<OMFReader> readOMF(QString &path)
 {
     bool success;
     QFile file(path);
-    OMFReader reader(file);
-    success = reader.read();
+    OMFReader *reader = new OMFReader(file);
+    success = reader->read();
     if (!success) {
-        return QSharedPointer<matrix>();
+        return QSharedPointer<OMFReader>();
     } else {
-        header = reader.getHeader();
-        return QSharedPointer<matrix>(reader.getField());
+        return QSharedPointer<OMFReader>(reader);
     }
-    return QSharedPointer<matrix>();
+    return QSharedPointer<OMFReader>();
 }
 
-OMFHeader OMFReader::getHeader()
-{
-    return header;
-}
-
-QSharedPointer<matrix> OMFReader::getField()
-{
-    return field;
-}
-
-OMFReader::OMFReader(QFile &fileref) : file(fileref)
+OMFReader::OMFReader(QFile &fileref) :
+    file(fileref),
+    Title("<title>"),
+    meshunit("<meshunit>"),
+    valueunit("<valueunit>"),
+    valuemultiplier(0.0),
+    xmin(0.0), ymin(0.0), zmin(0.0),
+    xmax(0.0), ymax(0.0), zmax(0.0),
+    ValueRangeMaxMag(0.0), ValueRangeMinMag(0.0),
+    meshtype("rectangular"),
+    xbase(0.0), ybase(0.0), zbase(0.0),
+    xstepsize(0.0), ystepsize(0.0), zstepsize(0.0),
+    xnodes(0), ynodes(0), znodes(0)
 {
 
 }
@@ -62,7 +63,7 @@ bool OMFReader::read()
     }
     // Read first line
     acceptLine();
-    ok = parseFirstLine(key, value, header.version);
+    ok = parseFirstLine(key, value, version);
     if (ok && key == "oommf") {
         acceptLine();
     } else {
@@ -176,14 +177,7 @@ bool OMFReader::parseSegment()
         qDebug() << "Parsing failed. May load anyway!";
         return false;
     }
-// #ifndef _WIN32
-//     ok = parseCommentLine(key, value);
-//     if (!ok || key != "end" || value != "segment") {
-//         qDebug() << "Expected 'End Segment'";
-//         return false;
-//     }
-//     acceptLine();
-// #endif
+
     return true;
 }
 
@@ -210,65 +204,65 @@ bool OMFReader::parseHeader()
             done = true;
             break;
         } else if (key == "title") {
-            header.Title = value;
+            Title = value;
         } else if (key == "desc") {
-            header.Desc.push_back(value);
+            Desc.push_back(value);
         } else if (key == "meshunit") {
-            header.meshunit = value;
+            meshunit = value;
         } else if (key == "valueunit") {
-            header.valueunit = value;
+            valueunit = value;
         } else if (key == "valuemultiplier") {
-            header.valuemultiplier = value.toDouble();
+            valuemultiplier = value.toDouble();
         } else if (key == "xmin") {
-            header.xmin = value.toDouble();
+            xmin = value.toDouble();
         } else if (key == "ymin") {
-            header.ymin = value.toDouble();
+            ymin = value.toDouble();
         } else if (key == "zmin") {
-            header.zmin = value.toDouble();
+            zmin = value.toDouble();
         } else if (key == "xmax") {
-            header.xmax = value.toDouble();
+            xmax = value.toDouble();
         } else if (key == "ymax") {
-            header.ymax = value.toDouble();
+            ymax = value.toDouble();
         } else if (key == "zmax") {
-            header.zmax = value.toDouble();
+            zmax = value.toDouble();
         } else if (key == "valuedim") {   // OVF 2.0
-            header.valuedim = value.toInt();
+            valuedim = value.toInt();
         } else if (key == "valueunits") { // OVF 2.0
-            header.valueunits.push_back(value);
+            valueunits.push_back(value);
         } else if (key == "valuelabels") { // OVF 2.0
-            header.valuelabels.push_back(value);
+            valuelabels.push_back(value);
         } else if (key == "valuerangeminmag") {
-            header.ValueRangeMinMag = value.toDouble();
+            ValueRangeMinMag = value.toDouble();
         } else if (key == "valuerangemaxmag") {
-            header.ValueRangeMaxMag = value.toDouble();
+            ValueRangeMaxMag = value.toDouble();
         } else if (key == "meshtype") {
-            header.meshtype = value;
+            meshtype = value;
         } else if (key == "xbase") {
-            header.xbase = value.toDouble();
+            xbase = value.toDouble();
         } else if (key == "ybase") {
-            header.ybase = value.toDouble();
+            ybase = value.toDouble();
         } else if (key == "zbase") {
-            header.zbase = value.toDouble();
+            zbase = value.toDouble();
         } else if (key == "xstepsize") {
-            header.xstepsize = value.toDouble();
+            xstepsize = value.toDouble();
         } else if (key == "ystepsize") {
-            header.ystepsize = value.toDouble();
+            ystepsize = value.toDouble();
         } else if (key == "zstepsize") {
-            header.zstepsize = value.toDouble();
+            zstepsize = value.toDouble();
         } else if (key == "xnodes") {
-            header.xnodes = value.toInt();
+            xnodes = value.toInt();
         } else if (key == "ynodes") {
-            header.ynodes = value.toInt();
+            ynodes = value.toInt();
         } else if (key == "znodes") {
-            header.znodes = value.toInt();
+            znodes = value.toInt();
         } else {
             qDebug() << "OMFReader::parseHeader: Unknown key: " << key << "---" << value;
         }
         acceptLine();
     }
 
-    if (header.version == 1) {
-        header.valuedim = 3;
+    if (version == 1) {
+        valuedim = 3;
     }
 
     ok = parseCommentLine( key, value);
@@ -293,16 +287,16 @@ bool OMFReader::parseDataAscii()
     acceptLine();
 
     // Create field matrix object
-    field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
+    field = QSharedPointer<matrix>(new matrix(xnodes, ynodes, znodes));
 
-    for (int z=0; z<header.znodes; ++z)
-        for (int y=0; y<header.ynodes; ++y)
-            for (int x=0; x<header.xnodes; ++x) {
+    for (int z=0; z<znodes; ++z)
+        for (int y=0; y<ynodes; ++y)
+            for (int x=0; x<xnodes; ++x) {
                 QTextStream ss(&line);
 
                 double v1, v2, v3;
                 QVector3D val;
-                if (header.valuedim == 1) {
+                if (valuedim == 1) {
                     ss >> v1;
                     val = QVector3D(v1,v1,v1);
                 } else {
@@ -310,24 +304,15 @@ bool OMFReader::parseDataAscii()
                     val = QVector3D(v1,v2,v3);
                 }
 
-                if (header.version==1) {
-                    val = val*header.valuemultiplier;
+                if (version==1) {
+                    val = val*valuemultiplier;
                 }
 
                 field->set(x,y,z,val);
 
                 acceptLine();
             }
-    // The following code causes problems on Windows only.
-    // For now, just comment out!
-#ifndef _WIN32
-    ok = parseCommentLine(key, value);
-    if (!ok || key != "end" || value != "data text") {
-        qDebug() << "Expected 'End Data Text'";
-        return false;
-    }
-    acceptLine();
-#endif
+
     return true;
 }
 
@@ -346,7 +331,7 @@ bool OMFReader::parseDataBinary4()
     }
 
     // Create field matrix object
-    field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
+    field = QSharedPointer<matrix>(new matrix(xnodes, ynodes, znodes));
     const int num_cells = field->num_elements();
 
     // Read magic value and field contents from file
@@ -354,10 +339,10 @@ bool OMFReader::parseDataBinary4()
     QByteArray magicArray = file.read(sizeof(float));
     QDataStream magicStream(magicArray);
     magicStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    if (header.version==1) {
+    if (version==1) {
         magicStream.setByteOrder(QDataStream::BigEndian);
         magicStream >> magic;
-    } else if (header.version==2) {
+    } else if (version==2) {
         magicStream.setByteOrder(QDataStream::LittleEndian);
         magicStream >> magic;
     } else {
@@ -368,14 +353,14 @@ bool OMFReader::parseDataBinary4()
     if (magic != 1234567.0) qDebug() << "Wrong magic number (binary 4 format)";
 
     QByteArray dataArray;
-    if (header.valuedim == 1) {
+    if (valuedim == 1) {
         dataArray = file.read(num_cells*sizeof(float));
     } else {
         dataArray = file.read(3*num_cells*sizeof(float));
     }
     QDataStream dataStream(dataArray);
     dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision);
-    if (header.version==1) {
+    if (version==1) {
         dataStream.setByteOrder(QDataStream::BigEndian);
     } else {
         dataStream.setByteOrder(QDataStream::LittleEndian);
@@ -384,17 +369,17 @@ bool OMFReader::parseDataBinary4()
     QVector3D val;
     double v1, v2, v3;
     for (int i=0; i<num_cells; ++i) {
-        if (header.valuedim == 1) {
+        if (valuedim == 1) {
             dataStream >> v1;
-            if (header.version==1) {
-                v1 = v1 * header.valuemultiplier;
+            if (version==1) {
+                v1 = v1 * valuemultiplier;
             }
             val = QVector3D(v1,v1,v1);
         } else {
             dataStream >> v1 >> v2 >> v3;
             val = QVector3D(v1, v2, v3);
-            if (header.version==1) {
-                val = val * header.valuemultiplier;
+            if (version==1) {
+                val = val * valuemultiplier;
             }
         }
         field->set(i,val);
@@ -417,7 +402,7 @@ bool OMFReader::parseDataBinary8()
     }
 
     // Create field matrix object
-    field = QSharedPointer<matrix>(new matrix(header.xnodes, header.ynodes, header.znodes));
+    field = QSharedPointer<matrix>(new matrix(xnodes, ynodes, znodes));
     const int num_cells = field->num_elements();
 
     // Read magic value and field contents from file
@@ -425,7 +410,7 @@ bool OMFReader::parseDataBinary8()
     QByteArray magicArray = file.read(sizeof(double));
     QDataStream magicStream(magicArray);
     magicStream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-    if (header.version==1) {
+    if (version==1) {
         magicStream.setByteOrder(QDataStream::BigEndian);
         magicStream >> magic;
     } else {
@@ -436,14 +421,14 @@ bool OMFReader::parseDataBinary8()
     if (magic != 123456789012345.0) qDebug() << "Wrong magic number (binary 8 format)";
 
     QByteArray dataArray;
-    if (header.valuedim == 1) {
+    if (valuedim == 1) {
         dataArray = file.read(num_cells*sizeof(double));
     } else {
         dataArray = file.read(3*num_cells*sizeof(double));
     }
     QDataStream dataStream(dataArray);
     dataStream.setFloatingPointPrecision(QDataStream::DoublePrecision);
-    if (header.version==1) {
+    if (version==1) {
         dataStream.setByteOrder(QDataStream::BigEndian);
     } else {
         dataStream.setByteOrder(QDataStream::LittleEndian);
@@ -452,17 +437,17 @@ bool OMFReader::parseDataBinary8()
     QVector3D val;
     double v1, v2, v3;
     for (int i=0; i<num_cells; ++i) {
-        if (header.valuedim == 1) {
+        if (valuedim == 1) {
             dataStream >> v1;
-            if (header.version==1) {
-                v1 = v1 * header.valuemultiplier;
+            if (version==1) {
+                v1 = v1 * valuemultiplier;
             }
             val = QVector3D(v1,v1,v1);
         } else {
             dataStream >> v1 >> v2 >> v3;
             val = QVector3D(v1, v2, v3);
-            if (header.version==1) {
-                val = val * header.valuemultiplier;
+            if (version==1) {
+                val = val * valuemultiplier;
             }
         }
         field->set(i,val);

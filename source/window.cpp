@@ -22,7 +22,7 @@
 #include "qxtspanslider.h"
 
 #include "OMFImport.h"
-#include "OMFHeader.h"
+//#include "OMFHeader.h"
 
 struct OMFImport;
 
@@ -145,7 +145,7 @@ Window::Window(QStringList arguments) :
     ui->xSlider->setValue(345 * 1600);
     ui->ySlider->setValue(0   * 1600);
     ui->zSlider->setValue(0   * 1600);
-    setWindowTitle(tr("MuView 2.1.1"));
+    setWindowTitle(tr("MuView 2.1.2"));
 
     // Data, don't connect until we are ready (probably still not ready here)...
     connect(ui->animSlider, SIGNAL(valueChanged(int)), this, SLOT(updateDisplayData(int)));
@@ -273,21 +273,17 @@ void Window::openAbout()
 void Window::processFilenames() {
     // Looping over files
     for (int loadPos=0; loadPos<cacheSize && loadPos<filenames.size(); loadPos++) {
-        // Initialize a header object
-        QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
         // Attempt to read the file, null pointer returned if this fails
-        QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
-        if (omfdata.isNull()) {
+        QSharedPointer<OMFReader> omf = readOMF(filenames[loadPos]);
+        if (omf.isNull()) {
             qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
         }
-        omfHeaderCache.push_back(header);
-        omfCache.push_back(omfdata);
+        omfCache.push_back(omf);
     }
     cachePos = 0;
 }
 
 void Window::gotoFrontOfCache() {
-    viewport->updateHeader(omfHeaderCache.front(), omfCache.front());
     ui->statusbar->showMessage(filenames.front());
     viewport->updateData(omfCache.front());
     cachePos = 0;
@@ -295,18 +291,13 @@ void Window::gotoFrontOfCache() {
 }
 
 void Window::gotoBackOfCache() {
-    viewport->updateHeader(omfHeaderCache.back(), omfCache.back());
     ui->statusbar->showMessage(filenames.back());
     viewport->updateData(omfCache.back());
     cachePos = filenames.size()-1;
-    adjustAnimSlider(true); // Go to start of slide
-
+    adjustAnimSlider(true); // Go to start of slider
 }
 
 void Window::clearCaches() {
-    while (!omfHeaderCache.empty()) {
-        omfHeaderCache.pop_back();
-    }
     while (!omfCache.empty()) {
         omfCache.pop_back();
     }
@@ -353,7 +344,7 @@ void Window::updateWatchedFiles() {
     chosenDir.setNameFilters(filters);
     QStringList dirFiles = chosenDir.entryList();
 
-    OMFHeader tempHeader = OMFHeader();
+//    OMFHeader tempHeader = OMFHeader();
 
     // compare to existing list of files
     bool changed = false;
@@ -402,19 +393,15 @@ void Window::updateDisplayData(int index)
     // too far out of range just scratch everything and
     // reload.
     if ( abs(index-cachePos) >= cacheSize ) {
-            // Out of the realm of caching
-            // Clear the cache of pre-existing elements
+            // Out of the realm of caching: clear the cache of pre-existing elements
         clearCaches();
         cachePos = index;
         for (int loadPos=index; loadPos<(index+cacheSize) && loadPos<filenames.size(); loadPos++) {
-            // Initialize a header object
-            QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             // Attempt to read the file, null pointer returned if this fails
-            QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
+            QSharedPointer<OMFReader> omfdata = readOMF(filenames[loadPos]);
             if (omfdata.isNull()) {
                 qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
             }
-            omfHeaderCache.push_back(header);
             omfCache.push_back(omfdata);
         }
         cachePos = index;
@@ -423,16 +410,12 @@ void Window::updateDisplayData(int index)
         for (int loadPos=cachePos-1; loadPos >= index && loadPos<filenames.size(); loadPos--) {
             if (omfCache.size() == cacheSize) {
                 omfCache.pop_back();
-                omfHeaderCache.pop_back();
             }
-            // Initialize a header object
-            QSharedPointer<OMFHeader> header = QSharedPointer<OMFHeader>(new OMFHeader());
             // Attempt to read the file, null pointer returned if this fails
-            QSharedPointer<matrix> omfdata = readOMF(filenames[loadPos], *header);
+            QSharedPointer<OMFReader> omfdata = readOMF(filenames[loadPos]);
             if (omfdata.isNull()) {
                 qDebug() << "Error loading file " << filenames[loadPos] << ", skipping...";
             }
-            omfHeaderCache.push_front(header);
             omfCache.push_front(omfdata);
         }
         cachePos = index;
@@ -445,7 +428,6 @@ void Window::updateDisplayData(int index)
         } else {
             ui->statusbar->showMessage(displayNames[index]);
             // Update the Display
-            viewport->updateHeader(omfHeaderCache.at(index-cachePos), omfCache.at(index-cachePos));
             viewport->updateData(omfCache.at(index-cachePos));
         }
     } else {

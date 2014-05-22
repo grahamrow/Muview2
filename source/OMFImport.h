@@ -9,23 +9,48 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QTextStream>
-//#include <string>
-//#include <istream>
 #include "matrix.h"
-#include "OMFHeader.h"
 
-// Now we return pointers to a custom matrix class.
-// Arrays should be garbage collected when
-// we dereference the pointers everywhere
+// Always using QSharedPointers to data arrays
+// since they will be automatically deleted when
+// going out of scope. This way the cache doesn't
+// spiral out of control w.r.t memory usage
 
-class OMFReader
+enum OMFFormat
 {
+    OMF_FORMAT_ASCII,
+    OMF_FORMAT_BINARY_4,
+    OMF_FORMAT_BINARY_8
+};
+
+class OMFReader : public QObject
+{
+    Q_OBJECT
 public:
     OMFReader(QFile &fileref);
     bool read();
-    OMFHeader getHeader();
-    QSharedPointer<matrix> getField();
+    QSharedPointer<matrix> field;
+
+    // Header related
+    QString Title;
+    QStringList Desc;
+    QStringList valueunits;  // OVF 2.0
+    QStringList valuelabels; // OVF 2.0
+    QString meshunit;        // e.g. "m"
+    QString valueunit;       // e.g. "A/m"
+    double valuemultiplier;
+    double xmin, ymin, zmin;
+    double xmax, ymax, zmax;
+    double ValueRangeMaxMag, ValueRangeMinMag;
+    QString meshtype;        // "rectangular"
+    double xbase, ybase, zbase;
+    double xstepsize, ystepsize, zstepsize;
+    int xnodes, ynodes, znodes;
+    int valuedim;            // OVF 2.0 only
+    int version;
+
 private:
+    // Parsing related
     bool parse();
     bool parseFirstLine(QString &key, QString &value, int &version);
     bool parseSegment();
@@ -36,8 +61,7 @@ private:
     bool parseDataBinary8();
     void acceptLine();
 
-    OMFHeader header;
-    QSharedPointer<matrix> field;
+    // OMFHeader header;
     QTextStream in;
     QString line;
     QString filename;
@@ -45,10 +69,7 @@ private:
     int lineno;
 };
 
-//QSharedPointer<matrix> readOMF(const std::string  &path, OMFHeader &header);
-//QSharedPointer<matrix> readOMF(      std::istream   &in, OMFHeader &header);
-QSharedPointer<matrix> readOMF(QString &path, OMFHeader &header);
-//QSharedPointer<matrix> readOMF(QTextStream &in, OMFHeader &header);
+QSharedPointer<OMFReader> readOMF(QString &path);
 
 #endif
 

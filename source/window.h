@@ -13,11 +13,10 @@
 // Other parts of the interface
 #include "preferences.h"
 #include "aboutdialog.h"
+#include "glwidget.h"
 
 // For reading OMF files
-#include "OMFHeader.h"
 #include "matrix.h"
-#include "glwidget.h"
 
 // Forward Declarations
 class QSlider;
@@ -52,7 +51,6 @@ private slots:
     void watch(const QString& str);
     void stopWatch();
     void toggleDisplay();
-//    void updateWatchedFiles(const QString& str);
     void updateWatchedFiles();
     void openSettings();
     void openAbout();
@@ -88,8 +86,7 @@ private:
     void gotoFrontOfCache();
     void processFilenames();
 
-    QVector<QSharedPointer<matrix> >    omfCache;
-    QVector<QSharedPointer<OMFHeader> > omfHeaderCache;
+    QVector<QSharedPointer<OMFReader> > omfCache;
     QStringList filenames;
     QStringList displayNames;
 

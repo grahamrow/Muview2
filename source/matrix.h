@@ -1,10 +1,14 @@
 #ifndef MATRIX_H
 #define MATRIX_H
+#include <QObject>
 #include <QVector>
+#include <QDebug>
 #include <QVector3D>
+#include <QSharedPointer>
 
-class matrix
+class matrix : public QObject
 {
+    Q_OBJECT
 public:
     matrix(int sizeX, int sizeY, int sizeZ);
     void clear();
@@ -15,13 +19,14 @@ public:
     void minmaxScalar(float &min, float &max);
     void minmaxMagnitude(float &min, float &max);
     int num_elements();
+
 private:
     int index(int x, int y, int z);
     // x, y, z ordering
     QVector<int> sizes;
     QVector<int> strides;
     int numElements;
-    QVector<QVector3D> *data;
+    QSharedPointer<QVector<QVector3D> > data;
 };
 
 #endif // MATRIX_H

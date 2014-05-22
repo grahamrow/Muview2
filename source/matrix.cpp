@@ -5,7 +5,7 @@ matrix::matrix(int sizeX, int sizeY, int sizeZ)
     sizes << sizeX << sizeY << sizeZ;
     numElements = sizeX*sizeY*sizeZ;
     strides << 1 << sizeX << sizeY*sizeX;
-    data = new QVector<QVector3D>(numElements);
+    data = QSharedPointer<QVector<QVector3D> >(new QVector<QVector3D>(numElements));
 }
 
 void matrix::clear()
