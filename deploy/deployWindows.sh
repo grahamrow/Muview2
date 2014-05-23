@@ -8,9 +8,9 @@ TARGET="muview.exe"
 MANIFEST="muview.exe.embed.manifest"
 BUILD_DIR="../build-muview-Desktop_Qt_5_3_0_MSVC2013_OpenGL_64bit-Release/source"
 SOURCE_DIR="/C/Qt/Qt5.3.0/5.3/msvc2013_64_opengl/bin"
-QTDLLS="Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL icuin51 icuuc51 icudt51"
-WINDLL_DIR="/C/Windows/System32"
-WINDLLS="msvcp110 msvcr110"
+QTDLLS="Qt5Core Qt5Gui Qt5Widgets Qt5OpenGL icuin52 icuuc52 icudt52"
+# WINDLL_DIR="/C/Windows/System32"
+# WINDLLS="msvcp110 msvcr110"
 PLATFORMDLLS="qwindows qminimal"
 PLUGIN_DIR="C:\Qt\Qt5.3.0\5.3\msvc2013_64_opengl\plugins"
 FILES="README.md LICENSE"
@@ -30,11 +30,11 @@ do
 	cp "${SOURCE_DIR}/${DLL}.dll" ${NAME}
 done
 
-for DLL in $WINDLLS
-do
-	echo "Copying ${DLL}.dll"
-	cp "${WINDLL_DIR}/${DLL}.dll" ${NAME}
-done
+# for DLL in $WINDLLS
+# do
+# 	echo "Copying ${DLL}.dll"
+# 	cp "${WINDLL_DIR}/${DLL}.dll" ${NAME}
+# done
 
 for DLL in $PLATFORMDLLS
 do
