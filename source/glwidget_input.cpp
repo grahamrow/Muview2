@@ -45,10 +45,10 @@ void GLWidget::mouseMoveEvent(QMouseEvent *e)
 {
     QVector2D diff = QVector2D(e->localPos()) - previousMousePosition;
 
-    if (e->buttons() & Qt::LeftButton) {
+    if (e->buttons() & Qt::RightButton) {
         setXRotation(xRot + 800 * diff.y());
         setYRotation(yRot + 800 * diff.x());
-      } else if (e->buttons() & Qt::RightButton) {
+      } else if (e->buttons() & Qt::LeftButton) {
         setXRotation(xRot + 800 * diff.y());
         setZRotation(zRot + 800 * diff.x());
       } else if (e->buttons() & Qt::MidButton) {
