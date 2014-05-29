@@ -174,7 +174,7 @@ Window::Window(QStringList arguments) :
                     foreach (QString file, files)
                     {
                         filenames << (dirString+file);
-                        displayNames << (dirString+item);
+                        displayNames << (dirString+file);
                     }
 
                 } else {
@@ -184,9 +184,14 @@ Window::Window(QStringList arguments) :
                 }
             }
         }
-        processFilenames();
-        gotoFrontOfCache();
-        adjustAnimSlider(false);  // Refresh the animation bar
+        if (filenames.length() > 0) {
+            processFilenames();
+            gotoFrontOfCache();
+            adjustAnimSlider(false);  // Refresh the animation bar
+        } else {
+            ui->statusbar->showMessage(QString("No omf or ovf filers"));
+            qDebug() << "No omf or ovf filers found.";
+        }
     }
 
     // This seems to solve the strange issue of the QGLwidget not filling its container...
@@ -344,8 +349,6 @@ void Window::updateWatchedFiles() {
     chosenDir.setNameFilters(filters);
     QStringList dirFiles = chosenDir.entryList();
 
-//    OMFHeader tempHeader = OMFHeader();
-
     // compare to existing list of files
     bool changed = false;
     foreach(QString dirFile, dirFiles)
@@ -378,8 +381,12 @@ void Window::updateWatchedFiles() {
     }
 
     if (changed) {
-        clearCaches();
-        processFilenames();
+        clearCaches(); // Blank slate
+        QSharedPointer<OMFReader> omf = readOMF(filenames.last());
+        if (omf.isNull()) {
+            qDebug() << "Error loading file " << filenames.last() << ", skipping...";
+        }
+        omfCache.push_back(omf);
         gotoBackOfCache();
     }
 
