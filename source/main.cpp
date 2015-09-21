@@ -9,7 +9,7 @@ int main( int argc, char* argv[] )
 
     // Parse command line arguments
     QApplication::setApplicationName("Muview");
-    QApplication::setApplicationVersion("2.1.2");
+    QApplication::setApplicationVersion("2.1.3");
     app.setStyle(QStyleFactory::create("GTK+"));
 
     Window w( app.arguments() );

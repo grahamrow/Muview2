@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <QtGui>
 #include <QDir>
@@ -59,7 +58,7 @@ Window::Window(QStringList arguments) :
     // This actually seems to yield a 4.1 context on Mavericks
     glFormat.setVersion(3, 2);
 #else
-    glFormat.setVersion( 3, 1 );
+    glFormat.setVersion( 3, 3 );
 #endif
     glFormat.setProfile( QGLFormat::CoreProfile ); // Requires >=Qt-4.8.0
     glFormat.setSampleBuffers( true );
@@ -515,10 +514,10 @@ void Window::saveImageSequence()
         QString number;
         for (int i=0; i<filenames.length(); i++) {
             number = QString("%1").arg(i, 6, 'd', 0, QChar('0'));
-            viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
             ui->animSlider->setValue(i);
             ui->statusbar->showMessage("Saving file"+dir+"/muviewSequence"+number+".jpg");
             update();
+            viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
         }
 
         disconnect(viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));

@@ -330,7 +330,7 @@
          <item>
           <widget class="QLabel" name="label_12">
            <property name="text">
-            <string>Vector Length (Relative to default)</string>
+            <string>Cone/Vector Length (Relative to default)</string>
            </property>
           </widget>
          </item>
@@ -392,7 +392,7 @@
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Vector Radius (Relative to default)</string>
+            <string>Cone/Vector Radius (Relative to default)</string>
            </property>
           </widget>
          </item>

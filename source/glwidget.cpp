@@ -293,6 +293,7 @@ void GLWidget::setSpriteDimensions(int newslices, float length, float radius, fl
         vectorTipLengthRatio = tipLengthRatio;
         vectorShaftRadiusRatio = shaftRadiusRatio;
         initializeVect(slices, 5.0f*vectorLength, 1.0f*vectorRadius, vectorTipLengthRatio, vectorShaftRadiusRatio);
+        initializeCone(slices, 1.0*vectorRadius, 2.0*vectorLength);
         needsUpdate = true;
     }
 }

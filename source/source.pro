@@ -1,4 +1,4 @@
-QT          += core gui opengl 
+QT          += core gui widgets opengl
 TEMPLATE     = app
 TARGET       = ../muview
 INCLUDEPATH += $$top_srcdir
