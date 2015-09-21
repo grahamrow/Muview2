@@ -5,7 +5,13 @@
 # ./configure -release -opensource -static -opengl desktop -fontconfig -qt-xkbcommon -qt-xcb -qt-libjpeg -qt-libpng
 # make -j10 sub-src
 
-VERSION="2.1.2"
+# Static compilation of Qt5.4.0 source distribution
+# cd into qtbase subdir
+# ./configure -release -opensource -static -opengl desktop -fontconfig -no-dbus \
+#			  -qt-xkbcommon -qt-xcb -qt-libjpeg -qt-libpng -nomake examples -nomake tests
+# make -j10 sub-src
+
+VERSION="2.1.3"
 NAME="Muview${VERSION}-Linux"
 # buildDir="../build-muview-Desktop-Release"
 
@@ -26,10 +32,12 @@ fi
 
 cd source
 make clean
-qmake -r -spec linux-g++
+rm Makefile
+qmake -r -spec linux-g++ -config release
 cd ..
 make clean
-qmake -r -spec linux-g++
+rm Makefile
+qmake -r -spec linux-g++ -config release
 make -j20
 
 FILES="muview README.md LICENSE"
