@@ -10,3 +10,4 @@ muview.pro.user*
 qrc_*
 .qmake.stash
 .DS_Store
+*.dmg
