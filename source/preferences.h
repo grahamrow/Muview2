@@ -25,6 +25,7 @@ public:
     QSize getImageDimensions();
     QString getColorScale();
     QString getColorQuantity();
+    QString getVectorOrigin();
     ~Preferences();
 
 private:

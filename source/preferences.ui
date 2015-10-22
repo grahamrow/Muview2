@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
-    <height>411</height>
+    <width>530</width>
+    <height>457</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -239,6 +239,42 @@
            <property name="lineWidth">
             <number>2</number>
            </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_14">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Vector Origin</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="vectorTail">
+           <property name="text">
+            <string>Tail</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">vectorOriginGroup</string>
+           </attribute>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="vectorCenter">
+           <property name="text">
+            <string>Center</string>
+           </property>
+           <attribute name="buttonGroup">
+            <string notr="true">vectorOriginGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -934,5 +970,6 @@
  <buttongroups>
   <buttongroup name="colorScaleGroup"/>
   <buttongroup name="coloredQuantityGroup"/>
+  <buttongroup name="vectorOriginGroup"/>
  </buttongroups>
 </ui>

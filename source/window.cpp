@@ -252,7 +252,7 @@ void Window::keyPressEvent(QKeyEvent *e)
 void Window::updatePrefs() {
     viewport->setBackgroundColor(prefs->getBackgroundColor());
     viewport->setSpriteDimensions(prefs->getSpriteResolution(), prefs->getVectorLength(), prefs->getVectorRadius(),
-                                  prefs->getVectorTipToTail(), prefs->getVectorInnerToOuter());
+                                  prefs->getVectorTipToTail(), prefs->getVectorInnerToOuter(), prefs->getVectorOrigin());
     viewport->setBrightness(prefs->getBrightness());
     if (prefs->getImageDimensions() == QSize(-1,-1)) {
         viewport->setFixedSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);

@@ -288,16 +288,18 @@ void GLWidget::setBackgroundColor(QColor color) {
     needsUpdate = true;
 }
 
-void GLWidget::setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio)
+void GLWidget::setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio, QString origin)
 {
     if ( (slices != newslices) || (vectorLength != length) || (vectorRadius != radius) ||
-         (vectorTipLengthRatio != tipLengthRatio) || (vectorShaftRadiusRatio != shaftRadiusRatio) )
+         (vectorTipLengthRatio != tipLengthRatio) || (vectorShaftRadiusRatio != shaftRadiusRatio) ||
+         (vectorOrigin != origin) )
     {
         slices = newslices;
         vectorLength = length;
         vectorRadius = radius;
         vectorTipLengthRatio = tipLengthRatio;
         vectorShaftRadiusRatio = shaftRadiusRatio;
+        vectorOrigin = origin;
         initializeVect(slices, 5.0f*vectorLength, 1.0f*vectorRadius, vectorTipLengthRatio, vectorShaftRadiusRatio);
         initializeCone(slices, 1.0*vectorRadius, 2.0*vectorLength);
         needsUpdate = true;

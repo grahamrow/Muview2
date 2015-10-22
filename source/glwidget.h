@@ -35,7 +35,7 @@ public:
     // View Preferences
     virtual void toggleDisplay(int type);
     virtual void setBackgroundColor(QColor color);
-    virtual void setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio);
+    virtual void setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio, QString origin);
     virtual void setBrightness(float bright);
     void setColorScale(QString value);
     void setColoredQuantity(QString value);
@@ -132,6 +132,7 @@ private:
     int zSliceLow, zSliceHigh;
     QString colorScale;
     QString coloredQuantity;
+    QString vectorOrigin;
 
     // Mouse control
     QVector2D previousMousePosition;

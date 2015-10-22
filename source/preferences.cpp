@@ -86,3 +86,8 @@ QString Preferences::getColorQuantity()
 {
     return ui->coloredQuantityGroup->checkedButton()->text();
 }
+
+QString Preferences::getVectorOrigin()
+{
+    return ui->vectorOriginGroup->checkedButton()->text();
+}
