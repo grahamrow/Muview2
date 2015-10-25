@@ -176,9 +176,15 @@ void GLWidget::paintGL()
 
                         lumVal = 0.5;
                         if (coloredQuantity == ("In-Plane Angle")) {
-                            hueVal = (phi+PI)/(2.0f*PI);
+                            hueVal = phi/(2.0f*PI);
+                            if (hueVal < 0.0f) {
+                                hueVal += 1.0f;
+                            }
                         } else if (coloredQuantity ==  ("Full Orientation")) {
-                            hueVal = (phi+PI)/(2.0f*PI);
+                            hueVal = phi/(2.0f*PI);
+                            if (hueVal < 0.0f) {
+                                hueVal += 1.0f;
+                            }
                             if (hueVal < 0.0f) hueVal = 0.0f;
                             if ((hueVal > 1.0f) || (hueVal < 0.0f))
                             {
