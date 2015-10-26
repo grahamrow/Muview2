@@ -10,9 +10,6 @@
 #include "matrix.h"
 #include "OMFImport.h"
 
-//typedef void (*PglGenVertexArrays) (GLsizei n,  GLuint *arrays);
-//typedef void (*PglBindVertexArray) (GLuint array);
-
 struct sprite
 {
     QOpenGLBuffer vbo;
@@ -40,6 +37,7 @@ public:
     void setColorScale(QString value);
     void setSpriteScale(QString value);
     void setColoredQuantity(QString value);
+    void setCustomColorScale(QList<QColor> colors);
 
 public slots:
     virtual void update();
@@ -131,10 +129,14 @@ private:
     int xSliceLow, xSliceHigh;
     int ySliceLow, ySliceHigh;
     int zSliceLow, zSliceHigh;
+
+    // Coloring
     QString colorScale;
     QString coloredQuantity;
     QString vectorOrigin;
     QString spriteScale;
+    QColor customSpriteColor(float val); // val goes from 0 to 1.0
+    QList<QColor> customColors;
 
     // Mouse control
     QVector2D previousMousePosition;

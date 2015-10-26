@@ -35,6 +35,39 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     timer->start(16);
 }
 
+QColor GLWidget::customSpriteColor(float value) {
+    // Number of colors in the list
+    int numColors = customColors.length();
+
+    // Part of the mapping that value takes given this number of colors
+    float interval = 1.0f / (static_cast<float>(numColors) - 1.0f);
+
+    // Find which colors in the list we're in between
+    int firstColorIndex = static_cast<int>(0.999f*value/interval);
+    if (firstColorIndex > (numColors-2)) {
+        firstColorIndex = numColors-2;
+    }
+    QColor firstColor = customColors.at(firstColorIndex);
+    QColor secondColor = customColors.at(firstColorIndex + 1);
+
+    // Rescale the value to within 0:1
+    value = (value - firstColorIndex*interval)/interval;
+
+    // Linear interpolation between the chosen colors
+    qreal r = firstColor.redF() + value * (secondColor.redF() - firstColor.redF());
+    qreal g = firstColor.greenF() + value * (secondColor.greenF() - firstColor.greenF());
+    qreal b = firstColor.blueF() + value * (secondColor.blueF() - firstColor.blueF());
+
+    return QColor::fromRgbF(r,g,b);
+    
+}
+
+void GLWidget::setCustomColorScale(QList<QColor> colors)
+{
+    // Set the private color variables to the inputs
+    customColors = colors;
+}
+
 void GLWidget::updateData(QSharedPointer<OMFReader> data)
 {
     if (data.isNull()) {
@@ -215,6 +248,8 @@ void GLWidget::paintGL()
                             } else {
                                 spriteColor = QColor::fromHsvF(0.5,(hueVal-0.5)*2.0,1.0);
                             }
+                        } else if (colorScale ==  ("Custom")) {
+                            spriteColor = customSpriteColor(hueVal);
                         } else {
                             spriteColor = QColor::fromRgbF(0.0,0.0,0.0);
                         }

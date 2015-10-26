@@ -27,11 +27,11 @@ public:
     QString getColorQuantity();
     QString getVectorOrigin();
     QString getSpriteScale();
+    QList<QColor> getCustomColorScale();
     ~Preferences();
 
 private:
     Ui::Preferences *ui;
-//    QColorDialog *colorPicker;
     QColor backgroundColor;
     QColor customColor1;
     QColor customColor2;
