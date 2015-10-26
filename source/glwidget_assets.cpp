@@ -251,7 +251,16 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
     vect.vao->bind();
 //    qDebug() << "Slices" << slices << "Height" << height << "Radius" << radius << "Tip Fraction" << fractionTip << "Inner Fraction" << fractionInner;
     float normScale = 1.0/sqrt(height*height + radius*radius);
-    float offset = height*(1.0f-fractionTip);
+    float headOffset, tailOffset;
+    if (vectorOrigin == "Tail") {
+        tailOffset = 0.0f;
+        headOffset = height;
+    } else { // Center origin
+        tailOffset = -height/2.0f;
+        headOffset =  height/2.0f;
+    }
+    float centerOffset = tailOffset + height*(1.0f-fractionTip);
+
     float tipHeight = height*fractionTip;
 
     std::vector<GLfloat> vertices;
@@ -260,7 +269,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( 0.0f);
         vertices.push_back( 0.0f);
-        vertices.push_back( height);
+        vertices.push_back( headOffset);
         // Normal
         vertices.push_back( normScale*tipHeight*cos(2.0*PI*(i+0.5)/slices));
         vertices.push_back(-normScale*tipHeight*sin(2.0*PI*(i+0.5)/slices));
@@ -268,7 +277,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*cos(2.0*PI*(i+1)/slices));
         vertices.push_back(-radius*sin(2.0*PI*(i+1)/slices));
-        vertices.push_back( offset);
+        vertices.push_back( centerOffset);
         // Normal
         vertices.push_back( normScale*tipHeight*cos(2.0*PI*(i+0.5)/slices));
         vertices.push_back(-normScale*tipHeight*sin(2.0*PI*(i+0.5)/slices));
@@ -276,7 +285,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*cos(2.0*PI*i/slices));
         vertices.push_back(-radius*sin(2.0*PI*i/slices));
-        vertices.push_back( offset);
+        vertices.push_back( centerOffset);
         // Normal
         vertices.push_back( normScale*tipHeight*cos(2.0*PI*(i+0.5)/slices));
         vertices.push_back(-normScale*tipHeight*sin(2.0*PI*(i+0.5)/slices));
@@ -287,7 +296,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -295,7 +304,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*cos(2.0*PI*(i-1)/slices));
         vertices.push_back(-radius*sin(2.0*PI*(i-1)/slices));
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -303,7 +312,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*cos(2.0*PI*(i)/slices));
         vertices.push_back(-radius*sin(2.0*PI*(i)/slices));
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -314,7 +323,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -322,7 +331,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i-1)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i-1)/slices));
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -330,7 +339,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i)/slices));
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back(0.0f);
         vertices.push_back(0.0f);
@@ -341,7 +350,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i)/slices));
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
@@ -349,7 +358,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i-1)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i-1)/slices));
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
@@ -357,7 +366,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i)/slices));
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
@@ -367,7 +376,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i-1)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i-1)/slices));
-        vertices.push_back(0.0);
+        vertices.push_back(tailOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
@@ -375,7 +384,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i-1)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i-1)/slices));
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
@@ -383,7 +392,7 @@ bool GLWidget::initializeVect(int slices, float height, float radius, float frac
         // Vertex
         vertices.push_back( radius*fractionInner*cos(2.0*PI*(i)/slices));
         vertices.push_back(-radius*fractionInner*sin(2.0*PI*(i)/slices));
-        vertices.push_back(offset);
+        vertices.push_back(centerOffset);
         // Normal
         vertices.push_back( cos(2.0*PI*(i-0.5)/slices));
         vertices.push_back(-sin(2.0*PI*(i-0.5)/slices));
