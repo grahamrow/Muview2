@@ -33,8 +33,14 @@ private:
     Ui::Preferences *ui;
 //    QColorDialog *colorPicker;
     QColor backgroundColor;
+    QColor customColor1;
+    QColor customColor2;
+    QColor customColor3;
 private slots:
-    void setcolor();
+    void setColor();
+    void setCustomColor1();
+    void setCustomColor2();
+    void setCustomColor3();
 };
 
 #endif // PREFERENCES_H

@@ -10,10 +10,13 @@ Preferences::Preferences(QWidget *parent) :
     ui->setupUi(this);
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
     ui->colorBox->setPalette(QPalette(backgroundColor));
-    connect(ui->setBackgroundColor, SIGNAL(clicked()), this, SLOT(setcolor()));
+    connect(ui->setBackgroundColor, SIGNAL(clicked()), this, SLOT(setColor()));
+    connect(ui->setCustomColor1, SIGNAL(clicked()), this, SLOT(setCustomColor1()));
+    connect(ui->setCustomColor2, SIGNAL(clicked()), this, SLOT(setCustomColor2()));
+    connect(ui->setCustomColor3, SIGNAL(clicked()), this, SLOT(setCustomColor3()));
 }
 
-void Preferences::setcolor()
+void Preferences::setColor()
 {
     QColor color = QColorDialog::getColor(backgroundColor, this);
     if (color.isValid())
@@ -21,6 +24,39 @@ void Preferences::setcolor()
         ui->colorBox->setPalette(QPalette(color));
         ui->colorBox->setAutoFillBackground(true);
         backgroundColor = color;
+    }
+}
+
+void Preferences::setCustomColor1()
+{
+    QColor color = QColorDialog::getColor(customColor1, this);
+    if (color.isValid())
+    {
+        ui->customColorBox1->setPalette(QPalette(color));
+        ui->customColorBox1->setAutoFillBackground(true);
+        customColor1 = color;
+    }
+}
+
+void Preferences::setCustomColor2()
+{
+    QColor color = QColorDialog::getColor(customColor2, this);
+    if (color.isValid())
+    {
+        ui->customColorBox2->setPalette(QPalette(color));
+        ui->customColorBox2->setAutoFillBackground(true);
+        customColor2 = color;
+    }
+}
+
+void Preferences::setCustomColor3()
+{
+    QColor color = QColorDialog::getColor(customColor3, this);
+    if (color.isValid())
+    {
+        ui->customColorBox3->setPalette(QPalette(color));
+        ui->customColorBox3->setAutoFillBackground(true);
+        customColor3 = color;
     }
 }
 
