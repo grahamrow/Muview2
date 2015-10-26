@@ -11,3 +11,4 @@ qrc_*
 .qmake.stash
 .DS_Store
 *.dmg
+*.app
