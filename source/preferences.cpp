@@ -9,8 +9,17 @@ Preferences::Preferences(QWidget *parent) :
     ui(new Ui::Preferences)
 {
     ui->setupUi(this);
+
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
+    customColor1 = QColor::fromRgb(240,115,20);
+    customColor2 = QColor::fromRgb(175,175,175);
+    customColor3 = QColor::fromRgb(55,195,225);
+
     ui->colorBox->setPalette(QPalette(backgroundColor));
+    ui->customColorBox1->setPalette(QPalette(customColor1));
+    ui->customColorBox2->setPalette(QPalette(customColor2));
+    ui->customColorBox3->setPalette(QPalette(customColor3));
+
     connect(ui->setBackgroundColor, SIGNAL(clicked()), this, SLOT(setColor()));
     connect(ui->setCustomColor1, SIGNAL(clicked()), this, SLOT(setCustomColor1()));
     connect(ui->setCustomColor2, SIGNAL(clicked()), this, SLOT(setCustomColor2()));
