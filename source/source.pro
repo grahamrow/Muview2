@@ -52,6 +52,7 @@ linux {
 macx {
     message(Building in Mac OSX Environment)
     message("    will install muview (app) to /Applications")
+    QMAKE_MAC_SDK = macosx10.11
     target.path = /Applications
 
     VERSION   = 2.1.2
