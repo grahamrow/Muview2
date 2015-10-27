@@ -132,6 +132,7 @@ QString Preferences::getVectorOrigin()
 QString Preferences::getSpriteScale()
 {
     return ui->spriteScaleGroup->checkedButton()->text();
+}
 
 QList<QColor> Preferences::getCustomColorScale()
 {
