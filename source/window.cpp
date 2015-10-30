@@ -512,12 +512,15 @@ void Window::saveImageSequence()
         lastSavedLocation = QDir(dir);
         QImage screen;
         QString number;
+        QString format = (prefs->getFormat()).toLower();
+        QString outpath;
         for (int i=0; i<filenames.length(); i++) {
             number = QString("%1").arg(i, 6, 'd', 0, QChar('0'));
             ui->animSlider->setValue(i);
-            ui->statusbar->showMessage("Saving file"+dir+"/muviewSequence"+number+".jpg");
+            outpath = dir+"/muviewSequence"+number+"."+format;
+            ui->statusbar->showMessage("Saving file "+outpath);
             update();
-            viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
+            viewport->renderFrame(outpath);
         }
 
         disconnect(viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
