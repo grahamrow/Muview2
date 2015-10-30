@@ -481,7 +481,7 @@ void Window::saveImageFile(QString name)
     if (name != "") {
         lastSavedLocation = QDir(name);
         QImage screen = viewport->grabFrameBuffer();
-        screen.save(name, (prefs->getFormat()).toStdString().c_str(), 90);
+        screen.save(name, 0, 90); //format was (prefs->getFormat()).toStdString().c_str()
     }
 }
 
@@ -493,8 +493,14 @@ void Window::copyImage()
 
 void Window::saveImage()
 {
-    QString fileName;
-    fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), lastSavedLocation.path());
+    QString fileName, filter;
+    QString format = prefs->getFormat();
+    if (format == "JPG") {
+        filter = tr("JPEG Images (*.jpg)");
+    } else {
+        filter = tr("PNG Images (*.png)");
+    }
+    fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), lastSavedLocation.path(), tr("JPEG Images (*.jpg);;PNG Images (*.png)"), &filter);
     saveImageFile(fileName);
 }
 
