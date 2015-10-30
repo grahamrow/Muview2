@@ -91,3 +91,8 @@ QString Preferences::getVectorOrigin()
 {
     return ui->vectorOriginGroup->checkedButton()->text();
 }
+
+QString Preferences::getSpriteScale()
+{
+    return ui->spriteScaleGroup->checkedButton()->text();
+}

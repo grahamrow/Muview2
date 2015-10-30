@@ -228,7 +228,8 @@ void GLWidget::paintGL()
                                         znodes > subsampling ? (float)subsampling : 1.0f);
                         } else {
                             // Rotate the cones or vectors, but don't mess with their aspect ratios...
-                            model.scale(1.0f + (float)subsampling*0.4f);
+                            float scale = (spriteScale == "Proportional") ? mag/maxmag : 1.0f;
+                            model.scale((1.0f + (float)subsampling*0.4f)*scale);
                             model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
                         }
@@ -320,4 +321,9 @@ void GLWidget::setColoredQuantity(QString value)
 void GLWidget::setColorScale(QString value)
 {
     colorScale = value;
+}
+
+void GLWidget::setSpriteScale(QString value)
+{
+    spriteScale = value;
 }

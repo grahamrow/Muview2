@@ -38,6 +38,7 @@ public:
     virtual void setSpriteDimensions(int newslices, float length, float radius, float tipLengthRatio, float shaftRadiusRatio, QString origin);
     virtual void setBrightness(float bright);
     void setColorScale(QString value);
+    void setSpriteScale(QString value);
     void setColoredQuantity(QString value);
 
 public slots:
@@ -133,6 +134,7 @@ private:
     QString colorScale;
     QString coloredQuantity;
     QString vectorOrigin;
+    QString spriteScale;
 
     // Mouse control
     QVector2D previousMousePosition;

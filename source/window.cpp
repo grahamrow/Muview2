@@ -262,6 +262,7 @@ void Window::updatePrefs() {
     }
     viewport->setColoredQuantity(prefs->getColorQuantity());
     viewport->setColorScale(prefs->getColorScale());
+    viewport->setSpriteScale(prefs->getSpriteScale());
 }
 
 void Window::openSettings()
