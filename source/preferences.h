@@ -26,6 +26,7 @@ public:
     QString getColorScale();
     QString getColorQuantity();
     QString getVectorOrigin();
+    QString getSpriteScale();
     ~Preferences();
 
 private:
