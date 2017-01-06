@@ -20,15 +20,15 @@ echo "using macdeployqt from $(which macdeployqt)"
 
 macdeployqt $buildDir/$applicationName -verbose=3
 
+echo "Creating disk image"
 hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title
 
-device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | \
-         egrep '^/dev/' | sed 1q | awk '{print $1}')
-
+echo "Mounting disk image"
+hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" -mountpoint mnt
 sleep 1
 
-mkdir "/Volumes/${title}/.background"
-cp deploy/background-dmg.png "/Volumes/${title}/.background"
+mkdir "mnt/${title}/.background"
+cp deploy/background-dmg.png "mnt/${title}/.background"
 
 echo '
    tell application "Finder"
@@ -50,9 +50,9 @@ echo '
    end tell
 ' | osascript
 
-chmod -Rf go-w /Volumes/"${title}"
+chmod -Rf go-w mnt/"${title}"
 sync
 sync
-hdiutil detach ${device}
+hdiutil detach mnt
 hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f pack.temp.dmg 
