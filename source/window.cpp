@@ -482,7 +482,7 @@ void Window::saveImageFile(QString name)
     if (name != "") {
         lastSavedLocation = QDir(name);
         QImage screen = viewport->grabFrameBuffer();
-        screen.save(name, (prefs->getFormat()).toStdString().c_str(), 90);
+        screen.save(name, 0, 90); //format was (prefs->getFormat()).toStdString().c_str()
     }
 }
 
@@ -494,8 +494,14 @@ void Window::copyImage()
 
 void Window::saveImage()
 {
-    QString fileName;
-    fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), lastSavedLocation.path());
+    QString fileName, filter;
+    QString format = prefs->getFormat();
+    if (format == "JPG") {
+        filter = tr("JPEG Images (*.jpg)");
+    } else {
+        filter = tr("PNG Images (*.png)");
+    }
+    fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), lastSavedLocation.path(), tr("JPEG Images (*.jpg);;PNG Images (*.png)"), &filter);
     saveImageFile(fileName);
 }
 
@@ -513,12 +519,15 @@ void Window::saveImageSequence()
         lastSavedLocation = QDir(dir);
         QImage screen;
         QString number;
+        QString format = (prefs->getFormat()).toLower();
+        QString outpath;
         for (int i=0; i<filenames.length(); i++) {
             number = QString("%1").arg(i, 6, 'd', 0, QChar('0'));
             ui->animSlider->setValue(i);
-            ui->statusbar->showMessage("Saving file"+dir+"/muviewSequence"+number+".jpg");
+            outpath = dir+"/muviewSequence"+number+"."+format;
+            ui->statusbar->showMessage("Saving file "+outpath);
             update();
-            viewport->renderFrame(dir+"/muviewSequence"+number+".jpg");
+            viewport->renderFrame(outpath);
         }
 
         disconnect(viewport, SIGNAL(doneRenderingFrame(QString)), this, SLOT(saveImageFile(QString)));
