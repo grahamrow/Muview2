@@ -117,8 +117,8 @@ bool OMFReader::parseCommentLine(QString &key, QString &value)
 {
     if (line.at(0) == '#') {
         int sep = line.indexOf(':');
-        key     = line.mid(2, sep-2).toLower();
-        value   = line.mid(sep+2).toLower();
+        key   = line.mid(2,sep-2).toLower().simplified();
+        value = line.mid(sep+1).toLower().simplified();
         return true;
     } else {
         return false;
