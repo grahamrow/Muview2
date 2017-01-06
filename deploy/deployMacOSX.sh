@@ -1,10 +1,9 @@
 #!/bin/bash
 
-#buildDir="../build-muview-Desktop_Qt_5_2_1_clang_64bit-Release"
 buildDir='./'
 backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
-finalDMGName="Muview2.1.2-MacOSX.dmg"
+finalDMGName="Muview.dmg"
 title="Muview"
 
 # Kill old product
@@ -26,7 +25,7 @@ qmake -config release
 cd ..
 make clean
 qmake -config release
-make -j10
+make -j4
 
 echo "Creating Bundle at $PWD/Muview.app"
 echo "using qmake from $(which qmake)"
@@ -39,10 +38,12 @@ macdeployqt $buildDir/$applicationName -verbose=3
 
 if [ -e pack.temp.dmg ]
 	then
+  echo "Removing pack.temp.dmg"
 	rm pack.temp.dmg
 fi
 if [ -e $finalDMGName ]
 	then
+  echo "Removing $finalDMGName"
 	rm $finalDMGName
 fi
 
