@@ -7,10 +7,6 @@ finalDMGName="Muview.dmg"
 title="Muview"
 
 # This produces Muview 
-cd source
-qmake -config release
-cd ..
-make clean
 qmake -config release
 make -j4
 
@@ -27,12 +23,12 @@ echo "Mounting disk image"
 hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" -mountpoint mnt
 sleep 1
 
-mkdir "mnt/${title}/.background"
-cp deploy/background-dmg.png "mnt/${title}/.background"
+mkdir "mnt/.background"
+cp deploy/background-dmg.png "mnt/.background"
 
 echo '
    tell application "Finder"
-     tell disk "'${title}'"
+     tell disk "mnt"
            open
            set current view of container window to icon view
            set toolbar visible of container window to false
@@ -50,9 +46,7 @@ echo '
    end tell
 ' | osascript
 
-chmod -Rf go-w mnt/"${title}"
+
 sync
-sync
-hdiutil detach mnt
 hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f pack.temp.dmg 
