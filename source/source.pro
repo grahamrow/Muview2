@@ -66,7 +66,7 @@ win32 {
     message(Building in Windows Environment)
     message("    will install muview (binary) to C:\\Program Files")
     target.path = "C:\\Program Files"
-
+    LIBS     += opengl32.lib
     INSTALLS += target
 }
 
@@ -120,4 +120,3 @@ OTHER_FILES +=  \
 
 RESOURCES += \
     resources.qrc
-
