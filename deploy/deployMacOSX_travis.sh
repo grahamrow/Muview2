@@ -6,6 +6,9 @@ applicationName="Muview.app"
 finalDMGName="Muview.dmg"
 title="Muview"
 
+# qmake version
+qmake_vers=$(qmake -v | tail -n1 | sed -n 's|.*\(/usr/.*\)/lib|\1|p')
+
 # This produces Muview 
 qmake -config release
 make -j4
@@ -14,7 +17,10 @@ echo "Creating Bundle at $PWD/Muview.app"
 echo "using qmake from $(which qmake)"
 echo "using macdeployqt from $(which macdeployqt)"
 
-macdeployqt $buildDir/$applicationName -verbose=3
+# Macdeployqt has known problems for brewed qt
+macdeployqt $buildDir/$applicationName -verbose=3 -always-overwrite
+curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
+python /tmp/macdeployqtfix.py Muview.app/Contents/MacOS/Muview $qmake_vers
 
 echo "Creating disk image"
 hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title

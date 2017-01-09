@@ -68,10 +68,13 @@ artifacts:
 #---------------------------------#
 
 deploy:
-  - provider: GitHub
+    provider: GitHub
     auth_token:
       secure: WaoteXAP3GvNQh6rtIpTQG9oJd0QP4nrzQ+CtQxGH/u6aypK+YiaPRxoUlWDfjW3J7xjgMVRmZTV3DgxsSjV+1YgJav6XeS+ek/ZbKBqW/gqjmeSJflDt/fBsqXXaiSm98r1xVOsP1E0C4zq28ps8laSBSKL8iOKRgJ2i6Zc6hG5z3x8Y6kMBHWpTa68O8oBVPBO0tRKazML4XfoZ9VZswkFlmE4lEJtnuJagfUdFERzHCNmSazKF3HJVxLyDxxsBrjqcjIjHrJl3ySXzvXlTw/gRbRq/5rt55yJ2zOE4ToyIBhilWwWmIdreuiY4QbKHNDlbnHwQyzuewtxeH/U1lBzb0QhMMamhHweX1LxcQM0xopWGVcIHxae5BkInpQqKsrjVIrPFEVHGrgZJkofdt6fHcohLusyo5/PY3E8S6tExRd9DFuZpbuQjCLy+RWTsWhUVINh4geZrwFnaH0yqqo+8mqfgJwPQ07vN77HdLZ01bcvrpMvgNjtyt6dggAIQeQbc3LmBBFdENArTxTrIPQsFePZ1+IMaXW0GIPPMRthity9/yeMGUro8lzIYvSMWhtFTDDJs0Y7LyKiCXQ0AibDOTrShQRMsqz4+/lrUy9JU8zJBV81RGplu7OeMcVuMl8tphy8lVq4gUfW3k9VsY8cLjKTUesDaFqCgOcka5I=
-    artifact: Muview.7z           # upload all NuGet packages to release assets
+    artifact: Muview.7z
+    description: 'Testing release 2.1.3'
+    draft: true
+    prerelease: false
     on:
       branch: master                # release from master branch only
       appveyor_repo_tag: true       # deploy on tag push only
