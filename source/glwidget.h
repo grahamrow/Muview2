@@ -49,9 +49,11 @@ public slots:
     void setXSliceLow(int low);
     void setYSliceLow(int low);
     void setZSliceLow(int low);
+    void setThresholdLow(int low);
     void setXSliceHigh(int high);
     void setYSliceHigh(int high);
     void setZSliceHigh(int high);
+    void setThresholdHigh(int high);
     void setXCom(float val);
     void setYCom(float val);
     void setZCom(float val);
@@ -129,6 +131,7 @@ private:
     int xSliceLow, xSliceHigh;
     int ySliceLow, ySliceHigh;
     int zSliceLow, zSliceHigh;
+    int thresholdLow, thresholdHigh;
 
     // Coloring
     QString colorScale;

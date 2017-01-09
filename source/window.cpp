@@ -91,6 +91,7 @@ Window::Window(QStringList arguments) :
     initSpanSlider(ui->xSpanSlider);
     initSpanSlider(ui->ySpanSlider);
     initSpanSlider(ui->zSpanSlider);
+    initSpanSlider(ui->thresholdSlider);
 
     // Rotation
     connect(ui->xSlider,  SIGNAL(valueChanged(int)),     viewport, SLOT(setXRotation(int)));
@@ -107,6 +108,8 @@ Window::Window(QStringList arguments) :
     connect(ui->ySpanSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setYSliceHigh(int)));
     connect(ui->zSpanSlider, SIGNAL(lowerValueChanged(int)), viewport, SLOT(setZSliceLow(int)));
     connect(ui->zSpanSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setZSliceHigh(int)));
+    connect(ui->thresholdSlider, SIGNAL(lowerValueChanged(int)), viewport, SLOT(setThresholdLow(int)));
+    connect(ui->thresholdSlider, SIGNAL(upperValueChanged(int)), viewport, SLOT(setThresholdHigh(int)));
 
     // Animation
     ui->animSlider->setEnabled(false);

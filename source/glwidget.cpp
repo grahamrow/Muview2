@@ -21,9 +21,9 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     vectorTipLengthRatio = 0.4f;
     vectorShaftRadiusRatio = 0.4f;
 
-    // Slicing
-    xSliceLow=ySliceLow=zSliceLow=0;
-    xSliceHigh=ySliceHigh=zSliceHigh=16*100;
+    // Slicing and Thresholding
+    xSliceLow=ySliceLow=zSliceLow=thresholdLow=0;
+    xSliceHigh=ySliceHigh=zSliceHigh=thresholdHigh=16*100;
 
     // Load shader programs, lights, models, etc.
     context()->makeCurrent();
@@ -187,13 +187,17 @@ void GLWidget::paintGL()
                         mag = datum.length();
                     }
 
-                    if ( ((valuedim == 1 ) || ((valuedim == 3) && mag != 0.0)) &&
+                    float relmag = mag/maxmag;
+
+                    if ( ((valuedim == 1 ) || (valuedim == 3)) &&
                          i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
                          i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
                          j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
                          j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
                          k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
-                         k <= (zmax-zmin)*(float)zSliceHigh/1600.0)
+                         k <= (zmax-zmin)*(float)zSliceHigh/1600.0 &&
+                         relmag >= thresholdLow/1600.0 && 
+                         relmag <= thresholdHigh/1600.0)
                     {
 
                         theta = acos(datum.z()/mag);
@@ -263,7 +267,7 @@ void GLWidget::paintGL()
                                         znodes > subsampling ? (float)subsampling : 1.0f);
                         } else {
                             // Rotate the cones or vectors, but don't mess with their aspect ratios...
-                            float scale = (spriteScale == "Proportional") ? mag/maxmag : 1.0f;
+                            float scale = (spriteScale == "Proportional") ? relmag : 1.0f;
                             model.scale((1.0f + (float)subsampling*0.4f)*scale);
                             model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
                             model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);

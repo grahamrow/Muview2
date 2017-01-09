@@ -117,6 +117,22 @@ void GLWidget::setZSliceHigh(int high)
     }
 }
 
+void GLWidget::setThresholdLow(int low)
+{
+    if (thresholdLow != low) {
+        thresholdLow = low;
+        needsUpdate = true;
+    }
+}
+
+void GLWidget::setThresholdHigh(int high)
+{
+    if (thresholdLow != high) {
+        thresholdHigh = high;
+        needsUpdate = true;
+    }
+}
+
 static void qNormalizeAngle(int &angle)
 {
   while (angle < 0)
