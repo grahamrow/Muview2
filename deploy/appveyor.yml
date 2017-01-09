@@ -55,7 +55,6 @@ build_script:
 # scripts to run after build
 after_build:
   - 7z a Muview.7z Muview
-  - rmdir Muview
 
 #---------------------------------#
 #      artifacts configuration    #
