@@ -2,21 +2,47 @@ sudo: false
 language: cpp
 os:
 - osx
+- linux
 compiler:
 - clang
 before_install:
-- brew update
-- brew ls | grep -wq qt5 || brew install qt5
-- echo "Adding brewed Qt5 to path"
-- export PATH=/usr/local/opt/qt5/bin:$PATH
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+  brew update
+  brew ls | grep -wq qt5 || brew install qt5
+  echo "Adding brewed Qt5 to path"
+  export PATH=/usr/local/opt/qt5/bin:$PATH
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  add-apt-repository --yes ppa:canonical-qt5-edgers/ubuntu1204-qt5
+  apt-get -qq update
+  apt-get install -qq qt5-qmake qtbase5-dev libgl1-mesa-dev
+  qmake -v
+  git clone https://github.com/probonopd/linuxdeployqt.git
+  cd linuxdeployqt
+  qmake linuxdeployqt.pro
+  make
+  wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2
+  tar xf patchelf-0.9.tar.bz2
+  ( cd patchelf-0.9/ && ./configure  && make && sudo make install )
+  wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+  chmod a+x appimagetool
+  sudo mv appimagetool /usr/local/bin/
+  fi
 script:
-- echo "Preparing to deploy Muview2"
-- bash deploy/deployMacOSX_travis.sh
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]
+  echo "Preparing to deploy Muview2"
+  bash deploy/deployMacOSX_travis.sh
+  fi
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]
+  bash deploy/deployLinux_travis.sh
+  fi
 deploy:
   provider: releases
   api_key:
     secure: WaoteXAP3GvNQh6rtIpTQG9oJd0QP4nrzQ+CtQxGH/u6aypK+YiaPRxoUlWDfjW3J7xjgMVRmZTV3DgxsSjV+1YgJav6XeS+ek/ZbKBqW/gqjmeSJflDt/fBsqXXaiSm98r1xVOsP1E0C4zq28ps8laSBSKL8iOKRgJ2i6Zc6hG5z3x8Y6kMBHWpTa68O8oBVPBO0tRKazML4XfoZ9VZswkFlmE4lEJtnuJagfUdFERzHCNmSazKF3HJVxLyDxxsBrjqcjIjHrJl3ySXzvXlTw/gRbRq/5rt55yJ2zOE4ToyIBhilWwWmIdreuiY4QbKHNDlbnHwQyzuewtxeH/U1lBzb0QhMMamhHweX1LxcQM0xopWGVcIHxae5BkInpQqKsrjVIrPFEVHGrgZJkofdt6fHcohLusyo5/PY3E8S6tExRd9DFuZpbuQjCLy+RWTsWhUVINh4geZrwFnaH0yqqo+8mqfgJwPQ07vN77HdLZ01bcvrpMvgNjtyt6dggAIQeQbc3LmBBFdENArTxTrIPQsFePZ1+IMaXW0GIPPMRthity9/yeMGUro8lzIYvSMWhtFTDDJs0Y7LyKiCXQ0AibDOTrShQRMsqz4+/lrUy9JU8zJBV81RGplu7OeMcVuMl8tphy8lVq4gUfW3k9VsY8cLjKTUesDaFqCgOcka5I=
-  file: Muview.dmg
+  file:
+    - Muview.dmg
+    - Muview.tar.gz
   skip_cleanup: true
   on:
     repo: grahamrow/Muview2
