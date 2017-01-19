@@ -9,8 +9,6 @@ addons:
   apt:
     sources:
     - sourceline: 'ppa:canonical-qt5-edgers/ubuntu1204-qt5' 
-addons:
-  apt:
     packages:
     - qt5-qmake
     - qtbase5-dev
@@ -32,7 +30,7 @@ before_install:
     ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
     ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);
     export PATH=$PATH:$HOME/patchelf/bin;
-    ls $HOME/patchelf/bin
+    ls $HOME/patchelf/bin;
     
     wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
     chmod a+x appimagetool;
