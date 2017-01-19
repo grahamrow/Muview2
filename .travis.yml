@@ -5,28 +5,41 @@ os:
 - linux
 compiler:
 - clang
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:canonical-qt5-edgers/ubuntu1204-qt5' 
+addons:
+  apt:
+    packages:
+    - qt5-qmake
+    - qtbase5-dev
+    - libgl1-mesa-dev
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update;
     brew ls | grep -wq qt5 || brew install qt5;
     echo "Adding brewed Qt5 to path";
     export PATH=/usr/local/opt/qt5/bin:$PATH;
+    qmake -v;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    add-apt-repository --yes ppa:canonical-qt5-edgers/ubuntu1204-qt5;
-    apt-get -qq update;
-    apt-get install -qq qt5-qmake qtbase5-dev libgl1-mesa-dev;
     qmake -v;
+
     git clone https://github.com/probonopd/linuxdeployqt.git;
-    cd linuxdeployqt;
-    qmake linuxdeployqt.pro;
-    make;
-    wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2;
-    tar xf patchelf-0.9.tar.bz2;
-    ( cd patchelf-0.9/ && ./configure  && make && make install );
+    (cd linuxdeployqt && qmake linuxdeployqt.pro && make && cd ..);
+    
+    ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
+    ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);
+    export PATH=$PATH:$HOME/patchelf/bin;
+    ls $HOME/patchelf/bin
+    
     wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
     chmod a+x appimagetool;
-    mv appimagetool /usr/local/bin/;
+    mkdir $HOME/appimagetool/bin;
+    mv appimagetool $HOME/appimagetool/bin/;
+    export PATH=$PATH:$HOME/appimagetool/bin;
+    
   fi
 script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
