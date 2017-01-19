@@ -1,4 +1,5 @@
 sudo: false
+dist: trusty
 language: cpp
 os:
 - osx
@@ -8,7 +9,7 @@ compiler:
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:canonical-qt5-edgers/ubuntu1204-qt5' 
+    - sourceline: 'ppa:ubuntu-sdk-team/ppa' 
     packages:
     - qt5-default
     - qt5-qmake
