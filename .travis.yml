@@ -23,10 +23,10 @@ before_install:
     make;
     wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2;
     tar xf patchelf-0.9.tar.bz2;
-    ( cd patchelf-0.9/ && ./configure  && make && sudo make install );
+    ( cd patchelf-0.9/ && ./configure  && make && make install );
     wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
     chmod a+x appimagetool;
-    sudo mv appimagetool /usr/local/bin/;
+    mv appimagetool /usr/local/bin/;
   fi
 script:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
