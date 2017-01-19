@@ -10,9 +10,9 @@ addons:
     sources:
     - sourceline: 'ppa:canonical-qt5-edgers/ubuntu1204-qt5' 
     packages:
+    - qt5-default
     - qt5-qmake
     - qtbase5-dev
-    - libgl1-mesa-dev
 before_install:
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update;
@@ -23,6 +23,7 @@ before_install:
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     echo $PATH=/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH
+    which qmake;
     qmake -v;
 
     git clone https://github.com/probonopd/linuxdeployqt.git;
