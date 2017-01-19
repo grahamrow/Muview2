@@ -22,6 +22,7 @@ before_install:
     qmake -v;
   fi
 - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    echo $PATH=/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH
     qmake -v;
 
     git clone https://github.com/probonopd/linuxdeployqt.git;
@@ -34,7 +35,7 @@ before_install:
     
     wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
     chmod a+x appimagetool;
-    mkdir $HOME/appimagetool/bin;
+    mkdir -p $HOME/appimagetool/bin;
     mv appimagetool $HOME/appimagetool/bin/;
     export PATH=$PATH:$HOME/appimagetool/bin;
     
