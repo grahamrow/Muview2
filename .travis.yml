@@ -33,19 +33,20 @@ before_install:
       which qmake;
       qmake -v;
   
+      cd /home/travis/build;
       git clone https://github.com/probonopd/linuxdeployqt.git;
-      (cd linuxdeployqt && qmake linuxdeployqt.pro && make && cd ..);
+      (cd linuxdeployqt && qmake linuxdeployqt.pro && make);
       
+      cd /home/travis/build;
       ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
       ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);
-      export PATH=$PATH:$HOME/patchelf/bin;
-      ls $HOME/patchelf/bin;
+      export PATH=$PATH:/home/travis/build/patchelf/bin;
       
+      cd /home/travis/build;
+      (mkdir appimagetool && cd appimagetool);
       wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
       chmod a+x appimagetool;
-      mkdir -p $HOME/appimagetool/bin;
-      mv appimagetool $HOME/appimagetool/bin/;
-      export PATH=$PATH:$HOME/appimagetool/bin;
+      export PATH=$PATH:/home/travis/build/appimagetool;
       
     fi
 script:
@@ -54,6 +55,7 @@ script:
       bash deploy/deployMacOSX_travis.sh;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      cd /home/travis/build/grahamrow/Muview2;
       bash deploy/deployLinux_travis.sh;
     fi
 deploy:
