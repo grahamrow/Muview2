@@ -2,54 +2,60 @@ sudo: false
 dist: trusty
 language: cpp
 os:
-- osx
-- linux
+  - osx
+  - linux
 compiler:
-- clang
+  - clang
+cache:
+  directories:
+  - $HOME/qt
+# services:
+#   - docker
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:ubuntu-sdk-team/ppa' 
+    - sourceline: 'ppa:beineri/opt-qt57-trusty' 
     packages:
-    - qt5-default
-    - qt5-qmake
-    - qtbase5-dev
+    - qt57base
+    - qt573d
+    - qt57tools
+    - qt57x11extras
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update;
-    brew ls | grep -wq qt5 || brew install qt5;
-    echo "Adding brewed Qt5 to path";
-    export PATH=/usr/local/opt/qt5/bin:$PATH;
-    qmake -v;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    echo $PATH=/usr/lib/x86_64-linux-gnu/qt5/bin:$PATH
-    which qmake;
-    qmake -v;
-
-    git clone https://github.com/probonopd/linuxdeployqt.git;
-    (cd linuxdeployqt && qmake linuxdeployqt.pro && make && cd ..);
-    
-    ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
-    ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);
-    export PATH=$PATH:$HOME/patchelf/bin;
-    ls $HOME/patchelf/bin;
-    
-    wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
-    chmod a+x appimagetool;
-    mkdir -p $HOME/appimagetool/bin;
-    mv appimagetool $HOME/appimagetool/bin/;
-    export PATH=$PATH:$HOME/appimagetool/bin;
-    
-  fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update;
+      brew ls | grep -wq qt5 || brew install qt5;
+      echo "Adding brewed Qt5 to path";
+      export PATH=/usr/local/opt/qt5/bin:$PATH;
+      qmake -v;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      source /opt/qt57/bin/qt57-env.sh;
+      which qmake;
+      qmake -v;
+  
+      git clone https://github.com/probonopd/linuxdeployqt.git;
+      (cd linuxdeployqt && qmake linuxdeployqt.pro && make && cd ..);
+      
+      ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
+      ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);
+      export PATH=$PATH:$HOME/patchelf/bin;
+      ls $HOME/patchelf/bin;
+      
+      wget https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool;
+      chmod a+x appimagetool;
+      mkdir -p $HOME/appimagetool/bin;
+      mv appimagetool $HOME/appimagetool/bin/;
+      export PATH=$PATH:$HOME/appimagetool/bin;
+      
+    fi
 script:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    echo "Preparing to deploy Muview2";
-    bash deploy/deployMacOSX_travis.sh;
-  fi
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    bash deploy/deployLinux_travis.sh;
-  fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      echo "Preparing to deploy Muview2";
+      bash deploy/deployMacOSX_travis.sh;
+    fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      bash deploy/deployLinux_travis.sh;
+    fi
 deploy:
   provider: releases
   api_key:
