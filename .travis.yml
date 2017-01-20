@@ -36,6 +36,7 @@ before_install:
       cd /home/travis/build;
       git clone https://github.com/probonopd/linuxdeployqt.git;
       (cd linuxdeployqt && qmake linuxdeployqt.pro && make);
+      export PATH=$PATH:/home/travis/build/linuxdeployqt/linuxdeployqt:/home/travis/build/linuxdeployqt;
       
       cd /home/travis/build;
       ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
