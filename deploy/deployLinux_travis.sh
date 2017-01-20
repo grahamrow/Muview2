@@ -17,12 +17,12 @@ rm $NAME/resources/muview.icns $NAME/resources/splash*.png
 cp $FILES $NAME
 
 # Package using linuxdeployqt
-echo "Creating AppImage bundle at $PWD/Muview.AppImage"
+# echo "Creating AppImage bundle at $PWD/Muview.AppImage"
 echo "using qmake from $(which qmake)"
 echo "using linuxdeployqt from $(which linuxdeployqt)"
 
 cd $NAME
-linuxdeployqt muview -appimage -verbose=2
+linuxdeployqt muview -verbose=2
 cd ..
 
 tar -czvf "Muview.tar.gz" $NAME
