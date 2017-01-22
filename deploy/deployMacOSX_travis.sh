@@ -6,6 +6,13 @@ applicationName="Muview.app"
 finalDMGName="Muview.dmg"
 title="Muview"
 
+# Fix version numbers
+for name in source/aboutdialog.ui source/source.pro source/window.cpp
+do
+  sed "s/2.1.2/${TRAVIS_BRANCH}/" $name > $name.temp
+  mv $name.temp $name
+done
+
 # qmake version
 qmake_vers=$(qmake -v | tail -n1 | sed -n 's|.*\(/usr/.*\)/lib|\1|p')
 

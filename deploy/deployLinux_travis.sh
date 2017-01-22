@@ -2,6 +2,13 @@
 
 NAME="Muview"
 
+# Fix version numbers
+for name in source/aboutdialog.ui source/source.pro source/window.cpp
+do
+	sed "s/2.1.2/${TRAVIS_BRANCH}/" $name > $name.temp
+	# mv $name.temp $name
+done
+
 qmake -r -spec linux-g++ -config release
 make -j4
 
