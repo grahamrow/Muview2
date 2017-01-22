@@ -1,4 +1,5 @@
 ### Muview2
+[![Build Status](https://travis-ci.org/grahamrow/Muview2.svg?branch=master)](https://travis-ci.org/grahamrow/Muview2) [![Build status](https://ci.appveyor.com/api/projects/status/0av837y4esu4t2gg?svg=true)](https://ci.appveyor.com/project/grahamrow/muview2)
 
 MuView2 is an OVF (version 1 and 2) compatible viewer intended to function with Mumax and OOMMF. The viewer provides a fast QT/OpenGL interface that enables users to scrub through loaded files with an animation timeline, eliminating the need for manually generating image sequences and rendering animations using several third party software packages.
 
