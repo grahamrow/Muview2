@@ -9,7 +9,7 @@ FILES="muview README.md LICENSE"
 
 mkdir $NAME
 # Copy the install-only makefile to deploy directory
-# cp deploy/MakefileInstall Muview/Makefile
+cp deploy/MakefileInstall Muview/Makefile
 # Copy the necessary resources, delete extraneous ones
 cp -R source/resources $NAME
 rm $NAME/resources/muview.icns $NAME/resources/splash*.png
@@ -23,6 +23,7 @@ echo "using linuxdeployqt from $(which linuxdeployqt)"
 
 cd $NAME
 linuxdeployqt muview -verbose=2
+mv AppRun muview
 cd ..
 
 tar -czvf "Muview.tar.gz" $NAME

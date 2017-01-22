@@ -3,20 +3,20 @@ CURRENT_DIR     = $(shell pwd)
 INSTALL_FILE    = install -m 644 -p
 INSTALL_DIR     = $(COPY_DIR)
 INSTALL_PROGRAM = install -m 755 -p
+LINK_PROGRAM    = ln -sf
 STRIP           = strip
 TARGET          = muview
 DEL_FILE        = rm
 # INSTALL ROOT may be set to the desired prefix
 
-install_target: 
+install_target:
 	@test -d $(INSTALL_ROOT)/usr/local/bin || mkdir -p $(INSTALL_ROOT)/usr/local/bin
-	-$(INSTALL_PROGRAM) "./$(TARGET)" "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
-	-$(STRIP) "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
+	-$(LINK_PROGRAM) $(CURRENT_DIR)/$(TARGET) $(INSTALL_ROOT)/usr/local/bin/$(TARGET)
 
 uninstall_target:
 	-$(DEL_FILE) "$(INSTALL_ROOT)/usr/local/bin/$(TARGET)"
 
-install_desktopfile: 
+install_desktopfile:
 	@test -d $(INSTALL_ROOT)/usr/share/applications || mkdir -p $(INSTALL_ROOT)/usr/share/applications
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/muview.desktop $(INSTALL_ROOT)/usr/share/applications/
 
@@ -24,55 +24,55 @@ uninstall_desktopfile:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/applications/muview.desktop
 
 
-install_iconfile512: 
+install_iconfile512:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/512x512/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps/
 
 uninstall_iconfile512:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/512x512/apps/muview.png
 
-install_iconfile256: 
+install_iconfile256:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/256x256/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps/
 
 uninstall_iconfile256:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/256x256/apps/muview.png
 
-install_iconfile128: 
+install_iconfile128:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/128x128/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps/
 
 uninstall_iconfile128:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/128x128/apps/muview.png
 
-install_iconfile64: 
+install_iconfile64:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/64x64/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps/
 
 uninstall_iconfile64:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/64x64/apps/muview.png
 
-install_iconfile32: 
+install_iconfile32:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/32x32/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps/
 
 uninstall_iconfile32:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/32x32/apps/muview.png
 
-install_iconfile16: 
+install_iconfile16:
 	@test -d $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps || mkdir -p $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/16x16/muview.png $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps/
 
 uninstall_iconfile16:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/icons/hicolor/16x16/apps/muview.png
 
-install_pixmap: 
+install_pixmap:
 	@test -d $(INSTALL_ROOT)/usr/share/pixmaps || mkdir -p $(INSTALL_ROOT)/usr/share/pixmaps
 	-$(INSTALL_FILE) $(CURRENT_DIR)/resources/256x256/muview.png $(INSTALL_ROOT)/usr/share/pixmaps/
 
 uninstall_pixmap:
 	-$(DEL_FILE) -r $(INSTALL_ROOT)/usr/share/pixmaps/muview.png
 
-install:  install_desktopfile install_iconfile512 install_iconfile256 install_iconfile128 install_iconfile64 install_iconfile32 install_iconfile16 install_target install_pixmap 
+install:  install_desktopfile install_iconfile512 install_iconfile256 install_iconfile128 install_iconfile64 install_iconfile32 install_iconfile16 install_target install_pixmap
 
-uninstall: uninstall_desktopfile uninstall_iconfile512 uninstall_iconfile256 uninstall_iconfile128 uninstall_iconfile64 uninstall_iconfile32 uninstall_iconfile16 uninstall_target uninstall_pixmap  
+uninstall: uninstall_desktopfile uninstall_iconfile512 uninstall_iconfile256 uninstall_iconfile128 uninstall_iconfile64 uninstall_iconfile32 uninstall_iconfile16 uninstall_target uninstall_pixmap
