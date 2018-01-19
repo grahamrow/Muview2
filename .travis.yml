@@ -17,10 +17,10 @@ addons:
     sources:
     - sourceline: 'ppa:beineri/opt-qt593-trusty' 
     packages:
-    - qt57base
-    - qt573d
-    - qt57tools
-    - qt57x11extras
+    - qt59base
+    - qt593d
+    - qt59tools
+    - qt59x11extras
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
