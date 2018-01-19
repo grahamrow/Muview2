@@ -37,8 +37,8 @@ before_install:
   
       cd /home/travis/build;
       mkdir linuxdeployqt && cd linuxdeployqt;
-      wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" -O linuxdeployqt
-      chmod a+x linuxdeployqt
+      wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt;
+      chmod a+x linuxdeployqt;
       export PATH=$PATH:/home/travis/build/linuxdeployqt;
 
       cd /home/travis/build;
