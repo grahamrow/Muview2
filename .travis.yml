@@ -10,6 +10,7 @@ matrix:
   include:
     - os: linux
       env: DEPLOY_FILE=Muview.tar.gz
+      env: APP_FILE=Muview2-x86_64.AppImage
     - os: osx
       env: DEPLOY_FILE=Muview.dmg
 addons:
@@ -35,10 +36,11 @@ before_install:
       qmake -v;
   
       cd /home/travis/build;
-      git clone https://github.com/probonopd/linuxdeployqt.git;
-      (cd linuxdeployqt && qmake linuxdeployqt.pro && make);
-      export PATH=$PATH:/home/travis/build/linuxdeployqt/linuxdeployqt:/home/travis/build/linuxdeployqt;
-      
+      mkdir linuxdeployqt && cd linuxdeployqt;
+      wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" -O linuxdeployqt
+      chmod a+x linuxdeployqt
+      export PATH=$PATH:/home/travis/build/linuxdeployqt;
+
       cd /home/travis/build;
       ( wget https://nixos.org/releases/patchelf/patchelf-0.9/patchelf-0.9.tar.bz2 && tar xf patchelf-0.9.tar.bz2);
       ( cd patchelf-0.9/ && ./configure --prefix=$HOME/patchelf && make && make install && cd ..);

@@ -29,7 +29,9 @@ echo "using qmake from $(which qmake)"
 echo "using linuxdeployqt from $(which linuxdeployqt)"
 
 cd $NAME
-linuxdeployqt muview -verbose=2
+linuxdeployqt muview -bundle-non-qt-libs -verbose=1
+linuxdeployqt resources/muview.desktop -appimage -verbose=1
+mv Muview_Viewer-x86_64.AppImage ../Muview2-x86_64.AppImage
 rm AppRun
 cd ..
 
