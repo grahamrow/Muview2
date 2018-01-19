@@ -15,7 +15,7 @@ matrix:
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:beineri/opt-qt57-trusty' 
+    - sourceline: 'ppa:beineri/opt-qt593-trusty' 
     packages:
     - qt57base
     - qt573d

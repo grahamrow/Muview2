@@ -30,7 +30,7 @@ echo "using linuxdeployqt from $(which linuxdeployqt)"
 
 cd $NAME
 linuxdeployqt muview -verbose=2
-mv AppRun muview
+rm AppRun
 cd ..
 
 tar -czvf "Muview.tar.gz" $NAME
