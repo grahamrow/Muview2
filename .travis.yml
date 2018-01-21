@@ -10,7 +10,8 @@ matrix:
   include:
     - os: linux
       env: DEPLOY_FILE=Muview.tar.gz
-      env: APP_FILE=Muview2-x86_64.AppImage
+    - os: linux
+      env: DEPLOY_FILE=Muview2-x86_64.AppImage
     - os: osx
       env: DEPLOY_FILE=Muview.dmg
 addons:
