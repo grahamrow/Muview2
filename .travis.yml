@@ -1,4 +1,4 @@
-sudo: false
+sudo: required
 dist: trusty
 language: cpp
 os:
@@ -31,6 +31,11 @@ before_install:
       qmake -v;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo apt-get install -qq pkg-config fuse;
+      sudo modprobe fuse;
+      sudo chmod 666 /dev/fuse;
+      sudo chown root:$USER /etc/fuse.conf;
+      
       source /opt/qt59/bin/qt59-env.sh;
       which qmake;
       qmake -v;
