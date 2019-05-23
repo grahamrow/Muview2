@@ -12,16 +12,16 @@ max_jobs: 1
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 environment:
-  QT5: C:\Qt\5.7\msvc2015_64
+  QT5: C:\Qt\5.12.2\msvc2017_64
 
 # scripts that are called at very beginning, before repo cloning
 init:
   - git config --global core.autocrlf input
   - set PATH=%QT5%\bin;%PATH%
-  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 # clone directory
 clone_folder: C:\dev\Muview2
