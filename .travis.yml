@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: xenial
 language: cpp
 os:
   - osx
@@ -16,12 +16,12 @@ matrix:
 addons:
   apt:
     sources:
-    - sourceline: 'ppa:beineri/opt-qt593-trusty' 
+    - sourceline: 'ppa:beineri/opt-qt-5.12.3-xenial' 
     packages:
-    - qt59base
-    - qt593d
-    - qt59tools
-    - qt59x11extras
+    - qt512base
+    - qt5123d
+    - qt512tools
+    - qt512x11extras
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
@@ -36,7 +36,7 @@ before_install:
       sudo chmod 666 /dev/fuse;
       sudo chown root:$USER /etc/fuse.conf;
       
-      source /opt/qt59/bin/qt59-env.sh;
+      source /opt/qt512/bin/qt512-env.sh;
       which qmake;
       qmake -v;
   
