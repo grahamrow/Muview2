@@ -1,19 +1,19 @@
-sudo: required
+
 language: cpp
-os:
-  - osx
-  - linux
-compiler:
-  - clang
+
 matrix:
   include:
     - os: linux
       env: DEPLOY_FILE=Muview.tar.gz
       env: APP_FILE=Muview2-x86_64.AppImage
       dist: xenial
+      sudo: required
+      compiler: clang
     - os: osx
       env: DEPLOY_FILE=Muview.dmg
       osx_image: xcode10.2
+      sudo: required
+      compiler: clang
 addons:
   apt:
     sources:
