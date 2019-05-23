@@ -1,5 +1,4 @@
 sudo: required
-dist: xenial
 language: cpp
 os:
   - osx
@@ -11,8 +10,10 @@ matrix:
     - os: linux
       env: DEPLOY_FILE=Muview.tar.gz
       env: APP_FILE=Muview2-x86_64.AppImage
+      dist: xenial
     - os: osx
       env: DEPLOY_FILE=Muview.dmg
+      osx_image: xcode10.2
 addons:
   apt:
     sources:
@@ -31,6 +32,7 @@ before_install:
       qmake -v;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      echo "Before Install";
       sudo apt-get install -qq pkg-config fuse;
       sudo modprobe fuse;
       sudo chmod 666 /dev/fuse;
