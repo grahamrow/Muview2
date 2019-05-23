@@ -47,19 +47,22 @@ if [ -e $finalDMGName ]
 	rm $finalDMGName
 fi
 
+echo "Creating disk image"
 hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title
 
-device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" | \
+echo "Mounting disk image"
+device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" -mountpoint mnt | \
          egrep '^/dev/' | sed 1q | awk '{print $1}')
+echo "Device Name: $device"
 
 sleep 1
 
-mkdir "/Volumes/${title}/.background"
-cp deploy/background-dmg.png "/Volumes/${title}/.background"
+mkdir "mnt/.background"
+cp deploy/background-dmg.png "mnt/.background"
 
 echo '
    tell application "Finder"
-     tell disk "'${title}'"
+     tell disk "mnt"
            open
            set current view of container window to icon view
            set toolbar visible of container window to false
@@ -72,14 +75,17 @@ echo '
            set position of item "'${applicationName}'" of container window to {212, 282}
            update without registering applications
            delay 5
-           eject
      end tell
    end tell
 ' | osascript
 
-chmod -Rf go-w /Volumes/"${title}"
+chmod -Rf go-w ${device}
 sync
 sync
+
+echo "Detaching disk image"
 hdiutil detach ${device}
+
+echo "Compressing disk image"
 hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f pack.temp.dmg 

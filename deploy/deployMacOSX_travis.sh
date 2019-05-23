@@ -54,12 +54,14 @@ echo '
            set position of item "'${applicationName}'" of container window to {212, 282}
            update without registering applications
            delay 5
-           eject
      end tell
    end tell
 ' | osascript
 
 
 sync
+echo "Detaching disk image"
+hdiutil detach ${device}
+
 hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f pack.temp.dmg 
