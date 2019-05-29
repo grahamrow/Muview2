@@ -4,6 +4,7 @@
 
 #include <QGLWidget>
 #include <QOpenGLBuffer>
+#include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
@@ -13,6 +14,8 @@
 struct sprite
 {
     QOpenGLBuffer vbo;
+    QOpenGLBuffer pos_vbo;
+    QOpenGLBuffer col_vbo;
     QOpenGLVertexArrayObject *vao;
     GLuint count;
 };
@@ -89,6 +92,7 @@ protected:
 private:
     // Shaders
     QOpenGLShaderProgram flatShader, diffuseShader;
+    QOpenGLFunctions_3_3_Core* gl330Funcs;
 
     // Init functions
     void initializeAssets();
@@ -97,6 +101,9 @@ private:
     bool initializeCube();
     bool initializeCone(int slices, float radius, float height);
     bool initializeVect(int slices, float height, float radius, float fractionTip, float fractionInner);
+
+    QVector<QVector4D> instPositions;
+    QVector<QVector4D> instColors;
 
     // Sprites and Data
     sprite cube, cone, vect;

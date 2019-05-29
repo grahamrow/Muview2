@@ -45,13 +45,16 @@ bool GLWidget::initializeShaders()
 bool GLWidget::initializeCube()
 {
     cube.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    cube.pos_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    cube.col_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    
     cube.vao = new QOpenGLVertexArrayObject(this);
     cube.vao->create();
     cube.vao->bind();
     cube.count = 6*3*2;
 
     // Generate the coordinates, normals
-        GLfloat vertexNormData[] = {
+    GLfloat vertexNormData[] = {
             //  X     Y     Z      Normal
             // bottom
             -1.0f,-1.0f,-1.0f,     0.0f, -1.0f, 0.0f,
@@ -95,23 +98,20 @@ bool GLWidget::initializeCube()
             1.0f,-1.0f, 1.0f,     1.0f, 0.0f, 0.0f,
             1.0f, 1.0f,-1.0f,     1.0f, 0.0f, 0.0f,
             1.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f
-        };
+    };
 
     if (!cube.vbo.isCreated()) {
         cube.vbo.create();
+        cube.pos_vbo.create();
+        cube.col_vbo.create();
     } else {
         cube.vbo.destroy();
+        cube.pos_vbo.destroy();
+        cube.col_vbo.destroy();
         cube.vbo.create();
+        cube.pos_vbo.create();
+        cube.col_vbo.create();
     }
-
-    cube.vbo.setUsagePattern( QOpenGLBuffer::StaticDraw );
-    if ( !cube.vbo.bind() )
-    {
-        qWarning() << "Could not bind vertex buffer to the context";
-        return false;
-    }
-
-    cube.vbo.allocate( vertexNormData, 6*6*3*2 * sizeof( float ) );
 
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
@@ -121,10 +121,42 @@ bool GLWidget::initializeCube()
         return false;
     }
 
-    flatShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
-    flatShader.enableAttributeArray( "vertex" );
+    cube.vbo.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    cube.pos_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    cube.col_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    if ( !cube.vbo.bind() )
+    {
+        qWarning() << "Could not bind vertex buffer to the context";
+        return false;
+    }
+    cube.vbo.allocate( vertexNormData, 6*6*3*2 * sizeof( float ) );
+    flatShader.setAttributeBuffer( "vertex",       GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
     flatShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "vertex" );
     flatShader.enableAttributeArray( "vertexNormal" );
+    cube.vbo.release();
+
+    if ( !cube.pos_vbo.bind() )
+    {
+        qWarning() << "Could not bind position buffer to the context";
+        return false;
+    }
+    cube.pos_vbo.allocate( 1 * sizeof(QVector4D) );
+    flatShader.setAttributeBuffer( "translation",  GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "translation" );
+    gl330Funcs->glVertexAttribDivisor(3, 1); // "translation" vbo
+    cube.pos_vbo.release();
+
+    if ( !cube.col_vbo.bind() )
+    {
+        qWarning() << "Could not bind color buffer to the context";
+        return false;
+    }
+    cube.col_vbo.allocate( 1 * sizeof(QVector4D) );
+    flatShader.setAttributeBuffer( "color",        GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "color" );
+    gl330Funcs->glVertexAttribDivisor(2, 1); // "color" vbo
+    cube.col_vbo.release();
 
     cube.vao->release();
     return true;
