@@ -15,7 +15,7 @@ struct sprite
 {
     QOpenGLBuffer vbo;
     QOpenGLBuffer pos_vbo;
-    QOpenGLBuffer col_vbo;
+    QOpenGLBuffer mag_vbo;
     QOpenGLVertexArrayObject *vao;
     GLuint count;
 };
@@ -103,7 +103,7 @@ private:
     bool initializeVect(int slices, float height, float radius, float fractionTip, float fractionInner);
 
     QVector<QVector4D> instPositions;
-    QVector<QVector4D> instColors;
+    QVector<QVector4D> instMagnetizations;
 
     // Sprites and Data
     sprite cube, cone, vect;

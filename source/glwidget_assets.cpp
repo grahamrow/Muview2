@@ -46,7 +46,7 @@ bool GLWidget::initializeCube()
 {
     cube.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     cube.pos_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
-    cube.col_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+    cube.mag_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
     
     cube.vao = new QOpenGLVertexArrayObject(this);
     cube.vao->create();
@@ -100,19 +100,15 @@ bool GLWidget::initializeCube()
             1.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f
     };
 
-    if (!cube.vbo.isCreated()) {
-        cube.vbo.create();
-        cube.pos_vbo.create();
-        cube.col_vbo.create();
-    } else {
+    if (cube.vbo.isCreated()) {
         cube.vbo.destroy();
         cube.pos_vbo.destroy();
-        cube.col_vbo.destroy();
-        cube.vbo.create();
-        cube.pos_vbo.create();
-        cube.col_vbo.create();
+        cube.mag_vbo.destroy();
     }
-
+    cube.vbo.create();
+    cube.pos_vbo.create();
+    cube.mag_vbo.create();
+    
     // Bind the shader program so that we can associate variables from
     // our application to the shaders
     if ( !flatShader.bind() )
@@ -123,7 +119,7 @@ bool GLWidget::initializeCube()
 
     cube.vbo.setUsagePattern( QOpenGLBuffer::StaticDraw );
     cube.pos_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
-    cube.col_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    cube.mag_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
     if ( !cube.vbo.bind() )
     {
         qWarning() << "Could not bind vertex buffer to the context";
@@ -147,16 +143,16 @@ bool GLWidget::initializeCube()
     gl330Funcs->glVertexAttribDivisor(3, 1); // "translation" vbo
     cube.pos_vbo.release();
 
-    if ( !cube.col_vbo.bind() )
+    if ( !cube.mag_vbo.bind() )
     {
-        qWarning() << "Could not bind color buffer to the context";
+        qWarning() << "Could not bind magnetization buffer to the context";
         return false;
     }
-    cube.col_vbo.allocate( 1 * sizeof(QVector4D) );
-    flatShader.setAttributeBuffer( "color",        GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
-    flatShader.enableAttributeArray( "color" );
-    gl330Funcs->glVertexAttribDivisor(2, 1); // "color" vbo
-    cube.col_vbo.release();
+    cube.mag_vbo.allocate( 1 * sizeof(QVector4D) );
+    flatShader.setAttributeBuffer( "magnetization",        GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    flatShader.enableAttributeArray( "magnetization" );
+    gl330Funcs->glVertexAttribDivisor(2, 1); // "magnetization" vbo
+    cube.mag_vbo.release();
 
     cube.vao->release();
     return true;

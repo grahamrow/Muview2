@@ -164,6 +164,10 @@ void GLWidget::resizeGL( int w, int h )
     needsUpdate = true;
 }
 
+// void GLWidget::updateGeom()
+// {
+
+// }
 
 
 void GLWidget::paintGL()
@@ -178,12 +182,15 @@ void GLWidget::paintGL()
         int ynodes = size[1];
         int znodes = size[2];
         int numNodes = dataPtr->field->num_elements();
-        int drawnNodes = 0;
-        QVector3D datum;
-        QColor color;
-        float theta, phi, mag;
-        float hueVal, lumVal;
-        sprite *tempObject;
+        // int drawnNodes = 0;
+        // QVector3D datum;
+        // QColor color;
+        // float theta, phi, mag;
+        // float hueVal, lumVal;
+        // sprite *tempObject;
+        GLfloat thr_low, thr_high;
+        thr_low  = ((GLfloat)thresholdLow)/1600.0;
+        thr_high = ((GLfloat)thresholdHigh)/1600.0;
 
         QMatrix4x4 globalMovement;
         globalMovement.setToIdentity();
@@ -193,42 +200,23 @@ void GLWidget::paintGL()
         globalMovement.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
         flatShader.bind();
-        flatShader.setUniformValue("model",      globalMovement);
-        flatShader.setUniformValue("view",       view);
-        flatShader.setUniformValue("projection", projection);
-        flatShader.setUniformValue("brightness", brightness);
-        flatShader.setUniformValue("color",      QColor::fromHslF(0.5, 1.0, 0.5));
+        flatShader.setUniformValue("model",         globalMovement);
+        flatShader.setUniformValue("view",          view);
+        flatShader.setUniformValue("projection",    projection);
+        flatShader.setUniformValue("brightness",    brightness);
+        flatShader.setUniformValue("maxmag",        maxmag);
+        flatShader.setUniformValue("thresholdLow",  thr_low);
+        flatShader.setUniformValue("thresholdHigh", thr_high);
 
         for(int i=0; i<xnodes; i+=subsampling) {
             for(int j=0; j<ynodes; j+=subsampling) {
                 for(int k=0; k<znodes; k+=subsampling) {
-                    
-                    datum = dataPtr->field->at(i,j,k);
-                    if (valuedim == 1) {
-                        mag = datum.x();
-                    } else {
-                        mag = datum.length();
-                    }
-                    float relmag = mag/maxmag;
-
-                    if (relmag < thresholdLow/1600.0 || relmag > thresholdHigh/1600.0) { continue; }
-
-                    drawnNodes++;
-
-                    theta = acos(datum.z()/mag);
-                    phi   = atan2(datum.y(), datum.x());
-                    
-                    hueVal = phi/(2.0f*PI);
-                    lumVal = 0.5;
-                    if (hueVal < 0.0f) { hueVal += 1.0f; }
-                    color = QColor::fromHslF(hueVal, 1.0, lumVal);
-
                     instPositions << QVector4D(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0,0.0);
-                    instColors    << QVector4D(color.redF(), color.greenF(), color.blueF(), 0.0);
-
+                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
                 }   
             }
         }
+
         // Vertex Array 
         displayObject->vao->bind();
 
@@ -238,30 +226,28 @@ void GLWidget::paintGL()
             qDebug() << "Reallocating translation buffer to size:" << numNodes;
             displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
         }
-        displayObject->pos_vbo.write(0, instPositions.constData(), drawnNodes * sizeof(QVector4D));
+        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
         
 
-        displayObject->col_vbo.bind();
-        if (displayObject->col_vbo.size() != numNodes * sizeof(QVector4D)) {
-            qDebug() << "Reallocating color buffer to size:" << numNodes;
-            displayObject->col_vbo.allocate( numNodes * sizeof(QVector4D) );
+        displayObject->mag_vbo.bind();
+        if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
+            qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
+            displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
         }
-        displayObject->col_vbo.write(0, instColors.constData(), drawnNodes * sizeof(QVector4D));
+        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
 
         // Draw everything in one call
-        glEnable( GL_DEPTH_TEST );
-        gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, displayObject->count, drawnNodes);
-
-        // glDrawArrays( GL_TRIANGLES, 0, displayObject->count );
+        // glEnable( GL_DEPTH_TEST );
+        gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, displayObject->count, numNodes);
 
         // Release buffers
         displayObject->pos_vbo.release();
-        displayObject->col_vbo.release();
+        displayObject->mag_vbo.release();
         displayObject->vao->release();
         
         // Clear Qt containers
         instPositions.clear();
-        instColors.clear();
+        instMagnetizations.clear();
 
         // for(int i=0; i<xnodes; i+=subsampling)
         // {
