@@ -85,6 +85,47 @@ void GLWidget::updateData(QSharedPointer<OMFReader> data)
         updateCOM();
         updateExtent();
         needsUpdate = true;
+
+        QVector<int> size = dataPtr->field->shape();
+        int numNodes = dataPtr->field->num_elements();
+        // Push new data
+        for(int i=0; i<size[0]; i+=subsampling) {
+            for(int j=0; j<size[1]; j+=subsampling) {
+                for(int k=0; k<size[2]; k+=subsampling) {
+                    instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
+                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+                }   
+            }
+        }
+
+        diffuseShader.bind();
+        displayObject->vao->bind();
+
+        // Buffers for coordinates and colors
+        displayObject->pos_vbo.bind();
+        if (displayObject->pos_vbo.size() != numNodes * sizeof(QVector4D)) {
+            qDebug() << "Reallocating translation buffer to size:" << numNodes << "---" << displayObject->pos_vbo.size();
+            displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
+        }
+        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
+        
+
+        displayObject->mag_vbo.bind();
+        if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
+            qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
+            displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
+        }
+        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
+
+        // Release buffers
+        displayObject->pos_vbo.release();
+        displayObject->mag_vbo.release();
+        displayObject->vao->release();
+        
+        // Clear Qt containers
+        instPositions.clear();
+        instMagnetizations.clear();
+
     }
 }
 
@@ -149,8 +190,6 @@ void GLWidget::initializeGL()
     glEnable( GL_CULL_FACE );
     glEnable(GL_SMOOTH);
     glDepthFunc( GL_LEQUAL );
-
-    view.setToIdentity();
 }
 
 void GLWidget::resizeGL( int w, int h )
@@ -182,62 +221,69 @@ void GLWidget::paintGL()
         int ynodes = size[1];
         int znodes = size[2];
         int numNodes = dataPtr->field->num_elements();
-        // int drawnNodes = 0;
-        // QVector3D datum;
-        // QColor color;
-        // float theta, phi, mag;
-        // float hueVal, lumVal;
-        // sprite *tempObject;
-        GLfloat thr_low, thr_high;
-        thr_low  = ((GLfloat)thresholdLow)/1600.0;
-        thr_high = ((GLfloat)thresholdHigh)/1600.0;
 
-        QMatrix4x4 globalMovement;
-        globalMovement.setToIdentity();
-        globalMovement.translate(xLoc, yLoc, zoom);
-        globalMovement.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
-        globalMovement.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
-        globalMovement.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
+        GLfloat thrLo = ((GLfloat)thresholdLow)/1600.0;
+        GLfloat thrHi = ((GLfloat)thresholdHigh)/1600.0;
+        GLfloat xSlLo = (xmax-xmin)*(GLfloat)xSliceLow/1600.0;
+        GLfloat xSlHi = (xmax-xmin)*(GLfloat)xSliceHigh/1600.0;
+        GLfloat ySlLo = (ymax-ymin)*(GLfloat)ySliceLow/1600.0;
+        GLfloat ySlHi = (ymax-ymin)*(GLfloat)ySliceHigh/1600.0;
+        GLfloat zSlLo = (zmax-zmin)*(GLfloat)zSliceLow/1600.0;
+        GLfloat zSlHi = (zmax-zmin)*(GLfloat)zSliceHigh/1600.0;
+        view.setToIdentity();
+        view.translate(xLoc, yLoc, zoom);
+        view.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
+        view.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
+        view.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
-        flatShader.bind();
-        flatShader.setUniformValue("model",         globalMovement);
-        flatShader.setUniformValue("view",          view);
-        flatShader.setUniformValue("projection",    projection);
-        flatShader.setUniformValue("brightness",    brightness);
-        flatShader.setUniformValue("maxmag",        maxmag);
-        flatShader.setUniformValue("thresholdLow",  thr_low);
-        flatShader.setUniformValue("thresholdHigh", thr_high);
+        diffuseShader.bind();
+        diffuseShader.setUniformValue("view",              view);
+        diffuseShader.setUniformValue("projection",        projection);
+        diffuseShader.setUniformValue("brightness",        brightness);
+        diffuseShader.setUniformValue("light.position",    lightPosition);
+        diffuseShader.setUniformValue("light.intensities", lightIntensity);
+        diffuseShader.setUniformValue("ambient",           lightAmbient);
+        diffuseShader.setUniformValue("brightness",        brightness);
+        diffuseShader.setUniformValue("maxmag",            maxmag);
+        diffuseShader.setUniformValue("thresholdLow",      thrLo);
+        diffuseShader.setUniformValue("thresholdHigh",     thrHi);
+        diffuseShader.setUniformValue("xSliceLow",         xSlLo);
+        diffuseShader.setUniformValue("xSliceHigh",        xSlHi);
+        diffuseShader.setUniformValue("ySliceLow",         ySlLo);
+        diffuseShader.setUniformValue("ySliceHigh",        ySlHi);
+        diffuseShader.setUniformValue("zSliceLow",         zSlLo);
+        diffuseShader.setUniformValue("zSliceHigh",        zSlHi);
+        diffuseShader.setUniformValue("display_type",      5);
+        diffuseShader.setUniformValue("com",               QVector3D(xcom, ycom, zcom));
 
-        for(int i=0; i<xnodes; i+=subsampling) {
-            for(int j=0; j<ynodes; j+=subsampling) {
-                for(int k=0; k<znodes; k+=subsampling) {
-                    instPositions << QVector4D(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0,0.0);
-                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
-                }   
-            }
-        }
-
+        // for(int i=0; i<xnodes; i+=subsampling) {
+        //     for(int j=0; j<ynodes; j+=subsampling) {
+        //         for(int k=0; k<znodes; k+=subsampling) {
+        //             instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
+        //             instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+        //         }   
+        //     }
+        // }
         // Vertex Array 
         displayObject->vao->bind();
 
-        // Buffers for coordinates and colors
+        // // Buffers for coordinates and colors
         displayObject->pos_vbo.bind();
-        if (displayObject->pos_vbo.size() != numNodes * sizeof(QVector4D)) {
-            qDebug() << "Reallocating translation buffer to size:" << numNodes;
-            displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
-        }
-        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
+        // if (displayObject->pos_vbo.size() != numNodes * sizeof(QVector4D)) {
+        //     qDebug() << "Reallocating translation buffer to size:" << numNodes << "---" << displayObject->pos_vbo.size();
+        //     displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
+        // }
+        // displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
         
 
         displayObject->mag_vbo.bind();
-        if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
-            qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
-            displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
-        }
-        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
+        // if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
+        //     qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
+        //     displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
+        // }
+        // displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
 
         // Draw everything in one call
-        // glEnable( GL_DEPTH_TEST );
         gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, displayObject->count, numNodes);
 
         // Release buffers
@@ -245,77 +291,9 @@ void GLWidget::paintGL()
         displayObject->mag_vbo.release();
         displayObject->vao->release();
         
-        // Clear Qt containers
-        instPositions.clear();
-        instMagnetizations.clear();
-
-        // for(int i=0; i<xnodes; i+=subsampling)
-        // {
-        //     for(int j=0; j<ynodes; j+=subsampling)
-        //     {
-        //         for(int k=0; k<znodes; k+=subsampling)
-        //         {
-        //             datum = dataPtr->field->at(i,j,k);
-        //             if (valuedim == 1) {
-        //                 mag = datum.x();
-        //             } else {
-        //                 mag = datum.length();
-        //             }
-
-        //             float relmag = mag/maxmag;
-
-        //             if ( ((valuedim == 1 ) || (valuedim == 3)) &&
-        //                  i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
-        //                  i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
-        //                  j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
-        //                  j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
-        //                  k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
-        //                  k <= (zmax-zmin)*(float)zSliceHigh/1600.0 &&
-        //                  relmag >= thresholdLow/1600.0 && 
-        //                  relmag <= thresholdHigh/1600.0)
-        //             {
-
-        //                 theta = acos(datum.z()/mag);
-        //                 phi   = atan2(datum.y(), datum.x());
-
-        //                 if (valuedim == 1) {
-        //                     if (maxmag!=minmag) {
-        //                         phi = PI*(-0.999+1.998*(mag-minmag)/(maxmag-minmag));
-        //                     } else {
-        //                         phi = 0.0f;
-        //                     }
-        //                 }
-
-        //                 lumVal = 0.5;
-        //                 if (coloredQuantity == ("In-Plane Angle")) {
-        //                     hueVal = phi/(2.0f*PI);
-        //                     if (hueVal < 0.0f) {
-        //                         hueVal += 1.0f;
-        //                     }
-        //                 } else if (coloredQuantity ==  ("Full Orientation")) {
-        //                     hueVal = phi/(2.0f*PI);
-        //                     if (hueVal < 0.0f) {
-        //                         hueVal += 1.0f;
-        //                     }
-        //                     if (hueVal < 0.0f) hueVal = 0.0f;
-        //                     if ((hueVal > 1.0f) || (hueVal < 0.0f))
-        //                     {
-        //                         qDebug() << "Hue out of range:" << hueVal << datum.x() << datum.y() << datum.z() << theta << phi;
-        //                     }
-        //                     if (valuedim == 1) {
-        //                         lumVal=0.5;
-        //                     } else {
-        //                         lumVal = 0.5 + 0.5*datum.z()/mag;
-        //                     }
-        //                 } else if (coloredQuantity ==  ("X Coordinate")) {
-        //                     hueVal = 0.5+ 0.5*datum.x()/mag;
-        //                 } else if (coloredQuantity ==  ("Y Coordinate")) {
-        //                     hueVal = 0.5+ 0.5*datum.y()/mag;
-        //                 } else if (coloredQuantity ==  ("Z Coordinate")) {
-        //                     hueVal = 0.5+ 0.5*datum.z()/mag;
-        //                 } else {
-        //                     hueVal = 0.0;
-        //                 }
+        // // Clear Qt containers
+        // instPositions.clear();
+        // instMagnetizations.clear();
 
         //                 if (colorScale ==  ("HSL")) {
         //                     spriteColor = QColor::fromHslF(hueVal, 1.0, lumVal);

@@ -117,16 +117,18 @@ bool GLWidget::initializeCube()
         return false;
     }
 
+    // Set usage. Vertices are static, positions and orientations are dynamic
     cube.vbo.setUsagePattern( QOpenGLBuffer::StaticDraw );
     cube.pos_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
     cube.mag_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    
     if ( !cube.vbo.bind() )
     {
         qWarning() << "Could not bind vertex buffer to the context";
         return false;
     }
     cube.vbo.allocate( vertexNormData, 6*6*3*2 * sizeof( float ) );
-    flatShader.setAttributeBuffer( "vertex",       GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
+    flatShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
     flatShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
     flatShader.enableAttributeArray( "vertex" );
     flatShader.enableAttributeArray( "vertexNormal" );
@@ -138,7 +140,7 @@ bool GLWidget::initializeCube()
         return false;
     }
     cube.pos_vbo.allocate( 1 * sizeof(QVector4D) );
-    flatShader.setAttributeBuffer( "translation",  GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    flatShader.setAttributeBuffer( "translation", GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
     flatShader.enableAttributeArray( "translation" );
     gl330Funcs->glVertexAttribDivisor(3, 1); // "translation" vbo
     cube.pos_vbo.release();
@@ -149,7 +151,7 @@ bool GLWidget::initializeCube()
         return false;
     }
     cube.mag_vbo.allocate( 1 * sizeof(QVector4D) );
-    flatShader.setAttributeBuffer( "magnetization",        GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    flatShader.setAttributeBuffer( "magnetization", GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
     flatShader.enableAttributeArray( "magnetization" );
     gl330Funcs->glVertexAttribDivisor(2, 1); // "magnetization" vbo
     cube.mag_vbo.release();
@@ -163,13 +165,21 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
 
     if (!cone.vbo.isCreated()) {
         cone.vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        cone.pos_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+        cone.mag_vbo = QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
         cone.vbo.create();
+        cone.pos_vbo.create();
+        cone.mag_vbo.create();
 
         cone.vao = new QOpenGLVertexArrayObject(this);
         cone.vao->create();
     } else {
         cone.vbo.destroy();
+        cone.pos_vbo.destroy();
+        cone.mag_vbo.destroy();
         cone.vbo.create();
+        cone.pos_vbo.create();
+        cone.mag_vbo.create();
         cone.vao->destroy();
         cone.vao->create();
     }
@@ -195,16 +205,16 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
         vertices.push_back(-radius*sin(2.0*PI*(i+1)/slices));
         vertices.push_back(0.0f);
         // Normal
-        vertices.push_back( normScale*height*cos(2.0*PI*(i+0.5)/slices));
-        vertices.push_back(-normScale*height*sin(2.0*PI*(i+0.5)/slices));
+        vertices.push_back( normScale*height*cos(2.0*PI*(i+1.0)/slices));
+        vertices.push_back(-normScale*height*sin(2.0*PI*(i+1.0)/slices));
         vertices.push_back( radius*normScale );
 
         vertices.push_back( radius*cos(2.0*PI*i/slices));
         vertices.push_back(-radius*sin(2.0*PI*i/slices));
         vertices.push_back(0.0f);
         // Normal
-        vertices.push_back( normScale*height*cos(2.0*PI*(i+0.5)/slices));
-        vertices.push_back(-normScale*height*sin(2.0*PI*(i+0.5)/slices));
+        vertices.push_back( normScale*height*cos(2.0*PI*(i)/slices));
+        vertices.push_back(-normScale*height*sin(2.0*PI*(i)/slices));
         vertices.push_back( radius*normScale );
     }
 
@@ -235,27 +245,52 @@ bool GLWidget::initializeCone(int slices, float radius, float height)
         vertices.push_back(-1.0f);
     }
 
+    // Bind the shader program so that we can associate variables from
+    // our application to the shaders
+    if ( !diffuseShader.bind() )
+    {
+        qWarning() << "Could not bind shader program to context (cone)" << diffuseShader.log();
+        return false;
+    }
+
+    // Set usage. Vertices are static, positions and orientations are dynamic
     cone.vbo.setUsagePattern( QOpenGLBuffer::StaticDraw );
+    cone.pos_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    cone.mag_vbo.setUsagePattern( QOpenGLBuffer::DynamicDraw );
+    
     if ( !cone.vbo.bind() )
     {
         qWarning() << "Could not bind vertex buffer to the context";
         return false;
     }
-
     cone.vbo.allocate( &vertices.front(), vertices.size() * sizeof(vertices[0]) );
-
-    // Bind the shader program so that we can associate variables from
-    // our application to the shaders
-    if ( !diffuseShader.bind() )
-    {
-        qWarning() << "Could not bind shader program to context (cone)";
-        return false;
-    }
-
     diffuseShader.setAttributeBuffer( "vertex", GL_FLOAT, 0, 3, 6*sizeof(GLfloat) );
     diffuseShader.enableAttributeArray( "vertex" );
     diffuseShader.setAttributeBuffer( "vertexNormal", GL_FLOAT, 3*sizeof(GLfloat), 3, 6*sizeof(GLfloat) );
     diffuseShader.enableAttributeArray( "vertexNormal" );
+    cone.vbo.release();
+
+    if ( !cone.pos_vbo.bind() )
+    {
+        qWarning() << "Could not bind position buffer to the context";
+        return false;
+    }
+    cone.pos_vbo.allocate( 1 * sizeof(QVector4D) );
+    diffuseShader.setAttributeBuffer( "translation", GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "translation" );
+    gl330Funcs->glVertexAttribDivisor(3, 1); // "translation" vbo
+    cone.pos_vbo.release();
+
+    if ( !cone.mag_vbo.bind() )
+    {
+        qWarning() << "Could not bind magnetization buffer to the context";
+        return false;
+    }
+    cone.mag_vbo.allocate( 1 * sizeof(QVector4D) );
+    diffuseShader.setAttributeBuffer( "magnetization", GL_FLOAT, 0, 4, 4*sizeof(GLfloat) );
+    diffuseShader.enableAttributeArray( "magnetization" );
+    gl330Funcs->glVertexAttribDivisor(2, 1); // "magnetization" vbo
+    cone.mag_vbo.release();
 
     cone.vao->release();
     diffuseShader.release();

@@ -7,14 +7,25 @@ layout(location = 1) in vec4 vertexNormal;
 layout(location = 2) in vec4 magnetization;
 layout(location = 3) in vec4 translation;
 
-out vec4 fragVertex;
-out vec4 fragNormal;
+smooth out vec4 fragVertex;
+smooth out vec4 fragNormal;
 smooth out vec4 col;
+out vec4 trans;
+out mat4 mv;
+smooth out vec3 nrm;
 
-float mag, relmag, hue, phi, theta;
+float mag, relmag, phi, theta;
 
-uniform mat4 model, view, projection;
+// Which quantity to use for coloration
+// 1 = Full Orientation, 2 = In-Plane Angle, 3 = X-component,
+// 4 = Y-Component, 5 = Z-Component
+uniform int display_type;
+uniform int rotate_glyphs;
+
+uniform mat4 view, projection;
+uniform vec3 com; // Center of mass
 uniform float maxmag, thresholdLow, thresholdHigh;
+uniform float xSliceLow, xSliceHigh, ySliceLow, ySliceHigh, zSliceLow, zSliceHigh;
 
 float atan2(in float y, in float x)
 {
@@ -63,9 +74,16 @@ vec3 hsl2rgb(vec3 hsl) {
 
 void main( void )
 {
-	
+    trans = translation;
+
+	// mod_model = model;
+    mat4 model = mat4(1.0);
+    model[3][0] += 2.0*(translation.x-com.x);
+    model[3][1] += 2.0*(translation.y-com.y);
+    model[3][2] += 2.0*(translation.z-com.z);
+
     fragNormal = vertexNormal;
-    fragVertex = vertex;
+    fragVertex = vertex; // + translation;
 
     mag    = length(magnetization);
     relmag = mag/maxmag;
@@ -73,18 +91,55 @@ void main( void )
     theta  = acos(magnetization.z/mag);
     phi    = atan2(magnetization.y, magnetization.x);
     
-    hue   = phi/(2.0*PI);
+    mat4 rot_theta = mat4(1.0);
+    rot_theta[1][1] = rot_theta[2][2] = cos(theta);
+    rot_theta[1][2] = rot_theta[2][1] = sin(theta);
+    rot_theta[1][2] *= -1;
+
+    mat4 rot_phi = mat4(1.0);
+    rot_phi[0][0] = rot_phi[1][1] = cos(phi+0.5*PI);
+    rot_phi[0][1] = rot_phi[1][0] = sin(phi+0.5*PI);
+    rot_phi[0][1] *= -1;
+
+    model = model * rot_phi * rot_theta;
+    mv = view * model;
+
+    mat3 normalMatrix = transpose(inverse(mat3(mv)));
+    nrm = normalize(normalMatrix * vec3(fragNormal));
+
+    // In-plane angle coloring
+    float hue = phi/(2.0*PI);
+    float lum = 0.5;
     if (hue < 0.0)
     	hue += 1.0;
-// 
-    // col = vec4(magnetization.x/maxmag,0.0,0.0,0.0);
+    if (hue < 0.0)
+        hue = 0.0;
+    if (display_type == 1)
+        lum += 0.5*magnetization.z/mag;
+    if (display_type >= 3) // by component
+        hue += 0.5*magnetization[display_type-3]/mag;
 
+    col = vec4(hsl2rgb(vec3(hue, 1.0, lum)), 0.0);
 
-    col = vec4(hsl2rgb(vec3(hue, 1.0, 0.5)), 0.0);
+    // Discarded because of thresholding
     if (relmag < thresholdLow - 0.01)
         col.w = 1.0;
     if (relmag > thresholdHigh + 0.01)
         col.w = 1.0;
+
+    // Discarded because of clipping
+    if (translation.x < xSliceLow)
+        col.w = 1.0;
+    if (translation.x > xSliceHigh)
+        col.w = 1.0;
+    if (translation.y < ySliceLow)
+        col.w = 1.0;
+    if (translation.y > ySliceHigh)
+        col.w = 1.0;
+    if (translation.z < zSliceLow)
+        col.w = 1.0;
+    if (translation.z > zSliceHigh)
+        col.w = 1.0;
     
-    gl_Position =  projection * view * model * (translation + vertex);
+    gl_Position =  projection * view * model * vertex;
 }
