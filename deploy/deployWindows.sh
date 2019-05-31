@@ -2,7 +2,7 @@
 # Do this through a MINGW terminal to preserve sanity...
 # Compile in QtCreator first...
 
-VERSION="2.1.2"
+VERSION="2.2"
 NAME="Muview${VERSION}"
 TARGET="muview.exe"
 MANIFEST="muview.exe.embed.manifest"

@@ -77,7 +77,10 @@ echo '
            delay 5
      end tell
    end tell
-' | osascript
+' | osascript #> pretty_dmg.applescript #
+
+# /usr/local/bin/platypus --quit-after-execution --name 'PrettyDmg'  --interface-type 'None'  --interpreter '/usr/bin/osascript'  pretty_dmg.applescript
+# open PrettyDmg.app
 
 chmod -Rf go-w ${device}
 sync

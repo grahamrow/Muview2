@@ -5,11 +5,11 @@ INCLUDEPATH += $$top_srcdir
 UI_DIR      = uics
 MOC_DIR     = mocs
 OBJECTS_DIR = objs
+VERSION     = 2.2
 
 CONFIG += release
 
 linux {
-    VERSION = 2.1.2
     #CONFIG += static
     message(Building in Linux Environment)
     message("    will install muview (binary) to /usr/local/bin")
@@ -56,7 +56,7 @@ macx {
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
     target.path = /Applications
 
-    VERSION   = 2.1.2
+    
     TARGET    = ../Muview
     ICON      = resources/muview.icns
     CONFIG   += dead-strip
