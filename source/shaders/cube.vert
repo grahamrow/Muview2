@@ -7,12 +7,12 @@ layout(location = 1) in vec4 vertexNormal;
 layout(location = 2) in vec4 magnetization;
 layout(location = 3) in vec4 translation;
 
-smooth out vec4 fragVertex;
-smooth out vec4 fragNormal;
-smooth out vec4 col;
+out vec4 fragVertex;
+out vec4 fragNormal;
+out vec4 col;
 out vec4 trans;
 out mat4 mv;
-smooth out vec3 nrm;
+out vec3 nrm;
 
 float mag, relmag, phi, theta;
 
@@ -94,18 +94,7 @@ void main( void )
     col    = vec4(magnetization.x/mag, 0.0,0.0,0.0);
     theta  = acos(magnetization.z/mag);
     phi    = atan2(magnetization.y, magnetization.x);
-    
-    mat4 rot_theta = mat4(1.0);
-    rot_theta[1][1] = rot_theta[2][2] = cos(theta);
-    rot_theta[1][2] = rot_theta[2][1] = sin(theta);
-    rot_theta[1][2] *= -1;
 
-    mat4 rot_phi = mat4(1.0);
-    rot_phi[0][0] = rot_phi[1][1] = cos(phi+0.5*PI);
-    rot_phi[0][1] = rot_phi[1][0] = sin(phi+0.5*PI);
-    rot_phi[0][1] *= -1;
-
-    model = model * rot_phi * rot_theta;
     mv = view * model;
 
     mat3 normalMatrix = transpose(inverse(mat3(mv)));

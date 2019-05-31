@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>shaders/diffuse.frag</file>
+        <file>shaders/cube.frag</file>
+        <file>shaders/cube.vert</file>
         <file>shaders/standard.frag</file>
         <file>shaders/standard.vert</file>
         <file>resources/splash.png</file>
@@ -11,6 +12,5 @@
         <file>resources/256x256/muview.png</file>
         <file>resources/512x512/muview.png</file>
         <file>resources/16x16/muview.png</file>
-        <file>shaders/diffuseMacOSX.frag</file>
     </qresource>
 </RCC>

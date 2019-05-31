@@ -82,6 +82,8 @@ protected:
     virtual void initializeGL();
     virtual void resizeGL( int w, int h );
     virtual void paintGL();
+    virtual void pushBuffers();
+    virtual void pushLUT();
 
     virtual void keyPressEvent( QKeyEvent* e );
     virtual void mousePressEvent(QMouseEvent *e);
@@ -91,7 +93,8 @@ protected:
 
 private:
     // Shaders
-    QOpenGLShaderProgram flatShader, diffuseShader;
+    QOpenGLShaderProgram standardShader, cubeShader;
+    QOpenGLShaderProgram *currentShader;
     QOpenGLFunctions_3_3_Core* gl330Funcs;
 
     // Init functions
@@ -147,6 +150,7 @@ private:
     QString spriteScale;
     QColor customSpriteColor(float val); // val goes from 0 to 1.0
     QList<QColor> customColors;
+    QMap<QString, int> display_type_map;
 
     // Mouse control
     QVector2D previousMousePosition;

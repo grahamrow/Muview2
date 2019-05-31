@@ -1,11 +1,11 @@
 #version 330
 
-smooth in vec4 fragNormal;
-smooth in vec4 fragVertex;
+in vec4 fragNormal;
+in vec4 fragVertex;
 in vec4 col;
 in vec4 trans;
 in mat4 mv;
-smooth in vec3 nrm;
+in vec3 nrm;
 out vec4 fragColor;
 
 mat4 model;
@@ -19,21 +19,7 @@ uniform struct Light {
 
 void main( void )
 {
-    // mat4 model = mat4(1.0);
-    // model[3][0] = trans.x;
-    // model[3][1] = trans.y;
-    // model[3][2] = trans.z;
-
-
-
-    // mat4 mv = view * model; 
-    // // // base color
-    // // vec4 baseColor = color;
-
-    //calculate normal in world coordinates
-    // mat3 normalMatrix = transpose(inverse(mat3(mv)));
-    // vec3 normal = normalize(normalMatrix * vec3(fragNormal));
-    // vec3 normal = nrm;
+    // Drop thresholded or clipped values as dictated by vertex shader
     if (col.w > 0.5)
         discard;
 
@@ -52,6 +38,4 @@ void main( void )
     // 2. The color/intensities of the light: light.intensities
     // 3. The texture and texture coord: texture(tex, fragTexCoord)
     fragColor = (ambient + brightness * light.intensities) * col;
-
-    // fragColor = vec4(nrm,0.0);
 }

@@ -25,6 +25,14 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     xSliceLow=ySliceLow=zSliceLow=thresholdLow=0;
     xSliceHigh=ySliceHigh=zSliceHigh=thresholdHigh=16*100;
 
+    // Map from display type to int
+
+    display_type_map["Full Orientation"] = 1;
+    display_type_map["In-Plane Angle"]   = 2;
+    display_type_map["X Coordinate"]      = 3;
+    display_type_map["Y Coordinate"]      = 4;
+    display_type_map["Z Coordinate"]      = 5;
+
     // Load shader programs, lights, models, etc.
     context()->makeCurrent();
 
@@ -86,47 +94,71 @@ void GLWidget::updateData(QSharedPointer<OMFReader> data)
         updateExtent();
         needsUpdate = true;
 
-        QVector<int> size = dataPtr->field->shape();
-        int numNodes = dataPtr->field->num_elements();
-        // Push new data
-        for(int i=0; i<size[0]; i+=subsampling) {
-            for(int j=0; j<size[1]; j+=subsampling) {
-                for(int k=0; k<size[2]; k+=subsampling) {
-                    instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
-                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
-                }   
-            }
-        }
-
-        diffuseShader.bind();
-        displayObject->vao->bind();
-
-        // Buffers for coordinates and colors
-        displayObject->pos_vbo.bind();
-        if (displayObject->pos_vbo.size() != numNodes * sizeof(QVector4D)) {
-            qDebug() << "Reallocating translation buffer to size:" << numNodes << "---" << displayObject->pos_vbo.size();
-            displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
-        }
-        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
-        
-
-        displayObject->mag_vbo.bind();
-        if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
-            qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
-            displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
-        }
-        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
-
-        // Release buffers
-        displayObject->pos_vbo.release();
-        displayObject->mag_vbo.release();
-        displayObject->vao->release();
-        
-        // Clear Qt containers
-        instPositions.clear();
-        instMagnetizations.clear();
-
+        pushBuffers();
     }
+}
+
+void GLWidget::pushLUT() {
+    if (colorScale !=  "HSL") {
+        QVector4D lut[256];
+        for (int i=0; i<256; i++) {
+            float h = ((float)i)/255.0;
+            if (colorScale ==  ("Grayscale")) {
+                spriteColor = QColor::fromHslF(0.0, 0.0, h);
+            } else if (colorScale ==  ("Blue to Red")) {
+                if (h <= 0.5) {
+                    spriteColor = QColor::fromHsvF(0.0,1.0-2.0*h,1.0);
+                } else {
+                    spriteColor = QColor::fromHsvF(0.5,(h-0.5)*2.0,1.0);
+                }
+            } else if (colorScale ==  ("Green to White")) {
+                spriteColor = QColor::fromHsvF(0.3,1.0-h,0.25+0.75*h);
+
+            } else if (colorScale ==  ("Custom")) {
+                spriteColor = customSpriteColor(h);
+            }
+
+            lut[i] = QVector4D(spriteColor.redF(), spriteColor.greenF(), spriteColor.blueF(), 0.0);
+        }
+        currentShader->setUniformValueArray("color_lut", lut, 256);
+    }
+} 
+
+void GLWidget::pushBuffers()
+{
+
+    QVector<int> size = dataPtr->field->shape();
+    int numNodes = dataPtr->field->num_elements();
+    // Push new data
+    for(int i=0; i<size[0]; i+=subsampling) {
+        for(int j=0; j<size[1]; j+=subsampling) {
+            for(int k=0; k<size[2]; k+=subsampling) {
+                instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
+                instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+            }   
+        }
+    }
+
+    currentShader->bind();
+    displayObject->vao->bind();
+
+    // Buffers for coordinates and colors
+    displayObject->pos_vbo.bind();
+    displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
+    displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
+    
+    displayObject->mag_vbo.bind();
+    displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
+    displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
+
+    // Release buffers
+    displayObject->pos_vbo.release();
+    displayObject->mag_vbo.release();
+    displayObject->vao->release();
+    
+    // Clear Qt containers
+    instPositions.clear();
+    instMagnetizations.clear();
 }
 
 void GLWidget::updateExtent()
@@ -142,6 +174,7 @@ void GLWidget::updateExtent()
 
 void GLWidget::update() {
     if (needsUpdate) {
+        pushBuffers();
         updateGL();
         needsUpdate = false;
         emit doneRenderingFrame(filename);
@@ -203,12 +236,6 @@ void GLWidget::resizeGL( int w, int h )
     needsUpdate = true;
 }
 
-// void GLWidget::updateGeom()
-// {
-
-// }
-
-
 void GLWidget::paintGL()
 {
     // Clear the buffer with the current clearing color
@@ -217,9 +244,6 @@ void GLWidget::paintGL()
     if (displayOn) {
 
         QVector<int> size = dataPtr->field->shape();
-        int xnodes = size[0];
-        int ynodes = size[1];
-        int znodes = size[2];
         int numNodes = dataPtr->field->num_elements();
 
         GLfloat thrLo = ((GLfloat)thresholdLow)/1600.0;
@@ -236,52 +260,34 @@ void GLWidget::paintGL()
         view.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
         view.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
-        diffuseShader.bind();
-        diffuseShader.setUniformValue("view",              view);
-        diffuseShader.setUniformValue("projection",        projection);
-        diffuseShader.setUniformValue("brightness",        brightness);
-        diffuseShader.setUniformValue("light.position",    lightPosition);
-        diffuseShader.setUniformValue("light.intensities", lightIntensity);
-        diffuseShader.setUniformValue("ambient",           lightAmbient);
-        diffuseShader.setUniformValue("brightness",        brightness);
-        diffuseShader.setUniformValue("maxmag",            maxmag);
-        diffuseShader.setUniformValue("thresholdLow",      thrLo);
-        diffuseShader.setUniformValue("thresholdHigh",     thrHi);
-        diffuseShader.setUniformValue("xSliceLow",         xSlLo);
-        diffuseShader.setUniformValue("xSliceHigh",        xSlHi);
-        diffuseShader.setUniformValue("ySliceLow",         ySlLo);
-        diffuseShader.setUniformValue("ySliceHigh",        ySlHi);
-        diffuseShader.setUniformValue("zSliceLow",         zSlLo);
-        diffuseShader.setUniformValue("zSliceHigh",        zSlHi);
-        diffuseShader.setUniformValue("display_type",      5);
-        diffuseShader.setUniformValue("com",               QVector3D(xcom, ycom, zcom));
+        currentShader->bind();
+        currentShader->setUniformValue("view",              view);
+        currentShader->setUniformValue("projection",        projection);
+        currentShader->setUniformValue("brightness",        brightness);
+        currentShader->setUniformValue("light.position",    lightPosition);
+        currentShader->setUniformValue("light.intensities", lightIntensity);
+        currentShader->setUniformValue("ambient",           lightAmbient);
+        currentShader->setUniformValue("brightness",        brightness);
+        currentShader->setUniformValue("maxmag",            maxmag);
+        currentShader->setUniformValue("thresholdLow",      thrLo);
+        currentShader->setUniformValue("thresholdHigh",     thrHi);
+        currentShader->setUniformValue("xSliceLow",         xSlLo);
+        currentShader->setUniformValue("xSliceHigh",        xSlHi);
+        currentShader->setUniformValue("ySliceLow",         ySlLo);
+        currentShader->setUniformValue("ySliceHigh",        ySlHi);
+        currentShader->setUniformValue("zSliceLow",         zSlLo);
+        currentShader->setUniformValue("zSliceHigh",        zSlHi);
+        currentShader->setUniformValue("display_type",      display_type_map[coloredQuantity]);
+        currentShader->setUniformValue("use_color_lut",     (colorScale !=  "HSL") ? 1 : 0);
+        currentShader->setUniformValue("com",               QVector3D(xcom, ycom, zcom));
+        currentShader->setUniformValue("do_rotate",         (displayObject == &cube) ? 0 : 1);
 
-        // for(int i=0; i<xnodes; i+=subsampling) {
-        //     for(int j=0; j<ynodes; j+=subsampling) {
-        //         for(int k=0; k<znodes; k+=subsampling) {
-        //             instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
-        //             instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
-        //         }   
-        //     }
-        // }
         // Vertex Array 
         displayObject->vao->bind();
 
-        // // Buffers for coordinates and colors
+        // Buffers for coordinates and colors
         displayObject->pos_vbo.bind();
-        // if (displayObject->pos_vbo.size() != numNodes * sizeof(QVector4D)) {
-        //     qDebug() << "Reallocating translation buffer to size:" << numNodes << "---" << displayObject->pos_vbo.size();
-        //     displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
-        // }
-        // displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
-        
-
         displayObject->mag_vbo.bind();
-        // if (displayObject->mag_vbo.size() != numNodes * sizeof(QVector4D)) {
-        //     qDebug() << "Reallocating magnetization buffer to size:" << numNodes;
-        //     displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
-        // }
-        // displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
 
         // Draw everything in one call
         gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, displayObject->count, numNodes);
@@ -289,42 +295,7 @@ void GLWidget::paintGL()
         // Release buffers
         displayObject->pos_vbo.release();
         displayObject->mag_vbo.release();
-        displayObject->vao->release();
-        
-        // // Clear Qt containers
-        // instPositions.clear();
-        // instMagnetizations.clear();
-
-        //                 if (colorScale ==  ("HSL")) {
-        //                     spriteColor = QColor::fromHslF(hueVal, 1.0, lumVal);
-        //                 } else if (colorScale ==  ("Grayscale")) {
-        //                     spriteColor = QColor::fromHslF(0.0, 0.0, hueVal);
-        //                 } else if (colorScale ==  ("Blue to Red")) {
-        //                     if (hueVal <= 0.5) {
-        //                         spriteColor = QColor::fromHsvF(0.0,1.0-2.0*hueVal,1.0);
-        //                     } else {
-        //                         spriteColor = QColor::fromHsvF(0.5,(hueVal-0.5)*2.0,1.0);
-        //                     }
-        //                 } else if (colorScale ==  ("Custom")) {
-        //                     spriteColor = customSpriteColor(hueVal);
-        //                 } else {
-        //                     spriteColor = QColor::fromRgbF(0.0,0.0,0.0);
-        //                 }
-
-        //                 model = globalMovement;
-        //                 model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
-        //                 if (displayType == 0) {
-        //                     // Don't rotate the cubes, but do expand them to fill empty space...
-        //                     model.scale(xnodes > subsampling ? (float)subsampling : 1.0f,
-        //                                 ynodes > subsampling ? (float)subsampling : 1.0f,
-        //                                 znodes > subsampling ? (float)subsampling : 1.0f);
-        //                 } else {
-        //                     // Rotate the cones or vectors, but don't mess with their aspect ratios...
-        //                     float scale = (spriteScale == "Proportional") ? relmag : 1.0f;
-        //                     model.scale((1.0f + (float)subsampling*0.4f)*scale);
-        //                     model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
-        //                     model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
-        //                 }
+        displayObject->vao->release();          
 
         //                 if (valuedim == 1 ) {
         //                     tempObject = &cube;
@@ -332,33 +303,6 @@ void GLWidget::paintGL()
         //                     tempObject = displayObject;
         //                 }
 
-        //                 if (tempObject == &cube ) {
-        //                     flatShader.bind();
-        //                     flatShader.setUniformValue("model",      model);
-        //                     flatShader.setUniformValue("view",       view);
-        //                     flatShader.setUniformValue("projection", projection);
-        //                     flatShader.setUniformValue("color",      spriteColor);
-        //                     flatShader.setUniformValue("brightness", brightness);
-        //                 } else {
-        //                     diffuseShader.bind();
-        //                     diffuseShader.setUniformValue("model",             model);
-        //                     diffuseShader.setUniformValue("view",              view);
-        //                     diffuseShader.setUniformValue("projection",        projection);
-        //                     diffuseShader.setUniformValue("color",             spriteColor);
-        //                     diffuseShader.setUniformValue("light.position",    lightPosition);
-        //                     diffuseShader.setUniformValue("light.intensities", lightIntensity);
-        //                     diffuseShader.setUniformValue("ambient",           lightAmbient);
-        //                     diffuseShader.setUniformValue("brightness",        brightness);
-        //                 }
-
-        //                 tempObject->vao->bind();
-
-        //                 glDrawArrays( GL_TRIANGLES, 0, tempObject->count );
-
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
 
@@ -367,10 +311,13 @@ void GLWidget::toggleDisplay(int type)
     displayType = type;
     if (displayType == 0) {
         displayObject = &cube;
+        currentShader = &cubeShader;
     } else if (displayType == 1) {
         displayObject = &cone;
+        currentShader = &standardShader;
     } else {
         displayObject = &vect;
+        currentShader = &standardShader;
     }
     needsUpdate = true;
 }
@@ -413,6 +360,7 @@ void GLWidget::setColoredQuantity(QString value)
 void GLWidget::setColorScale(QString value)
 {
     colorScale = value;
+    pushLUT();
 }
 
 void GLWidget::setSpriteScale(QString value)
