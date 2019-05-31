@@ -18,7 +18,8 @@ if [ -d $buildDir/$applicationName ]
 fi
 
 # Fix version numbers
-if [[ $TRAVIS == true ]]
+if [ "$TRAVIS" == true ]
+  then
   echo "Updating version numbers"
   for name in source/aboutdialog.ui source/source.pro source/window.cpp
   do
