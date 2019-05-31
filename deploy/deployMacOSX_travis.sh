@@ -1,7 +1,6 @@
 #!/bin/bash
 
 buildDir='./'
-backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
 finalDMGName="Muview.dmg"
 title="Muview"
@@ -29,39 +28,23 @@ macdeployqt $buildDir/$applicationName -verbose=3 -always-overwrite
 curl -o /tmp/macdeployqtfix.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 python /tmp/macdeployqtfix.py Muview.app/Contents/MacOS/Muview $qmake_vers
 
-echo "Creating disk image"
-hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title
+if [ -e tmp.dmg ]
+  then
+  rm tmp.dmg
+fi
 
-echo "Mounting disk image"
-hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" -mountpoint mnt
-sleep 1
+if [ -e $finalDMGName ]
+  then
+  rm $finalDMGName
+fi
 
-mkdir "mnt/.background"
-cp deploy/background-dmg.png "mnt/.background"
+echo "Creating Staging Directory"
+rm -rf staging
+mkdir -p staging/.background
+cp deploy/background-dmg.png staging/.background
+cp Muview.DS_Store staging/.DS_Store
+cp -R $applicationName staging
 
-echo '
-   tell application "Finder"
-     tell disk "mnt"
-           open
-           set current view of container window to icon view
-           set toolbar visible of container window to false
-           set statusbar visible of container window to false
-           set the bounds of container window to {400, 100, 1071, 632}
-           set theViewOptions to the icon view options of container window
-           set arrangement of theViewOptions to not arranged
-           set icon size of theViewOptions to 350
-           set background picture of theViewOptions to file ".background:background-dmg.png"
-           set position of item "'${applicationName}'" of container window to {212, 282}
-           update without registering applications
-           delay 5
-     end tell
-   end tell
-' | osascript
-
-
-sync
-echo "Detaching disk image"
-hdiutil detach ${device}
-
-hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
-rm -f pack.temp.dmg 
+echo "Creating DMG"
+hdiutil makehybrid -hfs -hfs-volume-name $title -hfs-openfolder staging staging -o tmp.dmg
+hdiutil convert -format UDZO tmp.dmg -o $finalDMGName
