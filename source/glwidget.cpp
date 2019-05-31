@@ -126,39 +126,40 @@ void GLWidget::pushLUT() {
 
 void GLWidget::pushBuffers()
 {
-
-    QVector<int> size = dataPtr->field->shape();
-    int numNodes = dataPtr->field->num_elements();
-    // Push new data
-    for(int i=0; i<size[0]; i+=subsampling) {
-        for(int j=0; j<size[1]; j+=subsampling) {
-            for(int k=0; k<size[2]; k+=subsampling) {
-                instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
-                instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
-            }   
+    if (displayOn) {
+        QVector<int> size = dataPtr->field->shape();
+        int numNodes = dataPtr->field->num_elements();
+        // Push new data
+        for(int i=0; i<size[0]; i+=subsampling) {
+            for(int j=0; j<size[1]; j+=subsampling) {
+                for(int k=0; k<size[2]; k+=subsampling) {
+                    instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
+                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+                }   
+            }
         }
+
+        currentShader->bind();
+        displayObject->vao->bind();
+
+        // Buffers for coordinates and colors
+        displayObject->pos_vbo.bind();
+        displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
+        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
+        
+        displayObject->mag_vbo.bind();
+        displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
+        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
+
+        // Release buffers
+        displayObject->pos_vbo.release();
+        displayObject->mag_vbo.release();
+        displayObject->vao->release();
+        
+        // Clear Qt containers
+        instPositions.clear();
+        instMagnetizations.clear();
     }
-
-    currentShader->bind();
-    displayObject->vao->bind();
-
-    // Buffers for coordinates and colors
-    displayObject->pos_vbo.bind();
-    displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
-    displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
-    
-    displayObject->mag_vbo.bind();
-    displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
-    displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
-
-    // Release buffers
-    displayObject->pos_vbo.release();
-    displayObject->mag_vbo.release();
-    displayObject->vao->release();
-    
-    // Clear Qt containers
-    instPositions.clear();
-    instMagnetizations.clear();
 }
 
 void GLWidget::updateExtent()
