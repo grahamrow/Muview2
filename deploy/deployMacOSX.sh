@@ -48,7 +48,7 @@ echo "using macdeployqt from $(which macdeployqt)"
 macdeployqt $buildDir/$applicationName -verbose=3 -always-overwrite
 curl -o fix_temp.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 sed "s/deps = \[s.strip/deps = \[s.decode\(\).strip/" fix_temp.py > fix.py
-python macdeployqtfix.py Muview.app/Contents/MacOS/Muview $qmake_vers
+python fix.py Muview.app/Contents/MacOS/Muview $qmake_vers
 rm fix_temp.py fix.py
 
 if [ -e tmp.dmg ]
