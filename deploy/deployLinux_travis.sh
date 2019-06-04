@@ -3,13 +3,14 @@
 NAME="Muview"
 
 # Fix version numbers
-if [[ $TRAVIS == true  ]]
-	echo "Updating version numbers"
-	for name in source/aboutdialog.ui source/source.pro source/window.cpp
-	do
-		sed "s/2.2/${TRAVIS_BRANCH}/" $name > $name.temp
-		# mv $name.temp $name
-	done
+if [ "$TRAVIS" == true ]
+  then
+  echo "Updating version numbers"
+  for name in source/aboutdialog.ui source/source.pro source/window.cpp
+  do
+    sed "s|2.2|${TRAVIS_BRANCH}|" $name > $name.temp
+    mv $name.temp $name
+  done
 fi
 
 qmake -r -spec linux-g++ -config release
