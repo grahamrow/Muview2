@@ -7,4 +7,4 @@ Exec=muview %U
 StartupNotify=true
 Terminal=false
 Type=Application
-
+Categories=Science;Qt;3DGraphics;Viewer;
