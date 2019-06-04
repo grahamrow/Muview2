@@ -17,7 +17,6 @@ matrix:
       compiler: clang
 
 before_install:
-  - mkdir /home/travis/build/deploy
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
       brew install qt5;
@@ -95,3 +94,4 @@ deploy:
   skip_cleanup: true
   on:
     repo: grahamrow/Muview2
+    tags: true
