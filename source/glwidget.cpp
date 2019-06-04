@@ -220,9 +220,10 @@ void GLWidget::initializeGL()
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
     qglClearColor( backgroundColor );
 
+    glEnable( GL_MULTISAMPLE );
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
-    glEnable(GL_SMOOTH);
+    glEnable( GL_SMOOTH );
     glDepthFunc( GL_LEQUAL );
 }
 

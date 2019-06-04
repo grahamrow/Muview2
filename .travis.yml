@@ -41,6 +41,8 @@ before_install:
           ls /var/cache/apt/archives;
       fi
 
+      sudo apt-get -y install libgl1-mesa-dev
+
       echo "Installing Qt 5.12.3";
       sudo add-apt-repository --yes ppa:beineri/opt-qt-5.12.3-xenial;
       sudo apt-get update -qq;
