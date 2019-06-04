@@ -14,15 +14,7 @@ matrix:
       osx_image: xcode10.2
       sudo: required
       compiler: clang
-addons:
-  apt:
-    sources:
-    - sourceline: 'ppa:beineri/opt-qt-5.12.3-xenial' 
-    packages:
-    - qt512base
-    - qt5123d
-    - qt512tools
-    - qt512x11extras
+
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       brew update;
@@ -33,16 +25,20 @@ before_install:
       qmake -v;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      echo "Before Install";
+      echo "Installing Qt 5.12.3";
+      sudo add-apt-repository --yes ppa:beineri/opt-qt-5.12.3-xenial;
+      sudo apt-get update -qq;
+      sudo apt-get -y install qt512base qt5123d qt512tools qt512x11extras;
+      source /opt/qt512/bin/qt512-env.sh;
+      which qmake;
+      qmake -v;
+
+      echo "Installing Fuse";
       sudo apt-get install -qq pkg-config fuse;
       sudo modprobe fuse;
       sudo chmod 666 /dev/fuse;
       sudo chown root:$USER /etc/fuse.conf;
       
-      source /opt/qt512/bin/qt512-env.sh;
-      which qmake;
-      qmake -v;
-  
       cd /home/travis/build;
       mkdir linuxdeployqt && cd linuxdeployqt;
       wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt;
