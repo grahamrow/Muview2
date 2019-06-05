@@ -19,7 +19,7 @@ make -j4
 FILES="muview README.md LICENSE"
 
 mkdir $NAME
-mkdir deploy
+mkdir deploy/artifacts
 # Copy the install-only makefile to deploy directory
 cp deploy/MakefileInstall Muview/Makefile
 # Copy the necessary resources, delete extraneous ones
@@ -36,7 +36,7 @@ echo "using linuxdeployqt from $(which linuxdeployqt)"
 cd $NAME
 linuxdeployqt muview -bundle-non-qt-libs -verbose=1
 linuxdeployqt resources/muview.desktop -appimage -verbose=1
-mv Muview_Viewer*x86_64.AppImage ../deploy/Muview2-x86_64.AppImage
+mv Muview_Viewer*x86_64.AppImage ../deploy/artifacts/Muview2-x86_64.AppImage
 rm AppRun
 cd ..
 

@@ -2,8 +2,9 @@
 language: cpp
 
 cache:
-  - directories:
-    - $HOME/aptcache
+  ccache: true
+  directories:
+    - /var/cache/apt/archives
 
 matrix:
   include:
@@ -26,18 +27,6 @@ before_install:
       qmake -v;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-      export DEB_CACHE_DIR=$HOME/aptcache;
-      echo "Contents of $DEB_CACHE_DIR";
-      ls $DEB_CACHE_DIR;
-      echo "Check whether apt-get has a cache";
-      ls /var/cache/apt/archives;
-      
-      echo "Start loading cache";
-      if [ -e $DEB_CACHE_DIR/*.deb ]; then
-          sudo mv $DEB_CACHE_DIR/*.deb /var/cache/apt/archives/;
-          ls /var/cache/apt/archives;
-      fi
-
       sudo apt-get -y install libgl1-mesa-dev
 
       echo "Installing Qt 5.12.3";
@@ -47,9 +36,6 @@ before_install:
       source /opt/qt512/bin/qt512-env.sh;
       which qmake;
       qmake -v;
-
-      echo "Updating the cache"
-      cp /var/cache/apt/archives/*deb $DEB_CACHE_DIR/
 
       echo "Installing Fuse";
       sudo apt-get install -qq pkg-config fuse;
@@ -90,7 +76,7 @@ deploy:
   api_key:
     secure: WaoteXAP3GvNQh6rtIpTQG9oJd0QP4nrzQ+CtQxGH/u6aypK+YiaPRxoUlWDfjW3J7xjgMVRmZTV3DgxsSjV+1YgJav6XeS+ek/ZbKBqW/gqjmeSJflDt/fBsqXXaiSm98r1xVOsP1E0C4zq28ps8laSBSKL8iOKRgJ2i6Zc6hG5z3x8Y6kMBHWpTa68O8oBVPBO0tRKazML4XfoZ9VZswkFlmE4lEJtnuJagfUdFERzHCNmSazKF3HJVxLyDxxsBrjqcjIjHrJl3ySXzvXlTw/gRbRq/5rt55yJ2zOE4ToyIBhilWwWmIdreuiY4QbKHNDlbnHwQyzuewtxeH/U1lBzb0QhMMamhHweX1LxcQM0xopWGVcIHxae5BkInpQqKsrjVIrPFEVHGrgZJkofdt6fHcohLusyo5/PY3E8S6tExRd9DFuZpbuQjCLy+RWTsWhUVINh4geZrwFnaH0yqqo+8mqfgJwPQ07vN77HdLZ01bcvrpMvgNjtyt6dggAIQeQbc3LmBBFdENArTxTrIPQsFePZ1+IMaXW0GIPPMRthity9/yeMGUro8lzIYvSMWhtFTDDJs0Y7LyKiCXQ0AibDOTrShQRMsqz4+/lrUy9JU8zJBV81RGplu7OeMcVuMl8tphy8lVq4gUfW3k9VsY8cLjKTUesDaFqCgOcka5I=
   file_glob: true
-  file: deploy/*
+  file: deploy/artifacts/*
   skip_cleanup: true
   on:
     repo: grahamrow/Muview2
