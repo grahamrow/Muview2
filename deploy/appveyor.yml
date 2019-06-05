@@ -63,7 +63,7 @@ artifacts:
 deploy:
     provider: GitHub
     auth_token:
-      secure: 5f1bdbfb8bc72b7f72bfd043aa71bf295506fee5
+      secure: d2MC+YJVRE4Fk2vgIEB+6i6b7w304DMoHMA/ILIATfQPJXYBUslAT5jgEYrPX/2kFG2swKx20gmQobhwvuV1qbKkGCjWxwh/DDZGtDaHE23Lc9buOV6T8j81+/dbKXBDMd++8WuK7inxjbiIU33K3XlZQ8rWhoVGwmUi7iRNySwM+3ehUyELvDFUl0ry6J1VgTYMEipPWQyXDun5kn2pChm0HLrwR3bqywigAsVzpZRedVhKSDbuaXvi1DXB5ASXLEA8qgSjmso+ZywqSNlJx3sd8QPMBm+pi77ViFk0dqMEcm+AhU6fUyFNnxXgcIwt6+3j2D8mys6GY2l72KnkqIVqfJMpuQxAwtvkOZrSL/NwMSZAauzz3E93AcOmSRaafrLlMdkhvOCGJ6hq7YmeE4YZF7AfYZ9WRUiYWCt8O2HX1ls0LLBYvrWnZqKNdcksWLSY83Sf21R6J7STJje/s7IC5d76GTq4E+3HrvVIphk5akPL6N5Ke4cuaTK333DxdCU/taQW7jM13hhnFy1byY3Vu48UVSbFuU+zsl9TBiHoYcjY5kwOGs41Bu5hKjXlPYw36EKpXqMdl4J3vWHHx9aRY5z5rMOsEe87gPAkCjpt3vGx2VkBJ0aiIZ1Bs6mYHwSSAlkaWINQ6cC/Fn6Uc6GL47VvA0jFwrX9+okoe/Y=
     artifact: Muview.7z
     draft:      true
     prerelease: false
