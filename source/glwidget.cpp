@@ -15,7 +15,7 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     xLoc = yLoc = 0;
     zoom = -300.0;
     slices = 16;
-    subsampling = 1;
+    subsampling = 0;
     vectorLength = 1.0f;
     vectorRadius = 0.5f;
     vectorTipLengthRatio = 0.4f;
@@ -128,15 +128,29 @@ void GLWidget::pushBuffers()
 {
     if (displayOn) {
         QVector<int> size = dataPtr->field->shape();
-        int numNodes = dataPtr->field->num_elements();
+        // int numNodes = dataPtr->field->num_elements();
+        int incr_x = ((1 << subsampling) > size[0]) ? size[0] : (1 << subsampling);
+        int incr_y = ((1 << subsampling) > size[1]) ? size[1] : (1 << subsampling);
+        int incr_z = ((1 << subsampling) > size[2]) ? size[2] : (1 << subsampling);
+
+        // numNodes  = size[0]/incr_x;
+        // numNodes *= size[1]/incr_y;
+        // numNodes *= size[2]/incr_z;
+        numNodes = 0;
+        
         // Push new data
-        for(int i=0; i<size[0]; i+=subsampling) {
-            for(int j=0; j<size[1]; j+=subsampling) {
-                for(int k=0; k<size[2]; k+=subsampling) {
+        for(int i=0; i<size[0]; i+=incr_x) {
+            for(int j=0; j<size[1]; j+=incr_y) {
+                for(int k=0; k<size[2]; k+=incr_z) {
                     instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
                     instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+                    numNodes++;
                 }   
             }
+        }
+
+        if ( numNodes <= 1) { 
+            subsampling --;
         }
 
         currentShader->bind();
@@ -246,7 +260,9 @@ void GLWidget::paintGL()
     if (displayOn) {
 
         QVector<int> size = dataPtr->field->shape();
-        int numNodes = dataPtr->field->num_elements();
+        // int numNodes = dataPtr->field->num_elements();
+        sprite *tempSprite;
+        QOpenGLShaderProgram *tempShader;
 
         GLfloat thrLo = ((GLfloat)thresholdLow)/1600.0;
         GLfloat thrHi = ((GLfloat)thresholdHigh)/1600.0;
@@ -256,55 +272,59 @@ void GLWidget::paintGL()
         GLfloat ySlHi = (ymax-ymin)*(GLfloat)ySliceHigh/1600.0;
         GLfloat zSlLo = (zmax-zmin)*(GLfloat)zSliceLow/1600.0;
         GLfloat zSlHi = (zmax-zmin)*(GLfloat)zSliceHigh/1600.0;
+        GLfloat sc    = (GLfloat)(1 << subsampling);
         view.setToIdentity();
         view.translate(xLoc, yLoc, zoom);
         view.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
         view.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
         view.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
-        currentShader->bind();
-        currentShader->setUniformValue("view",              view);
-        currentShader->setUniformValue("projection",        projection);
-        currentShader->setUniformValue("brightness",        brightness);
-        currentShader->setUniformValue("light.position",    lightPosition);
-        currentShader->setUniformValue("light.intensities", lightIntensity);
-        currentShader->setUniformValue("ambient",           lightAmbient);
-        currentShader->setUniformValue("brightness",        brightness);
-        currentShader->setUniformValue("maxmag",            maxmag);
-        currentShader->setUniformValue("thresholdLow",      thrLo);
-        currentShader->setUniformValue("thresholdHigh",     thrHi);
-        currentShader->setUniformValue("xSliceLow",         xSlLo);
-        currentShader->setUniformValue("xSliceHigh",        xSlHi);
-        currentShader->setUniformValue("ySliceLow",         ySlLo);
-        currentShader->setUniformValue("ySliceHigh",        ySlHi);
-        currentShader->setUniformValue("zSliceLow",         zSlLo);
-        currentShader->setUniformValue("zSliceHigh",        zSlHi);
-        currentShader->setUniformValue("display_type",      display_type_map[coloredQuantity]);
-        currentShader->setUniformValue("use_color_lut",     (colorScale !=  "HSL") ? 1 : 0);
-        currentShader->setUniformValue("com",               QVector3D(xcom, ycom, zcom));
-        currentShader->setUniformValue("do_rotate",         (displayObject == &cube) ? 0 : 1);
+        if (valuedim == 1 ) {
+            tempSprite = &cube;
+            tempShader = &cubeShader;
+        } else {
+            tempSprite = displayObject;
+            tempShader = currentShader;
+        }
+
+        tempShader->bind();
+        tempShader->setUniformValue("view",              view);
+        tempShader->setUniformValue("projection",        projection);
+        tempShader->setUniformValue("brightness",        brightness);
+        tempShader->setUniformValue("light.position",    lightPosition);
+        tempShader->setUniformValue("light.intensities", lightIntensity);
+        tempShader->setUniformValue("ambient",           lightAmbient);
+        tempShader->setUniformValue("brightness",        brightness);
+        tempShader->setUniformValue("maxmag",            maxmag);
+        tempShader->setUniformValue("thresholdLow",      thrLo);
+        tempShader->setUniformValue("thresholdHigh",     thrHi);
+        tempShader->setUniformValue("xSliceLow",         xSlLo);
+        tempShader->setUniformValue("xSliceHigh",        xSlHi);
+        tempShader->setUniformValue("ySliceLow",         ySlLo);
+        tempShader->setUniformValue("ySliceHigh",        ySlHi);
+        tempShader->setUniformValue("zSliceLow",         zSlLo);
+        tempShader->setUniformValue("zSliceHigh",        zSlHi);
+        tempShader->setUniformValue("display_type",      display_type_map[coloredQuantity]);
+        tempShader->setUniformValue("use_color_lut",     (colorScale !=  "HSL") ? 1 : 0);
+        tempShader->setUniformValue("com",               QVector3D(xcom, ycom, zcom));
+        tempShader->setUniformValue("do_rotate",         (displayObject == &cube) ? 0 : 1);
+        tempShader->setUniformValue("valuedim",          valuedim);
+        tempShader->setUniformValue("scale",             sc);
 
         // Vertex Array 
-        displayObject->vao->bind();
+        tempSprite->vao->bind();
 
         // Buffers for coordinates and colors
-        displayObject->pos_vbo.bind();
-        displayObject->mag_vbo.bind();
+        tempSprite->pos_vbo.bind();
+        tempSprite->mag_vbo.bind();
 
         // Draw everything in one call
-        gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, displayObject->count, numNodes);
+        gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, tempSprite->count, numNodes);
 
         // Release buffers
-        displayObject->pos_vbo.release();
-        displayObject->mag_vbo.release();
-        displayObject->vao->release();          
-
-        //                 if (valuedim == 1 ) {
-        //                     tempObject = &cube;
-        //                 } else {
-        //                     tempObject = displayObject;
-        //                 }
-
+        tempSprite->pos_vbo.release();
+        tempSprite->mag_vbo.release();
+        tempSprite->vao->release();          
     }
 }
 

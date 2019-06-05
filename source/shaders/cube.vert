@@ -25,6 +25,10 @@ uniform int display_type;
 uniform int use_color_lut;
 uniform vec4 color_lut[256];
 
+// Dimensionality
+uniform int valuedim;
+uniform float scale;
+
 uniform mat4 view, projection;
 uniform vec3 com; // Center of mass
 uniform float maxmag, thresholdLow, thresholdHigh;
@@ -95,6 +99,8 @@ void main( void )
     theta  = acos(magnetization.z/mag);
     phi    = atan2(magnetization.y, magnetization.x);
 
+    mat4 sc = mat4(mat3(scale));
+    model = model * sc;
     mv = view * model;
 
     mat3 normalMatrix = transpose(inverse(mat3(mv)));

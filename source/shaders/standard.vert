@@ -25,6 +25,10 @@ uniform int display_type;
 uniform int use_color_lut;
 uniform vec4 color_lut[256];
 
+// Dimensionality
+uniform int valuedim;
+uniform float scale;
+
 uniform mat4 view, projection;
 uniform vec3 com; // Center of mass
 uniform float maxmag, thresholdLow, thresholdHigh;
@@ -95,6 +99,8 @@ void main( void )
     theta  = acos(magnetization.z/mag);
     phi    = atan2(magnetization.y, magnetization.x);
     
+    mat4 sc = mat4(mat3(scale));
+
     mat4 rot_theta = mat4(1.0);
     rot_theta[1][1] = rot_theta[2][2] = cos(theta);
     rot_theta[1][2] = rot_theta[2][1] = sin(theta);
@@ -105,7 +111,7 @@ void main( void )
     rot_phi[0][1] = rot_phi[1][0] = sin(phi+0.5*PI);
     rot_phi[0][1] *= -1;
 
-    model = model * rot_phi * rot_theta;
+    model = model * rot_phi * rot_theta * sc;
     mv = view * model;
 
     mat3 normalMatrix = transpose(inverse(mat3(mv)));

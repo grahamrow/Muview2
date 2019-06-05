@@ -111,9 +111,10 @@ private:
     // Sprites and Data
     sprite cube, cone, vect;
     sprite *displayObject;
+    int numNodes; // Number of nodes being displayed with current subsampling
     int displayType; // Cube 0, Cone 1, Vector 2
     int valuedim;    // scalar or vector
-    int subsampling; // display each n'th cell according to this variable
+    int subsampling; // display each 2^n'th cell according to this variable
     QSharedPointer<OMFReader> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;
