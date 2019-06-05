@@ -1,6 +1,4 @@
-
 language: cpp
-
 cache:
   ccache: true
   directories:
@@ -74,10 +72,11 @@ deploy:
   provider: releases
   draft: true
   api_key:
-    secure: WaoteXAP3GvNQh6rtIpTQG9oJd0QP4nrzQ+CtQxGH/u6aypK+YiaPRxoUlWDfjW3J7xjgMVRmZTV3DgxsSjV+1YgJav6XeS+ek/ZbKBqW/gqjmeSJflDt/fBsqXXaiSm98r1xVOsP1E0C4zq28ps8laSBSKL8iOKRgJ2i6Zc6hG5z3x8Y6kMBHWpTa68O8oBVPBO0tRKazML4XfoZ9VZswkFlmE4lEJtnuJagfUdFERzHCNmSazKF3HJVxLyDxxsBrjqcjIjHrJl3ySXzvXlTw/gRbRq/5rt55yJ2zOE4ToyIBhilWwWmIdreuiY4QbKHNDlbnHwQyzuewtxeH/U1lBzb0QhMMamhHweX1LxcQM0xopWGVcIHxae5BkInpQqKsrjVIrPFEVHGrgZJkofdt6fHcohLusyo5/PY3E8S6tExRd9DFuZpbuQjCLy+RWTsWhUVINh4geZrwFnaH0yqqo+8mqfgJwPQ07vN77HdLZ01bcvrpMvgNjtyt6dggAIQeQbc3LmBBFdENArTxTrIPQsFePZ1+IMaXW0GIPPMRthity9/yeMGUro8lzIYvSMWhtFTDDJs0Y7LyKiCXQ0AibDOTrShQRMsqz4+/lrUy9JU8zJBV81RGplu7OeMcVuMl8tphy8lVq4gUfW3k9VsY8cLjKTUesDaFqCgOcka5I=
+    secure: d2MC+YJVRE4Fk2vgIEB+6i6b7w304DMoHMA/ILIATfQPJXYBUslAT5jgEYrPX/2kFG2swKx20gmQobhwvuV1qbKkGCjWxwh/DDZGtDaHE23Lc9buOV6T8j81+/dbKXBDMd++8WuK7inxjbiIU33K3XlZQ8rWhoVGwmUi7iRNySwM+3ehUyELvDFUl0ry6J1VgTYMEipPWQyXDun5kn2pChm0HLrwR3bqywigAsVzpZRedVhKSDbuaXvi1DXB5ASXLEA8qgSjmso+ZywqSNlJx3sd8QPMBm+pi77ViFk0dqMEcm+AhU6fUyFNnxXgcIwt6+3j2D8mys6GY2l72KnkqIVqfJMpuQxAwtvkOZrSL/NwMSZAauzz3E93AcOmSRaafrLlMdkhvOCGJ6hq7YmeE4YZF7AfYZ9WRUiYWCt8O2HX1ls0LLBYvrWnZqKNdcksWLSY83Sf21R6J7STJje/s7IC5d76GTq4E+3HrvVIphk5akPL6N5Ke4cuaTK333DxdCU/taQW7jM13hhnFy1byY3Vu48UVSbFuU+zsl9TBiHoYcjY5kwOGs41Bu5hKjXlPYw36EKpXqMdl4J3vWHHx9aRY5z5rMOsEe87gPAkCjpt3vGx2VkBJ0aiIZ1Bs6mYHwSSAlkaWINQ6cC/Fn6Uc6GL47VvA0jFwrX9+okoe/Y=
   file_glob: true
   file: deploy/artifacts/*
   skip_cleanup: true
   on:
     repo: grahamrow/Muview2
     tags: true
+    

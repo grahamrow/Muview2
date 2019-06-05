@@ -63,9 +63,9 @@ artifacts:
 deploy:
     provider: GitHub
     auth_token:
-      secure: 4m39FfOSSP2sZRdJ1hhC+UV00MzZr1ZVoLjWqbjRfM22tTleeSNxURJAbsKliImF
+      secure: 5f1bdbfb8bc72b7f72bfd043aa71bf295506fee5
     artifact: Muview.7z
-    draft:      false
+    draft:      true
     prerelease: false
     on:
       appveyor_repo_tag: true       # deploy on tag push only
