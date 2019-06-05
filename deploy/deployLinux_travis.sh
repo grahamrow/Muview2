@@ -41,5 +41,5 @@ rm AppRun
 cd ..
 
 tar -czvf "Muview.tar.gz" $NAME
-mv Muview.tar.gz deploy
+mv Muview.tar.gz deploy/artifacts
 echo "Done deploying on Linux!"
