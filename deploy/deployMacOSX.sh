@@ -72,4 +72,4 @@ echo "Creating DMG"
 hdiutil makehybrid -hfs -hfs-volume-name $title -hfs-openfolder staging staging -o tmp.dmg
 hdiutil convert -format UDZO tmp.dmg -o $finalDMGName
 mkdir deploy/artifacts
-mv $finalDMGName deploy
+mv $finalDMGName deploy/artifacts

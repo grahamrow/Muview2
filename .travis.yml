@@ -68,6 +68,8 @@ script:
       cd /home/travis/build/grahamrow/Muview2;
       bash deploy/deployLinux_travis.sh;
     fi
+  - echo "Files in deploy/articfacts"
+  - ls deploy/artifacts
 deploy:
   provider: releases
   draft: true
@@ -79,4 +81,3 @@ deploy:
   on:
     repo: grahamrow/Muview2
     tags: true
-    
