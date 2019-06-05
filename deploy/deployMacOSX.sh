@@ -45,7 +45,7 @@ echo "using qmake from $(which qmake)"
 echo "using macdeployqt from $(which macdeployqt)"
 
 # Macdeployqt has known problems for brewed qt
-macdeployqt $buildDir/$applicationName -verbose=3 -always-overwrite
+macdeployqt $buildDir/$applicationName -verbose=1 -always-overwrite
 curl -o fix_temp.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
 sed "s/deps = \[s.strip/deps = \[s.decode\(\).strip/" fix_temp.py > fix.py
 python fix.py Muview.app/Contents/MacOS/Muview $qmake_vers
