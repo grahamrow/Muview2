@@ -202,13 +202,15 @@ void GLWidget::increaseSubsampling()
 {
     subsampling++;
     needsUpdate = true;
+    pushBuffers();
 }
 
 void GLWidget::decreaseSubsampling()
 {
-    if (subsampling > 1) {
+    if (subsampling > 0) {
         subsampling--;
         needsUpdate = true;
+        pushBuffers();
     }
 }
 

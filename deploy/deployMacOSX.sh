@@ -1,7 +1,6 @@
 #!/bin/bash
 
 buildDir='./'
-backgroundPictureName="deploy/background-dmg.png"
 applicationName="Muview.app"
 finalDMGName="Muview.dmg"
 title="Muview"
@@ -18,74 +17,59 @@ if [ -d $buildDir/$applicationName ]
   rm -r $buildDir/$applicationName
 fi
 
+# Fix version numbers
+if [ "$TRAVIS" == true ]
+  then
+  echo "Updating version numbers"
+  for name in source/aboutdialog.ui source/source.pro source/window.cpp
+  do
+    sed "s|2.2|${TRAVIS_BRANCH}|" $name > $name.temp
+    mv $name.temp $name
+  done
+fi
+
+# qmake version
+qmake_vers=$(qmake -v | tail -n1 | sed -n 's|.*\(/usr/.*\)/lib|\1|p')
+
 # This produces Muview 
 cd source
-make clean
 qmake -config release
+make clean
 cd ..
-make clean
 qmake -config release
+make clean
 make -j4
 
 echo "Creating Bundle at $PWD/Muview.app"
 echo "using qmake from $(which qmake)"
 echo "using macdeployqt from $(which macdeployqt)"
 
-macdeployqt $buildDir/$applicationName -verbose=3
+# Macdeployqt has known problems for brewed qt
+macdeployqt $buildDir/$applicationName -verbose=3 -always-overwrite
+curl -o fix_temp.py https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py
+sed "s/deps = \[s.strip/deps = \[s.decode\(\).strip/" fix_temp.py > fix.py
+python fix.py Muview.app/Contents/MacOS/Muview $qmake_vers
+rm fix_temp.py fix.py
 
-# Create a Nice Looking DMG
-# http://stackoverflow.com/questions/96882/how-do-i-create-a-nice-looking-dmg-for-mac-os-x-using-command-line-tools
-
-if [ -e pack.temp.dmg ]
+if [ -e tmp.dmg ]
 	then
-  echo "Removing pack.temp.dmg"
-	rm pack.temp.dmg
+	rm tmp.dmg
 fi
+
 if [ -e $finalDMGName ]
 	then
-  echo "Removing $finalDMGName"
 	rm $finalDMGName
 fi
 
-echo "Creating disk image"
-hdiutil create pack.temp.dmg -srcfolder $buildDir/$applicationName -format UDRW -volname $title
+echo "Creating Staging Directory"
+rm -rf staging
+mkdir -p staging/.background
+cp deploy/background-dmg.png staging/.background
+cp Muview.DS_Store staging/.DS_Store
+cp -R $applicationName staging
 
-echo "Mounting disk image"
-device=$(hdiutil attach -readwrite -noverify -noautoopen "pack.temp.dmg" -mountpoint mnt | \
-         egrep '^/dev/' | sed 1q | awk '{print $1}')
-echo "Device Name: $device"
-
-sleep 1
-
-mkdir "mnt/.background"
-cp deploy/background-dmg.png "mnt/.background"
-
-echo '
-   tell application "Finder"
-     tell disk "mnt"
-           open
-           set current view of container window to icon view
-           set toolbar visible of container window to false
-           set statusbar visible of container window to false
-           set the bounds of container window to {400, 100, 1071, 632}
-           set theViewOptions to the icon view options of container window
-           set arrangement of theViewOptions to not arranged
-           set icon size of theViewOptions to 350
-           set background picture of theViewOptions to file ".background:background-dmg.png"
-           set position of item "'${applicationName}'" of container window to {212, 282}
-           update without registering applications
-           delay 5
-     end tell
-   end tell
-' | osascript
-
-chmod -Rf go-w ${device}
-sync
-sync
-
-echo "Detaching disk image"
-hdiutil detach ${device}
-
-echo "Compressing disk image"
-hdiutil convert "pack.temp.dmg" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
-rm -f pack.temp.dmg 
+echo "Creating DMG"
+hdiutil makehybrid -hfs -hfs-volume-name $title -hfs-openfolder staging staging -o tmp.dmg
+hdiutil convert -format UDZO tmp.dmg -o $finalDMGName
+mkdir deploy/artifacts
+mv $finalDMGName deploy

@@ -4,6 +4,7 @@
 
 #include <QGLWidget>
 #include <QOpenGLBuffer>
+#include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 
@@ -13,6 +14,8 @@
 struct sprite
 {
     QOpenGLBuffer vbo;
+    QOpenGLBuffer pos_vbo;
+    QOpenGLBuffer mag_vbo;
     QOpenGLVertexArrayObject *vao;
     GLuint count;
 };
@@ -79,6 +82,8 @@ protected:
     virtual void initializeGL();
     virtual void resizeGL( int w, int h );
     virtual void paintGL();
+    virtual void pushBuffers();
+    virtual void pushLUT();
 
     virtual void keyPressEvent( QKeyEvent* e );
     virtual void mousePressEvent(QMouseEvent *e);
@@ -88,7 +93,9 @@ protected:
 
 private:
     // Shaders
-    QOpenGLShaderProgram flatShader, diffuseShader;
+    QOpenGLShaderProgram standardShader, cubeShader;
+    QOpenGLShaderProgram *currentShader;
+    QOpenGLFunctions_3_3_Core* gl330Funcs;
 
     // Init functions
     void initializeAssets();
@@ -98,12 +105,16 @@ private:
     bool initializeCone(int slices, float radius, float height);
     bool initializeVect(int slices, float height, float radius, float fractionTip, float fractionInner);
 
+    QVector<QVector4D> instPositions;
+    QVector<QVector4D> instMagnetizations;
+
     // Sprites and Data
     sprite cube, cone, vect;
     sprite *displayObject;
+    int numNodes; // Number of nodes being displayed with current subsampling
     int displayType; // Cube 0, Cone 1, Vector 2
     int valuedim;    // scalar or vector
-    int subsampling; // display each n'th cell according to this variable
+    int subsampling; // display each 2^n'th cell according to this variable
     QSharedPointer<OMFReader> dataPtr;
     float maxmag, minmag;
     QColor spriteColor;
@@ -140,6 +151,7 @@ private:
     QString spriteScale;
     QColor customSpriteColor(float val); // val goes from 0 to 1.0
     QList<QColor> customColors;
+    QMap<QString, int> display_type_map;
 
     // Mouse control
     QVector2D previousMousePosition;

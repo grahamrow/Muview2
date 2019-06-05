@@ -28,6 +28,11 @@ QVector3D matrix::at(int x, int y, int z)
     return data->at(index(x,y,z));
 }
 
+QVector3D matrix::get(int i)
+{
+    return data->at(i);
+}
+
 QVector<int> matrix::shape()
 {
     return sizes;

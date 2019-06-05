@@ -11,7 +11,7 @@
 #			  -qt-xkbcommon -qt-xcb -qt-libjpeg -qt-libpng -nomake examples -nomake tests
 # make -j10 sub-src
 
-VERSION="2.1.3"
+VERSION="2.2"
 NAME="Muview${VERSION}-Linux"
 # buildDir="../build-muview-Desktop-Release"
 

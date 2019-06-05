@@ -15,7 +15,7 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     xLoc = yLoc = 0;
     zoom = -300.0;
     slices = 16;
-    subsampling = 1;
+    subsampling = 0;
     vectorLength = 1.0f;
     vectorRadius = 0.5f;
     vectorTipLengthRatio = 0.4f;
@@ -25,9 +25,16 @@ GLWidget::GLWidget( const QGLFormat& glformat, QWidget* parent )
     xSliceLow=ySliceLow=zSliceLow=thresholdLow=0;
     xSliceHigh=ySliceHigh=zSliceHigh=thresholdHigh=16*100;
 
+    // Map from display type to int
+
+    display_type_map["Full Orientation"] = 1;
+    display_type_map["In-Plane Angle"]   = 2;
+    display_type_map["X Coordinate"]      = 3;
+    display_type_map["Y Coordinate"]      = 4;
+    display_type_map["Z Coordinate"]      = 5;
+
     // Load shader programs, lights, models, etc.
     context()->makeCurrent();
-    initializeAssets();
 
     // Draw at a fixed framerate (if updates are needed)
     QTimer *timer = new QTimer(this);
@@ -86,6 +93,86 @@ void GLWidget::updateData(QSharedPointer<OMFReader> data)
         updateCOM();
         updateExtent();
         needsUpdate = true;
+
+        pushBuffers();
+    }
+}
+
+void GLWidget::pushLUT() {
+    if (colorScale !=  "HSL") {
+        QVector4D lut[256];
+        for (int i=0; i<256; i++) {
+            float h = ((float)i)/255.0;
+            if (colorScale ==  ("Grayscale")) {
+                spriteColor = QColor::fromHslF(0.0, 0.0, h);
+            } else if (colorScale ==  ("Blue to Red")) {
+                if (h <= 0.5) {
+                    spriteColor = QColor::fromHsvF(0.0,1.0-2.0*h,1.0);
+                } else {
+                    spriteColor = QColor::fromHsvF(0.5,(h-0.5)*2.0,1.0);
+                }
+            } else if (colorScale ==  ("Green to White")) {
+                spriteColor = QColor::fromHsvF(0.3,1.0-h,0.25+0.75*h);
+
+            } else if (colorScale ==  ("Custom")) {
+                spriteColor = customSpriteColor(h);
+            }
+
+            lut[i] = QVector4D(spriteColor.redF(), spriteColor.greenF(), spriteColor.blueF(), 0.0);
+        }
+        currentShader->setUniformValueArray("color_lut", lut, 256);
+    }
+} 
+
+void GLWidget::pushBuffers()
+{
+    if (displayOn) {
+        QVector<int> size = dataPtr->field->shape();
+        // int numNodes = dataPtr->field->num_elements();
+        int incr_x = ((1 << subsampling) > size[0]) ? size[0] : (1 << subsampling);
+        int incr_y = ((1 << subsampling) > size[1]) ? size[1] : (1 << subsampling);
+        int incr_z = ((1 << subsampling) > size[2]) ? size[2] : (1 << subsampling);
+
+        // numNodes  = size[0]/incr_x;
+        // numNodes *= size[1]/incr_y;
+        // numNodes *= size[2]/incr_z;
+        numNodes = 0;
+        
+        // Push new data
+        for(int i=0; i<size[0]; i+=incr_x) {
+            for(int j=0; j<size[1]; j+=incr_y) {
+                for(int k=0; k<size[2]; k+=incr_z) {
+                    instPositions << QVector4D((float)i,(float)j,(float)k,0.0);
+                    instMagnetizations << QVector4D(dataPtr->field->at(i,j,k), 0.0);
+                    numNodes++;
+                }   
+            }
+        }
+
+        if ( numNodes <= 1) { 
+            subsampling --;
+        }
+
+        currentShader->bind();
+        displayObject->vao->bind();
+
+        // Buffers for coordinates and colors
+        displayObject->pos_vbo.bind();
+        displayObject->pos_vbo.allocate( numNodes * sizeof(QVector4D) );
+        displayObject->pos_vbo.write(0, instPositions.constData(), numNodes * sizeof(QVector4D));
+        
+        displayObject->mag_vbo.bind();
+        displayObject->mag_vbo.allocate( numNodes * sizeof(QVector4D) );
+        displayObject->mag_vbo.write(0, instMagnetizations.constData(), numNodes * sizeof(QVector4D));
+
+        // Release buffers
+        displayObject->pos_vbo.release();
+        displayObject->mag_vbo.release();
+        displayObject->vao->release();
+        
+        // Clear Qt containers
+        instPositions.clear();
+        instMagnetizations.clear();
     }
 }
 
@@ -102,6 +189,7 @@ void GLWidget::updateExtent()
 
 void GLWidget::update() {
     if (needsUpdate) {
+        pushBuffers();
         updateGL();
         needsUpdate = false;
         emit doneRenderingFrame(filename);
@@ -125,6 +213,19 @@ void GLWidget::initializeGL()
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
 
+    // gl330Funcs = 0;
+    // gl330Funcs = context()->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    gl330Funcs = new QOpenGLFunctions_3_3_Core;
+    if (gl330Funcs)
+        gl330Funcs->initializeOpenGLFunctions();
+    else
+    {
+        qWarning() << "Could not obtain required OpenGL context version";
+        exit(1);
+    }
+
+    initializeAssets();
+
     QGLFormat glFormat = QGLWidget::format();
     if ( !glFormat.sampleBuffers() )
         qWarning() << "Could not enable sample buffers";
@@ -133,12 +234,11 @@ void GLWidget::initializeGL()
     backgroundColor = QColor::fromRgbF(0.9, 0.8, 1.0).dark();
     qglClearColor( backgroundColor );
 
+    glEnable( GL_MULTISAMPLE );
     glEnable( GL_DEPTH_TEST );
     glEnable( GL_CULL_FACE );
-    glEnable(GL_SMOOTH);
+    glEnable( GL_SMOOTH );
     glDepthFunc( GL_LEQUAL );
-
-    view.setToIdentity();
 }
 
 void GLWidget::resizeGL( int w, int h )
@@ -158,154 +258,73 @@ void GLWidget::paintGL()
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     if (displayOn) {
+
         QVector<int> size = dataPtr->field->shape();
-        int xnodes = size[0];
-        int ynodes = size[1];
-        int znodes = size[2];
-        QVector3D datum;
-        float theta, phi, mag;
-        float hueVal, lumVal;
-        sprite *tempObject;
+        // int numNodes = dataPtr->field->num_elements();
+        sprite *tempSprite;
+        QOpenGLShaderProgram *tempShader;
 
-        QMatrix4x4 globalMovement;
-        globalMovement.setToIdentity();
-        globalMovement.translate(xLoc, yLoc, zoom);
-        globalMovement.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
-        globalMovement.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
-        globalMovement.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
+        GLfloat thrLo = ((GLfloat)thresholdLow)/1600.0;
+        GLfloat thrHi = ((GLfloat)thresholdHigh)/1600.0;
+        GLfloat xSlLo = (xmax-xmin)*(GLfloat)xSliceLow/1600.0;
+        GLfloat xSlHi = (xmax-xmin)*(GLfloat)xSliceHigh/1600.0;
+        GLfloat ySlLo = (ymax-ymin)*(GLfloat)ySliceLow/1600.0;
+        GLfloat ySlHi = (ymax-ymin)*(GLfloat)ySliceHigh/1600.0;
+        GLfloat zSlLo = (zmax-zmin)*(GLfloat)zSliceLow/1600.0;
+        GLfloat zSlHi = (zmax-zmin)*(GLfloat)zSliceHigh/1600.0;
+        GLfloat sc    = (GLfloat)(1 << subsampling);
+        view.setToIdentity();
+        view.translate(xLoc, yLoc, zoom);
+        view.rotate(xRot / 1600.0, 1.0, 0.0, 0.0);
+        view.rotate(yRot / 1600.0, 0.0, 1.0, 0.0);
+        view.rotate(zRot / 1600.0, 0.0, 0.0, 1.0);
 
-        for(int i=0; i<xnodes; i+=subsampling)
-        {
-            for(int j=0; j<ynodes; j+=subsampling)
-            {
-                for(int k=0; k<znodes; k+=subsampling)
-                {
-                    datum = dataPtr->field->at(i,j,k);
-                    if (valuedim == 1) {
-                        mag = datum.x();
-                    } else {
-                        mag = datum.length();
-                    }
-
-                    float relmag = mag/maxmag;
-
-                    if ( ((valuedim == 1 ) || (valuedim == 3)) &&
-                         i >= (xmax-xmin)*(float)xSliceLow/1600.0 &&
-                         i <= (xmax-xmin)*(float)xSliceHigh/1600.0 &&
-                         j >= (ymax-ymin)*(float)ySliceLow/1600.0 &&
-                         j <= (ymax-ymin)*(float)ySliceHigh/1600.0 &&
-                         k >= (zmax-zmin)*(float)zSliceLow/1600.0 &&
-                         k <= (zmax-zmin)*(float)zSliceHigh/1600.0 &&
-                         relmag >= thresholdLow/1600.0 && 
-                         relmag <= thresholdHigh/1600.0)
-                    {
-
-                        theta = acos(datum.z()/mag);
-                        phi   = atan2(datum.y(), datum.x());
-
-                        if (valuedim == 1) {
-                            if (maxmag!=minmag) {
-                                phi = PI*(-0.999+1.998*(mag-minmag)/(maxmag-minmag));
-                            } else {
-                                phi = 0.0f;
-                            }
-                        }
-
-                        lumVal = 0.5;
-                        if (coloredQuantity == ("In-Plane Angle")) {
-                            hueVal = phi/(2.0f*PI);
-                            if (hueVal < 0.0f) {
-                                hueVal += 1.0f;
-                            }
-                        } else if (coloredQuantity ==  ("Full Orientation")) {
-                            hueVal = phi/(2.0f*PI);
-                            if (hueVal < 0.0f) {
-                                hueVal += 1.0f;
-                            }
-                            if (hueVal < 0.0f) hueVal = 0.0f;
-                            if ((hueVal > 1.0f) || (hueVal < 0.0f))
-                            {
-                                qDebug() << "Hue out of range:" << hueVal << datum.x() << datum.y() << datum.z() << theta << phi;
-                            }
-                            if (valuedim == 1) {
-                                lumVal=0.5;
-                            } else {
-                                lumVal = 0.5 + 0.5*datum.z()/mag;
-                            }
-                        } else if (coloredQuantity ==  ("X Coordinate")) {
-                            hueVal = 0.5+ 0.5*datum.x()/mag;
-                        } else if (coloredQuantity ==  ("Y Coordinate")) {
-                            hueVal = 0.5+ 0.5*datum.y()/mag;
-                        } else if (coloredQuantity ==  ("Z Coordinate")) {
-                            hueVal = 0.5+ 0.5*datum.z()/mag;
-                        } else {
-                            hueVal = 0.0;
-                        }
-
-                        if (colorScale ==  ("HSL")) {
-                            spriteColor = QColor::fromHslF(hueVal, 1.0, lumVal);
-                        } else if (colorScale ==  ("Grayscale")) {
-                            spriteColor = QColor::fromHslF(0.0, 0.0, hueVal);
-                        } else if (colorScale ==  ("Blue to Red")) {
-                            if (hueVal <= 0.5) {
-                                spriteColor = QColor::fromHsvF(0.0,1.0-2.0*hueVal,1.0);
-                            } else {
-                                spriteColor = QColor::fromHsvF(0.5,(hueVal-0.5)*2.0,1.0);
-                            }
-                        } else if (colorScale ==  ("Custom")) {
-                            spriteColor = customSpriteColor(hueVal);
-                        } else {
-                            spriteColor = QColor::fromRgbF(0.0,0.0,0.0);
-                        }
-
-                        model = globalMovement;
-                        model.translate(((float)i-xcom)*2.0,((float)j-ycom)*2.0,((float)k-zcom)*2.0);
-                        if (displayType == 0) {
-                            // Don't rotate the cubes, but do expand them to fill empty space...
-                            model.scale(xnodes > subsampling ? (float)subsampling : 1.0f,
-                                        ynodes > subsampling ? (float)subsampling : 1.0f,
-                                        znodes > subsampling ? (float)subsampling : 1.0f);
-                        } else {
-                            // Rotate the cones or vectors, but don't mess with their aspect ratios...
-                            float scale = (spriteScale == "Proportional") ? relmag : 1.0f;
-                            model.scale((1.0f + (float)subsampling*0.4f)*scale);
-                            model.rotate(180.0*(phi+0.5*PI)/PI, 0.0, 0.0, 1.0);
-                            model.rotate(180.0*theta/PI,        1.0, 0.0, 0.0);
-                        }
-
-                        if (valuedim == 1 ) {
-                            tempObject = &cube;
-                        } else {
-                            tempObject = displayObject;
-                        }
-
-                        if (tempObject == &cube ) {
-                            flatShader.bind();
-                            flatShader.setUniformValue("model",      model);
-                            flatShader.setUniformValue("view",       view);
-                            flatShader.setUniformValue("projection", projection);
-                            flatShader.setUniformValue("color",      spriteColor);
-                            flatShader.setUniformValue("brightness", brightness);
-                        } else {
-                            diffuseShader.bind();
-                            diffuseShader.setUniformValue("model",             model);
-                            diffuseShader.setUniformValue("view",              view);
-                            diffuseShader.setUniformValue("projection",        projection);
-                            diffuseShader.setUniformValue("color",             spriteColor);
-                            diffuseShader.setUniformValue("light.position",    lightPosition);
-                            diffuseShader.setUniformValue("light.intensities", lightIntensity);
-                            diffuseShader.setUniformValue("ambient",           lightAmbient);
-                            diffuseShader.setUniformValue("brightness",        brightness);
-                        }
-
-                        tempObject->vao->bind();
-
-                        glDrawArrays( GL_TRIANGLES, 0, tempObject->count );
-
-                    }
-                }
-            }
+        if (valuedim == 1 ) {
+            tempSprite = &cube;
+            tempShader = &cubeShader;
+        } else {
+            tempSprite = displayObject;
+            tempShader = currentShader;
         }
+
+        tempShader->bind();
+        tempShader->setUniformValue("view",              view);
+        tempShader->setUniformValue("projection",        projection);
+        tempShader->setUniformValue("brightness",        brightness);
+        tempShader->setUniformValue("light.position",    lightPosition);
+        tempShader->setUniformValue("light.intensities", lightIntensity);
+        tempShader->setUniformValue("ambient",           lightAmbient);
+        tempShader->setUniformValue("brightness",        brightness);
+        tempShader->setUniformValue("maxmag",            maxmag);
+        tempShader->setUniformValue("thresholdLow",      thrLo);
+        tempShader->setUniformValue("thresholdHigh",     thrHi);
+        tempShader->setUniformValue("xSliceLow",         xSlLo);
+        tempShader->setUniformValue("xSliceHigh",        xSlHi);
+        tempShader->setUniformValue("ySliceLow",         ySlLo);
+        tempShader->setUniformValue("ySliceHigh",        ySlHi);
+        tempShader->setUniformValue("zSliceLow",         zSlLo);
+        tempShader->setUniformValue("zSliceHigh",        zSlHi);
+        tempShader->setUniformValue("display_type",      display_type_map[coloredQuantity]);
+        tempShader->setUniformValue("use_color_lut",     (colorScale !=  "HSL") ? 1 : 0);
+        tempShader->setUniformValue("com",               QVector3D(xcom, ycom, zcom));
+        tempShader->setUniformValue("do_rotate",         (displayObject == &cube) ? 0 : 1);
+        tempShader->setUniformValue("valuedim",          valuedim);
+        tempShader->setUniformValue("scale",             sc);
+
+        // Vertex Array 
+        tempSprite->vao->bind();
+
+        // Buffers for coordinates and colors
+        tempSprite->pos_vbo.bind();
+        tempSprite->mag_vbo.bind();
+
+        // Draw everything in one call
+        gl330Funcs->glDrawArraysInstanced( GL_TRIANGLES, 0, tempSprite->count, numNodes);
+
+        // Release buffers
+        tempSprite->pos_vbo.release();
+        tempSprite->mag_vbo.release();
+        tempSprite->vao->release();          
     }
 }
 
@@ -314,10 +333,13 @@ void GLWidget::toggleDisplay(int type)
     displayType = type;
     if (displayType == 0) {
         displayObject = &cube;
+        currentShader = &cubeShader;
     } else if (displayType == 1) {
         displayObject = &cone;
+        currentShader = &standardShader;
     } else {
         displayObject = &vect;
+        currentShader = &standardShader;
     }
     needsUpdate = true;
 }
@@ -360,6 +382,7 @@ void GLWidget::setColoredQuantity(QString value)
 void GLWidget::setColorScale(QString value)
 {
     colorScale = value;
+    pushLUT();
 }
 
 void GLWidget::setSpriteScale(QString value)

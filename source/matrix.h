@@ -15,6 +15,7 @@ public:
     void set(int x, int y, int z, QVector3D vector);
     void set(int ind, QVector3D vector);
     QVector3D at(int x, int y, int z);
+    QVector3D get(int i);
     QVector<int> shape();
     void minmaxScalar(float &min, float &max);
     void minmaxMagnitude(float &min, float &max);

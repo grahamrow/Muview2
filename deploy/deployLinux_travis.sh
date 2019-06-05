@@ -3,11 +3,15 @@
 NAME="Muview"
 
 # Fix version numbers
-for name in source/aboutdialog.ui source/source.pro source/window.cpp
-do
-	sed "s/2.1.2/${TRAVIS_BRANCH}/" $name > $name.temp
-	# mv $name.temp $name
-done
+if [ "$TRAVIS" == true ]
+  then
+  echo "Updating version numbers"
+  for name in source/aboutdialog.ui source/source.pro source/window.cpp
+  do
+    sed "s|2.2|${TRAVIS_BRANCH}|" $name > $name.temp
+    mv $name.temp $name
+  done
+fi
 
 qmake -r -spec linux-g++ -config release
 make -j4
@@ -15,6 +19,7 @@ make -j4
 FILES="muview README.md LICENSE"
 
 mkdir $NAME
+mkdir deploy/artifacts
 # Copy the install-only makefile to deploy directory
 cp deploy/MakefileInstall Muview/Makefile
 # Copy the necessary resources, delete extraneous ones
@@ -31,9 +36,10 @@ echo "using linuxdeployqt from $(which linuxdeployqt)"
 cd $NAME
 linuxdeployqt muview -bundle-non-qt-libs -verbose=1
 linuxdeployqt resources/muview.desktop -appimage -verbose=1
-mv Muview_Viewer-x86_64.AppImage ../Muview2-x86_64.AppImage
+mv Muview_Viewer*x86_64.AppImage ../deploy/artifacts/Muview2-x86_64.AppImage
 rm AppRun
 cd ..
 
 tar -czvf "Muview.tar.gz" $NAME
+mv Muview.tar.gz deploy
 echo "Done deploying on Linux!"
