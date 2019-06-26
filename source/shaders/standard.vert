@@ -104,12 +104,12 @@ void main( void )
     mat4 rot_theta = mat4(1.0);
     rot_theta[1][1] = rot_theta[2][2] = cos(theta);
     rot_theta[1][2] = rot_theta[2][1] = sin(theta);
-    rot_theta[1][2] *= -1;
+    rot_theta[2][1] *= -1;
 
     mat4 rot_phi = mat4(1.0);
     rot_phi[0][0] = rot_phi[1][1] = cos(phi+0.5*PI);
     rot_phi[0][1] = rot_phi[1][0] = sin(phi+0.5*PI);
-    rot_phi[0][1] *= -1;
+    rot_phi[1][0] *= -1;
 
     model = model * rot_phi * rot_theta * sc;
     mv = view * model;
